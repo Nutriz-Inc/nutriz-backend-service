@@ -1,23 +1,10 @@
 package utils
 
-import "github.com/segmentio/ksuid"
+import (
+	"github.com/segmentio/ksuid"
+)
 
-func IdValidation(id string) bool {
-	size := len(id)
-
-	if size != 31 {
-		return false
-	}
-
-	start := id[0:4]
-
-	switch start {
-	case "adr_", "dpt_", "fil_", "dst_", "don_", "job_", "usr_":
-		return true
-	}
-
-	return false
-}
+const PREFIX_LENGTH = 4
 
 type EnumEntityType string
 
@@ -31,48 +18,52 @@ const (
 	UserEntity          EnumEntityType = "user"
 )
 
-func GetIdEntity(id string) EnumEntityType {
-	start := id[0:4]
+var prefixToEntity = map[string]EnumEntityType{
+	"adr_": AddressEntity,
+	"dpt_": DonationPointEntity,
+	"fil_": FileEntity,
+	"dst_": DonationStepEntity,
+	"don_": DonationEntity,
+	"job_": JobEntity,
+	"usr_": UserEntity,
+}
 
-	switch start {
-	case "adr_":
-		return AddressEntity
-	case "dpt_":
-		return DonationPointEntity
-	case "fil_":
-		return FileEntity
-	case "dst_":
-		return DonationStepEntity
-	case "don_":
-		return DonationEntity
-	case "job_":
-		return JobEntity
-	case "usr_":
-		return UserEntity
+var entityToPrefix = func() map[EnumEntityType]string {
+	m := make(map[EnumEntityType]string)
+	for prefix, entity := range prefixToEntity {
+		m[entity] = prefix
+	}
+	return m
+}()
+
+func IdValidation(id string) bool {
+	if len(id) < PREFIX_LENGTH {
+		return false
 	}
 
-	return ""
+	prefix := id[:PREFIX_LENGTH]
+
+	if _, ok := prefixToEntity[prefix]; !ok {
+		return false
+	}
+
+	_, err := ksuid.Parse(id[PREFIX_LENGTH:])
+	return err == nil
+}
+
+func GetIdEntity(id string) EnumEntityType {
+	if len(id) < PREFIX_LENGTH {
+		return ""
+	}
+
+	return prefixToEntity[id[:PREFIX_LENGTH]]
 }
 
 func IdGenerate(entity EnumEntityType) string {
-	id := ksuid.New().String()
-
-	switch entity {
-	case AddressEntity:
-		return "adr_" + id
-	case DonationPointEntity:
-		return "dpt_" + id
-	case FileEntity:
-		return "fil_" + id
-	case DonationStepEntity:
-		return "dst_" + id
-	case DonationEntity:
-		return "don_" + id
-	case JobEntity:
-		return "job_" + id
-	case UserEntity:
-		return "usr_" + id
+	prefix, ok := entityToPrefix[entity]
+	if !ok {
+		panic("invalid entity type: " + string(entity))
 	}
 
-	return id
+	return prefix + ksuid.New().String()
 }

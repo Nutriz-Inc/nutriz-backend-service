@@ -11,7 +11,7 @@ type User struct {
 	PhoneNumber string     `json:"phone_number" db:"phone_number"`
 	Email       string     `json:"email" db:"email"`
 	Password    string     `json:"password" db:"password"`
-	MilkDonated float64    `json:"milk_donated" db:"milk_donated"`
+	MilkDonated *float64   `json:"milk_donated" db:"milk_donated"`
 	CreatedAt   time.Time  `json:"created_at" db:"created_at"`
 	CreatedBy   string     `json:"created_by" db:"created_by"`
 	UpdatedAt   *time.Time `json:"updated_at" db:"updated_at"`
