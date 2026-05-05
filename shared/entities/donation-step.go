@@ -1,0 +1,23 @@
+package entities
+
+import "time"
+
+type DonationStep struct {
+	IdStepDonation string     `json:"id_step_donation" db:"id_step_donation"`
+	IdDonation     string     `json:"id_donation" db:"id_donation"`
+	Name           string     `json:"name" db:"name"`
+	Description    string     `json:"description" db:"description"`
+	Status         string     `json:"status" db:"status"`
+	SetDate        *time.Time `json:"set_date" db:"set_date"`
+	CreatedAt      time.Time  `json:"created_at" db:"created_at"`
+	UpdatedAt      *time.Time `json:"updated_at" db:"updated_at"`
+	CompletedAt    *time.Time `json:"completed_at" db:"completed_at"`
+}
+
+func (d DonationStep) TableName() string {
+	return "donation_step"
+}
+
+func (d DonationStep) PrimaryKey() string {
+	return "id_step_donation"
+}
