@@ -7,14 +7,14 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-type errorResponse struct {
-	Error       bool        `json:"error"`
-	FailedField string      `json:"failed_field"`
+type ErrorResponse struct {
+	FailedField string      `json:"field"`
 	Tag         string      `json:"tag"`
 	Value       interface{} `json:"value"`
+	Error       bool        `json:"error"`
 }
 
-func ErrorValidation(err []errorResponse) *fluxgo.GlobalError {
+func ErrorValidation(err []ErrorResponse) *fluxgo.GlobalError {
 	return &fluxgo.GlobalError{
 		Message: "Error on validate data",
 		Code:    "validation.err",

@@ -11,6 +11,10 @@ func (g *GenericReq) SetActionBy(actionBy string) {
 type PaginationReq struct {
 	PageSize int `query:"page_size" default:"25" validate:"omitempty,min=1,max=50"`
 	Page     int `query:"page" default:"1" validate:"omitempty,min=1"`
+}
+
+type PaginationInternalReq struct {
+	PaginationReq
 	GenericReq
 }
 

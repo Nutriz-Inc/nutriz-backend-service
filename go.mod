@@ -3,8 +3,15 @@ module nutriz-backend-service
 go 1.25.0
 
 require (
+	github.com/MMortari/FluxGo v0.17.1
+	github.com/MMortari/go-query-builder v0.19.0
+	github.com/gofiber/fiber/v2 v2.52.12
+	github.com/segmentio/ksuid v1.0.4
+	go.opentelemetry.io/otel v1.40.0
+)
+
+require (
 	github.com/IBM/sarama v1.46.3 // indirect
-	github.com/MMortari/FluxGo v0.17.1 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/ansrivas/fiberprometheus/v2 v2.17.0 // indirect
 	github.com/aws/aws-sdk-go v1.49.6 // indirect
@@ -25,9 +32,9 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
+	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/go-playground/validator/v10 v10.28.0 // indirect
 	github.com/gofiber/contrib/otelfiber/v2 v2.2.3 // indirect
-	github.com/gofiber/fiber/v2 v2.52.12 // indirect
 	github.com/golang-migrate/migrate/v4 v4.19.1 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/uuid v1.6.0 // indirect
@@ -54,6 +61,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/ollama/ollama v0.13.5 // indirect
+	github.com/paemuri/brdoc/v2 v2.3.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
 	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
@@ -63,14 +71,12 @@ require (
 	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
-	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasthttp v1.69.0 // indirect
 	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib v1.20.0 // indirect
-	go.opentelemetry.io/otel v1.40.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.38.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.38.0 // indirect
 	go.opentelemetry.io/otel/exporters/stdout/stdouttrace v1.40.0 // indirect
