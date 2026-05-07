@@ -78,7 +78,7 @@ CREATE TABLE address (
 CREATE TABLE donation (
   id_donation VARCHAR(36) PRIMARY KEY,
 
-  is_active BOOLEAN,
+  is_active BOOLEAN NOT NULL,
 
   quantity NUMERIC(10,2),
   user_feedback TEXT,
