@@ -23,7 +23,7 @@ jobs:
           skip-cache: false
 
       - name: Build
-        run: go build -o bin/main src/main.go
+        run: go build -o bin/main main.go
 
       - name: Docker compose
         run: |
