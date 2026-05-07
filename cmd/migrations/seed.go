@@ -62,4 +62,41 @@ INSERT INTO donation_point (
     NULL,
     'doafacil@email.com',
     'Seg-Sáb 09:00-17:00'
+);
+
+INSERT INTO donation (
+    id_donation,
+    is_active,
+    quantity,
+    user_feedback,
+    created_at,
+    created_by,
+    updated_at,
+    updated_by,
+    removed_at,
+    removed_by
+) VALUES
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    true,
+    1.5,
+    'Doação realizada com sucesso',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
+    true,
+    2.0,
+    'Equipe muito atenciosa',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );`

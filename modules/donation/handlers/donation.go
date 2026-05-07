@@ -2,6 +2,7 @@ package handlers
 
 import (
 	c "context"
+	"fmt"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -11,7 +12,7 @@ import (
 )
 
 type HandlerListDonations struct {
-	donationsRepo *repositories.DonationRepository
+	donationRepo *repositories.DonationRepository
 }
 
 func HandlerListDonationsStart(donationRepo *repositories.DonationRepository) *HandlerListDonations {
@@ -27,8 +28,9 @@ func (h *HandlerListDonations) HandleHttp(c *fiber.Ctx, income interface{}) (*fl
 }
 
 func (h *HandlerListDonations) Execute(ctx c.Context, filters *dto.ListDonationReq) (*dto.ListDonationRes, *fluxgo.GlobalError) {
-	donations, total, err := h.donationsRepo.ListDonationByFilters(ctx, filters)
+	donations, total, err := h.donationRepo.ListDonationByFilters(ctx, filters)
 	if err != nil {
+		fmt.Println(err)
 		return nil, fluxgo.ErrorInternalError("Error to list donations")
 	}
 
