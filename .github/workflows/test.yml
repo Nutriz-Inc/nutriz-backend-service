@@ -28,7 +28,7 @@ jobs:
       - name: Docker compose
         run: |
           docker compose up -d
-          sleep 6
+          sleep 10
 
       - name: Migrations
         run: |

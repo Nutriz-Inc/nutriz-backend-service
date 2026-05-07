@@ -78,7 +78,7 @@ CREATE TABLE address (
 CREATE TABLE donation (
   id_donation VARCHAR(36) PRIMARY KEY,
 
-  id_donation_point VARCHAR(36),
+  is_active BOOLEAN NOT NULL,
 
   quantity NUMERIC(10,2),
   user_feedback TEXT,
@@ -89,8 +89,6 @@ CREATE TABLE donation (
   updated_by VARCHAR(36),
   removed_at TIMESTAMP,
   removed_by VARCHAR(36),
-
-  CONSTRAINT fk_donation_dp FOREIGN KEY (id_donation_point) REFERENCES donation_point(id_donation_point),
 
   CONSTRAINT fk_donation_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_donation_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),

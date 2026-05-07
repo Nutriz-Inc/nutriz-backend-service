@@ -11,11 +11,11 @@ import (
 )
 
 type HandlerListDonationPoints struct {
-	donationPointsRepo *repositories.DonationPointRepository
+	donationPointRepo *repositories.DonationPointRepository
 }
 
-func HandlerListDonationPointsStart(donationPointsRepo *repositories.DonationPointRepository) *HandlerListDonationPoints {
-	return &HandlerListDonationPoints{donationPointsRepo}
+func HandlerListDonationPointsStart(donationPointRepo *repositories.DonationPointRepository) *HandlerListDonationPoints {
+	return &HandlerListDonationPoints{donationPointRepo}
 }
 
 func (h *HandlerListDonationPoints) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.GlobalResponse, *fluxgo.GlobalError) {
@@ -27,7 +27,7 @@ func (h *HandlerListDonationPoints) HandleHttp(c *fiber.Ctx, income interface{})
 }
 
 func (h *HandlerListDonationPoints) Execute(ctx c.Context, filters *dto.ListDonationPointsReq) (*dto.ListDonationPointsRes, *fluxgo.GlobalError) {
-	donationPoints, total, err := h.donationPointsRepo.ListDonationPointsByFilters(ctx, filters)
+	donationPoints, total, err := h.donationPointRepo.ListDonationPointsByFilters(ctx, filters)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list donation points")
 	}
