@@ -30,7 +30,6 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
 		Select("dp.*").
 		From("donation_point", "dp").
-		OrderBy(q.OrderBy{Column: "dp.created_at"}).
 		PaginationPaged(filter.Page, filter.PageSize).
 		WhereAnd(q.Where{Column: "dp.removed_at", Type: "IS NULL"})
 
@@ -39,13 +38,6 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 			Column: "dp.name",
 			Type:   "ILIKE",
 			Val:    "%" + *filter.Name + "%",
-		})
-	}
-	if filter.Cnpj != nil {
-		qb.WhereAnd(q.Where{
-			Column: "dp.cnpj",
-			Type:   "=",
-			Val:    *filter.Cnpj,
 		})
 	}
 	if filter.HasHome != nil {

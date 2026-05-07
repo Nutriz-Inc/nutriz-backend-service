@@ -37,9 +37,10 @@ func Module() *fluxgo.FluxModule {
 			"GET",
 			"/donation/point",
 			fluxgo.RouteIncome{
-				Entity:   dto.ListDonationPointsReq{},
-				Cache:    redis,
-				CacheTTL: time.Hour,
+				Entity:    dto.ListDonationPointsReq{},
+				FromQuery: true,
+				Cache:     redis,
+				CacheTTL:  time.Hour,
 			},
 			handler.HandleHttp,
 		)

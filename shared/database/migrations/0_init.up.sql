@@ -24,7 +24,6 @@ CREATE TABLE "user" (
   removed_at TIMESTAMP,
   removed_by VARCHAR(36),
 
-  CONSTRAINT fk_user_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_user_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_user_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
 );
@@ -35,23 +34,13 @@ CREATE TABLE donation_point (
 
   name VARCHAR(150) NOT NULL,
   description TEXT,
-  cnpj VARCHAR(14) NOT NULL,
 
   has_home BOOLEAN NOT NULL,
   phone_number VARCHAR(20),
   email VARCHAR(255),
   opening_hours VARCHAR(255),
 
-  created_at TIMESTAMP NOT NULL,
-  created_by VARCHAR(36) NOT NULL,
-  updated_at TIMESTAMP,
-  updated_by VARCHAR(36),
-  removed_at TIMESTAMP,
-  removed_by VARCHAR(36),
-
-  CONSTRAINT fk_dp_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
-  CONSTRAINT fk_dp_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
-  CONSTRAINT fk_dp_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
+  removed_at TIMESTAMP
 );
 
 -- ADDRESS
