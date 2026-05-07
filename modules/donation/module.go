@@ -18,7 +18,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonations) error {
 		return mod.HttpRoute(
 			f,
-			"/public",
+			"/internal",
 			"GET",
 			"/donation",
 			fluxgo.RouteIncome{

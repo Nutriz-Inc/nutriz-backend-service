@@ -7,7 +7,6 @@ import (
 
 type ListDonationReq struct {
 	IsActive *bool `query:"is_active" validate:"omitempty"`
-
 	utils.PaginationInternalReq
 }
 

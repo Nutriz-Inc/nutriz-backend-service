@@ -1,21 +1,17 @@
 package utils
 
-type GenericReq struct {
-	ActionBy string `validate:"required,id"`
-}
-
-func (g *GenericReq) SetActionBy(actionBy string) {
-	g.ActionBy = actionBy
+type ActionBy struct {
+	ActionBy string `header:"page_size" validate:"required,id"`
 }
 
 type PaginationReq struct {
-	PageSize int `query:"page_size" default:"25" validate:"omitempty,min=1,max=50"`
-	Page     int `query:"page" default:"1" validate:"omitempty,min=1"`
+	PageSize int `query:"page_size" default:"25" validate:"required,min=1,max=50"`
+	Page     int `query:"page" default:"1" validate:"required,min=1"`
 }
 
 type PaginationInternalReq struct {
 	PaginationReq
-	GenericReq
+	ActionBy
 }
 
 type PaginationRes struct {
@@ -26,7 +22,7 @@ type PaginationRes struct {
 
 type GetReq struct {
 	Id string `params:"id" validate:"required,id"`
-	GenericReq
+	ActionBy
 }
 
 type DeleteRes struct {

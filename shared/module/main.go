@@ -30,7 +30,7 @@ func Module() *fluxgo.FluxGo {
 	flux.AddRedis(fluxgo.RedisOptions{Options: redis.Options{Addr: env.Redis.Addr}})
 	flux.AddKafka(env.Kafka.GetConfig())
 	flux.AddCron()
-	flux.AddHttp(http.GetHttp(flux.GetApm(), prom))
+	flux.AddHttp(http.GetHttp(flux.GetApm(), prom, &env))
 	flux.AddTools()
 
 	//Repositories

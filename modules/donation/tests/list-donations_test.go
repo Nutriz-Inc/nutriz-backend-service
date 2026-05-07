@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"nutriz-backend-service/shared/module"
+	"nutriz-backend-service/shared/utils"
 	"testing"
 
 	fluxgo "github.com/MMortari/FluxGo"
@@ -14,11 +15,12 @@ func TestListDonation(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/public/donation?page=1&page_size=25"
+	endpoint := "/internal/donation?page=1&page_size=25"
+	headers := &utils.TestHeaders
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("No filters", func(t *testing.T) {
-			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, nil)
+			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, headers)
 
 			assert.Equal(t, int(http.StatusOK), status)
 
@@ -38,7 +40,7 @@ func TestListDonation(t *testing.T) {
 			is_active := true
 			route := fmt.Sprintf("%s&is_active=%t", endpoint, is_active)
 
-			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, nil)
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
 
 			assert.Equal(t, int(http.StatusOK), status)
 
