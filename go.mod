@@ -3,15 +3,20 @@ module nutriz-backend-service
 go 1.25.0
 
 require (
+	github.com/IBM/sarama v1.46.3
 	github.com/MMortari/FluxGo v0.17.1
 	github.com/MMortari/go-query-builder v0.19.0
+	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/gofiber/fiber/v2 v2.52.12
+	github.com/paemuri/brdoc/v2 v2.3.3
+	github.com/prometheus/client_golang v1.23.2
+	github.com/redis/go-redis/v9 v9.14.0
 	github.com/segmentio/ksuid v1.0.4
+	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.40.0
 )
 
 require (
-	github.com/IBM/sarama v1.46.3 // indirect
 	github.com/andybalholm/brotli v1.2.0 // indirect
 	github.com/ansrivas/fiberprometheus/v2 v2.17.0 // indirect
 	github.com/aws/aws-sdk-go v1.49.6 // indirect
@@ -32,7 +37,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
-	github.com/go-playground/validator v9.31.0+incompatible // indirect
 	github.com/go-playground/validator/v10 v10.28.0 // indirect
 	github.com/gofiber/contrib/otelfiber/v2 v2.2.3 // indirect
 	github.com/golang-migrate/migrate/v4 v4.19.1 // indirect
@@ -61,14 +65,12 @@ require (
 	github.com/mattn/go-runewidth v0.0.16 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
 	github.com/ollama/ollama v0.13.5 // indirect
-	github.com/paemuri/brdoc/v2 v2.3.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.22 // indirect
-	github.com/prometheus/client_golang v1.23.2 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_model v0.6.2 // indirect
 	github.com/prometheus/common v0.66.1 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20250401214520-65e299d6c5c9 // indirect
-	github.com/redis/go-redis/v9 v9.14.0 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
@@ -97,5 +99,6 @@ require (
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250825161204-c5933d9347a5 // indirect
 	google.golang.org/grpc v1.75.0 // indirect
 	google.golang.org/protobuf v1.36.8 // indirect
+	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
