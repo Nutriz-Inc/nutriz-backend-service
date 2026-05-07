@@ -2,6 +2,7 @@ package module
 
 import (
 	"nutriz-backend-service/config"
+	"nutriz-backend-service/modules/auth"
 	"nutriz-backend-service/modules/donation"
 	"nutriz-backend-service/shared/http"
 	"nutriz-backend-service/shared/repositories"
@@ -29,15 +30,17 @@ func Module() *fluxgo.FluxGo {
 	flux.AddRedis(fluxgo.RedisOptions{Options: redis.Options{Addr: env.Redis.Addr}})
 	flux.AddKafka(env.Kafka.GetConfig())
 	flux.AddCron()
-	flux.AddHttp(http.GetHttp(flux.GetApm(), prom))
+	flux.AddHttp(http.GetHttp(flux.GetApm(), prom, &env))
 	flux.AddTools()
 
 	//Repositories
 	flux.AddDependency(repositories.DonationPointRepositoryStart)
 	flux.AddDependency(repositories.DonationRepositoryStart)
+	flux.AddDependency(repositories.UserRepositoryStart)
 
 	//Modules
 	flux.AddModule(donation.Module())
+	flux.AddModule(auth.Module())
 
 	return flux
 }

@@ -36,10 +36,16 @@ func (r *DonationRepository) ListDonationByFilters(
 	if filter.IsActive != nil {
 		qb.WhereAnd(q.Where{
 			Column: "d.is_active",
-			Type: "=",
-			Val: *filter.IsActive,
+			Type:   "=",
+			Val:    *filter.IsActive,
 		})
 	}
+
+	qb.WhereAnd(q.Where{
+		Column: "d.created_by",
+		Type:   "=",
+		Val:    filter.ActionBy,
+	})
 
 	query, args := qb.ToSelectSql()
 	resp := make([]entities.Donation, 0, filter.PageSize)
