@@ -21,6 +21,7 @@ func Module() *fluxgo.FluxModule {
 			fluxgo.RouteIncome{
 				Entity:   dto.LoginReq{},
 				FromBody: true,
+				Validate: true,
 				Cache:    nil,
 				CacheTTL: 0,
 			},

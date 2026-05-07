@@ -27,9 +27,18 @@ func TestListDonation(t *testing.T) {
 			data := fluxgo.ConvertToList(body["data"])
 			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
 
-			fluxgo.ConvertToMap(data[0])
 			first := fluxgo.ConvertToMap(data[0])
 			assert.NotEmpty(t, first["id_donation"])
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+
+				assert.Equal(
+					t,
+					"usr_2veL1FPpuXxUaZcFaEC57BfpcKE",
+					row["created_by"],
+				)
+			}
 
 			assert.Equal(t, float64(25), body["page_size"])
 			assert.Equal(t, float64(1), body["page"])

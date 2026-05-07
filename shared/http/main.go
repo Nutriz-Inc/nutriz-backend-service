@@ -42,6 +42,8 @@ func authMiddleware(env *config.Env) fiber.Handler {
 
 		c.Locals(UserContextKey, claims.IdUser)
 
+		c.Request().Header.Set("action-by", claims.IdUser)
+
 		return c.Next()
 	}
 }

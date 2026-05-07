@@ -34,6 +34,23 @@ INSERT INTO "user" (
     NULL,
     NULL,
     NULL
+),
+(
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    'common',
+    'Marta Silveira',
+    '72555730028',
+    CURRENT_DATE - INTERVAL '30 years',
+    '11999999998',
+    'marta@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    5.5,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO donation_point (
@@ -94,7 +111,7 @@ INSERT INTO donation (
     2.0,
     'Equipe muito atenciosa',
     NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
     NULL,
     NULL,
     NULL,
