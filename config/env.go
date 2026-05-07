@@ -23,4 +23,8 @@ type Env struct {
 	JWT   struct {
 		Secret string `env:"AUTH_JWT_SECRET" validate:"required"`
 	}
+	Secret struct {
+		IV  string `env:"SECRET_IV" validate:"required"`
+		Key string `env:"SECRET_KEY" validate:"required"`
+	}
 }

@@ -22,10 +22,10 @@ func Module() *fluxgo.FluxModule {
 			"GET",
 			"/donation",
 			fluxgo.RouteIncome{
-				Entity: dto.ListDonationReq{},
+				Entity:    dto.ListDonationReq{},
 				FromQuery: true,
-				Cache: redis,
-				CacheTTL: time.Hour,
+				Cache:     redis,
+				CacheTTL:  time.Hour,
 			},
 			handler.HandleHttp,
 		)

@@ -19,7 +19,6 @@ func TestListDonation(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Run("No filters", func(t *testing.T) {
 			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, nil)
-			fmt.Println("body", body)
 
 			assert.Equal(t, int(http.StatusOK), status)
 

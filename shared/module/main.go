@@ -2,6 +2,7 @@ package module
 
 import (
 	"nutriz-backend-service/config"
+	"nutriz-backend-service/modules/auth"
 	"nutriz-backend-service/modules/donation"
 	"nutriz-backend-service/shared/http"
 	"nutriz-backend-service/shared/repositories"
@@ -35,9 +36,11 @@ func Module() *fluxgo.FluxGo {
 	//Repositories
 	flux.AddDependency(repositories.DonationPointRepositoryStart)
 	flux.AddDependency(repositories.DonationRepositoryStart)
+	flux.AddDependency(repositories.UserRepositoryStart)
 
 	//Modules
 	flux.AddModule(donation.Module())
+	flux.AddModule(auth.Module())
 
 	return flux
 }

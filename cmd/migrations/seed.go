@@ -26,7 +26,7 @@ INSERT INTO "user" (
     CURRENT_DATE - INTERVAL '20 years',
     '11999999999',
     'maria@email.com',
-    'senha_hash_1',
+    '2b9643d9671363af30ebed5463130ee7',
     2.5,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
