@@ -7,7 +7,7 @@ import (
 
 type ListDonationReq struct {
 	IsActive *bool  `query:"is_active" validate:"omitempty"`
-	ActionBy string `reqHeader:"action-by" validate:"required"`
+	ActionBy string `reqHeader:"action-by" validate:"required,id"`
 	utils.PaginationReq
 }
 

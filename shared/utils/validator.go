@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/go-playground/validator"
+	"github.com/go-playground/validator/v10"
 	"github.com/paemuri/brdoc/v2"
 )
 
@@ -14,7 +14,7 @@ var (
 	once             sync.Once
 )
 
-func getValidate() *validator.Validate {
+func GetValidate() *validator.Validate {
 	once.Do(func() {
 		v := validator.New()
 
@@ -27,37 +27,6 @@ func getValidate() *validator.Validate {
 	})
 
 	return validateInstance
-}
-
-func Validate(data interface{}) (bool, []ErrorResponse) {
-	validate := getValidate()
-
-	err := validate.Struct(data)
-	if err == nil {
-		return false, nil
-	}
-
-	validationErrors, ok := err.(validator.ValidationErrors)
-	if !ok {
-		return true, []ErrorResponse{
-			{
-				Error: true,
-			},
-		}
-	}
-
-	errors := make([]ErrorResponse, 0, len(validationErrors))
-
-	for _, e := range validationErrors {
-		errors = append(errors, ErrorResponse{
-			FailedField: e.Field(),
-			Tag:         e.Tag(),
-			Value:       e.Value(),
-			Error:       true,
-		})
-	}
-
-	return true, errors
 }
 
 // validators
