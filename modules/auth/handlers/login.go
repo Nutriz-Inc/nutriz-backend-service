@@ -14,12 +14,13 @@ import (
 )
 
 type HandlerLogin struct {
-	userRepo *repositories.UserRepository
-	config   *config.Env
+	userRepo    *repositories.UserRepository
+	adresssRepo *repositories.AddressRepository
+	config      *config.Env
 }
 
-func HandlerLoginStart(userRepo *repositories.UserRepository, config *config.Env) *HandlerLogin {
-	return &HandlerLogin{userRepo, config}
+func HandlerLoginStart(userRepo *repositories.UserRepository, adresssRepo *repositories.AddressRepository, config *config.Env) *HandlerLogin {
+	return &HandlerLogin{userRepo, adresssRepo, config}
 }
 
 func (h *HandlerLogin) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.GlobalResponse, *fluxgo.GlobalError) {
@@ -46,6 +47,11 @@ func (h *HandlerLogin) Execute(ctx c.Context, data *dto.LoginReq) (*dto.LoginRes
 		return nil, fluxgo.ErrorBadRequest("Invalid email or password", "auth.invalid_credentials")
 	}
 
+	addresses, err := h.adresssRepo.GetAddressesByUserId(ctx, user.IdUser)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get addresses")
+	}
+
 	const SEVEN_DAYS = 7 * 24 * time.Hour
 
 	tokenPayload := utils.JwtClaims{
@@ -61,9 +67,10 @@ func (h *HandlerLogin) Execute(ctx c.Context, data *dto.LoginReq) (*dto.LoginRes
 	}
 
 	return &dto.LoginRes{
-		Token:  token,
-		IdUser: user.IdUser,
-		Name:   user.Name,
-		Type:   user.Type,
+		Token:    token,
+		IdUser:   user.IdUser,
+		Name:     user.Name,
+		Type:     user.Type,
+		Adresses: addresses,
 	}, nil
 }
