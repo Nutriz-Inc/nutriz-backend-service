@@ -6,13 +6,21 @@ import (
 )
 
 type ListDonationPointsReq struct {
-	Name    *string `query:"name" validate:"omitempty,max=120"`
-	HasHome *bool   `query:"has_home" validate:"omitempty"`
-	//to do: add location filter
+	ShowAddress bool     `query:"show_address"`
+	Name        *string  `query:"name" validate:"omitempty,max=120"`
+	HasHome     *bool    `query:"has_home" validate:"omitempty"`
+	Longitude   *float64 `query:"longitude" validate:"omitempty,required_with=Latitude"`
+	Latitude    *float64 `query:"latitude" validate:"omitempty,required_with=Longitude"`
 	utils.PaginationReq
 }
 
+type DonationPointsRes struct {
+	entities.DonationPoint
+	Address         *entities.Address `json:"address,omitempty"`
+	DistanceFromYou *float64          `json:"distance_from_you,omitempty" db:"distance_from_you"`
+}
+
 type ListDonationPointsRes struct {
-	Data []entities.DonationPoint `json:"data"`
+	Data []DonationPointsRes `json:"data"`
 	utils.PaginationRes
 }

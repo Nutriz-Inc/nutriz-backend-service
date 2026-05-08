@@ -10,7 +10,15 @@ import (
 )
 
 func GetHttp(apm *fluxgo.Apm, prom *fluxgo.Prometheus, env *config.Env) *fluxgo.Http {
-	http := fluxgo.NewHttp(fluxgo.HttpOptions{Port: 3333, LogRequest: true, Apm: apm, Prometheus: prom, AddHealthRoutes: true})
+	http := fluxgo.NewHttp(fluxgo.HttpOptions{
+		Port:            3333,
+		LogRequest:      true,
+		Apm:             apm,
+		Prometheus:      prom,
+		AddHealthRoutes: true,
+	})
+
+	http.GetValidator().Validate = utils.GetValidate()
 
 	http.CreateRouter("/public")
 	http.CreateRouter("/internal", authMiddleware(env))

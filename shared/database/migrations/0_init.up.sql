@@ -55,12 +55,12 @@ CREATE TABLE address (
   number VARCHAR(10),
   city VARCHAR(100) NOT NULL,
   state VARCHAR(2) NOT NULL,
+  neighborhood VARCHAR(100) NOT NULL,
   complement VARCHAR(100),
   latitude NUMERIC(10,7),
   longitude NUMERIC(10,7),
 
   created_at TIMESTAMP NOT NULL,
-  created_by VARCHAR(36) NOT NULL,
   updated_at TIMESTAMP,
   updated_by VARCHAR(36),
   removed_at TIMESTAMP,
@@ -69,7 +69,6 @@ CREATE TABLE address (
   CONSTRAINT fk_address_user FOREIGN KEY (id_user) REFERENCES "user"(id_user),
   CONSTRAINT fk_address_dp FOREIGN KEY (id_donation_point) REFERENCES donation_point(id_donation_point),
 
-  CONSTRAINT fk_address_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_address_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_address_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
 );

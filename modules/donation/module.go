@@ -12,7 +12,6 @@ func Module() *fluxgo.FluxModule {
 	mod := fluxgo.Module("donation")
 
 	mod.AddHandler(handlers.HandlerListDonationPointsStart)
-
 	mod.AddHandler(handlers.HandlerListDonationsStart)
 
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonations) error {
@@ -32,7 +31,6 @@ func Module() *fluxgo.FluxModule {
 			handler.HandleHttp,
 		)
 	})
-
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonationPoints) error {
 		return mod.HttpRoute(
 			f,

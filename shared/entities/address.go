@@ -11,11 +11,11 @@ type Address struct {
 	Number          *string    `json:"number" db:"number"`
 	City            string     `json:"city" db:"city"`
 	State           string     `json:"state" db:"state"`
+	Neighborhood    string     `json:"neighborhood" db:"neighborhood"`
 	Complement      *string    `json:"complement" db:"complement"`
 	Latitude        *float64   `json:"latitude" db:"latitude"`
 	Longitude       *float64   `json:"longitude" db:"longitude"`
 	CreatedAt       time.Time  `json:"created_at" db:"created_at"`
-	CreatedBy       string     `json:"created_by" db:"created_by"`
 	UpdatedAt       *time.Time `json:"updated_at" db:"updated_at"`
 	UpdatedBy       *string    `json:"updated_by" db:"updated_by"`
 	RemovedAt       *time.Time `json:"removed_at" db:"removed_at"`
@@ -29,3 +29,5 @@ func (a Address) TableName() string {
 func (a Address) PrimaryKey() string {
 	return "id_address"
 }
+
+const MAX_ADDRESS_QUANTITY_PER_USER = 10

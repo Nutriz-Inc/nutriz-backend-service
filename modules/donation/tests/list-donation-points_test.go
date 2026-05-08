@@ -60,5 +60,32 @@ func TestListDonationPoint(t *testing.T) {
 
 			assert.Equal(t, name, item["name"])
 		})
+		t.Run("show_address filter", func(t *testing.T) {
+			show_address := true
+			route := fmt.Sprintf("%s&show_address=%t", endpoint, show_address)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, nil)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			item := fluxgo.ConvertToMap(data[0])
+
+			assert.NotNil(t, item["address"])
+		})
+		t.Run("latitude and longitude filter", func(t *testing.T) {
+			latitude := -23.55052
+			longitude := -46.633308
+			route := fmt.Sprintf("%s&latitude=%f&longitude=%f", endpoint, latitude, longitude)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, nil)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			item := fluxgo.ConvertToMap(data[0])
+
+			assert.NotNil(t, item["distance_from_you"])
+		})
 	})
 }
