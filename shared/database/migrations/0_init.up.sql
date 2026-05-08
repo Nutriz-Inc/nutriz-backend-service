@@ -163,3 +163,35 @@ CREATE TABLE file (
   CONSTRAINT fk_file_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_file_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
 );
+
+-- CONSENT LOG
+CREATE TABLE consent_log (
+  id_consent_log VARCHAR(36) PRIMARY KEY,
+
+  id_user VARCHAR(36) NOT NULL,
+
+  terms_version VARCHAR(50) NOT NULL,
+
+  accepted_at TIMESTAMP NOT NULL,
+
+  ip_address VARCHAR(45) NOT NULL,
+  user_agent TEXT NOT NULL,
+
+  CONSTRAINT fk_consent_user FOREIGN KEY (id_user) REFERENCES "user"(id_user)
+);
+
+-- USER BABY
+CREATE TABLE user_baby (
+  id_user_baby VARCHAR(36) PRIMARY KEY,
+
+  id_user VARCHAR(36) NOT NULL,
+
+  name VARCHAR(120),
+  birth_date TIMESTAMP NOT NULL,
+
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP,
+  removed_at TIMESTAMP,
+
+  CONSTRAINT fk_user_baby_user FOREIGN KEY (id_user) REFERENCES "user"(id_user)
+);
