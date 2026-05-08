@@ -28,6 +28,7 @@ func (r *AddressRepository) GetAddressesByUserId(
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
 		Select("a.*").
 		From("address", "a").
+		PaginationPaged(1, entities.MAX_ADDRESS_QUANTITY_PER_USER).
 		OrderBy(q.OrderBy{Column: "a.created_at"}).
 		WhereAnd(q.Where{Column: "a.removed_at", Type: "IS NULL"}).
 		WhereAnd(q.Where{Column: "a.id_user", Type: "=", Val: userId})

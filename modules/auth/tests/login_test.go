@@ -31,6 +31,8 @@ func TestLogin(t *testing.T) {
 		assert.Equal(t, body["id_user"], "usr_2veL1FPpuXxUaZcFaEC57BfpcKE")
 		assert.Equal(t, body["name"], "Maria Silva")
 		assert.Equal(t, body["type"], "common")
+		assert.NotNil(t, body["addresses"])
+		assert.Len(t, body["addresses"], 1)
 	})
 
 	t.Run("Error", func(t *testing.T) {

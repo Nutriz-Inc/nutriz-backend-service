@@ -7,7 +7,6 @@ import (
 	"nutriz-backend-service/shared/entities"
 	"strconv"
 
-	"github.com/MMortari/go-query-builder"
 	q "github.com/MMortari/go-query-builder"
 
 	fluxgo "github.com/MMortari/FluxGo"
@@ -54,11 +53,11 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 	}
 
 	if filter.ShowAddress {
-		qb.Join(query.Join{
+		qb.Join(q.Join{
 			Table: "address",
 			As:    "a",
-			On:    "a.id_donation_point = dp.id_donation_point",
-			Type:  query.LeftJoin,
+			On:    "a.id_donation_point = dp.id_donation_point AND a.removed_at IS NULL",
+			Type:  q.LeftJoin,
 		})
 
 		qb.Select(`
@@ -87,11 +86,11 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 		lng := strconv.FormatFloat(*filter.Longitude, 'f', 6, 64)
 
 		if !filter.ShowAddress {
-			qb.Join(query.Join{
+			qb.Join(q.Join{
 				Table: "address",
 				As:    "a",
-				On:    "a.id_donation_point = dp.id_donation_point",
-				Type:  query.LeftJoin,
+				On:    "a.id_donation_point = dp.id_donation_point AND a.removed_at IS NULL",
+				Type:  q.LeftJoin,
 			})
 		}
 
@@ -107,7 +106,7 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 			) AS distance_from_you
 		`)
 
-		qb.OrderBy(query.OrderBy{
+		qb.OrderBy(q.OrderBy{
 			Column: "distance_from_you",
 			Type:   "ASC",
 		})

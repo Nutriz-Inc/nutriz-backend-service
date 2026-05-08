@@ -138,10 +138,10 @@ INSERT INTO address (
     removed_by
 ) VALUES
 (
-    'adr_01JTG8J5F6W9K2M4P7Q1X8Y3ZA',
+    'adr_01JTG8J5F6W9K2M4P7Q1X8Y3ZAL',
     NULL,
     'dpt_2veL1FPpuXxUaZcFaEC57BfpcKE',
-    '01310-100',
+    '01310100',
     'Avenida Paulista',
     '1578',
     'São Paulo',
@@ -157,10 +157,10 @@ INSERT INTO address (
     NULL
 ),
 (
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7BC',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7BCD',
     NULL,
     'dpt_2veL1FPpuXxUaZcFaEC57BfpcMA',
-    '22250-040',
+    '22250040',
     'Rua Voluntários da Pátria',
     '45',
     'Rio de Janeiro',
@@ -169,6 +169,25 @@ INSERT INTO address (
     'Fundos',
     -22.951916,
     -43.182482,
+    NOW(),
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7MIP',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NULL,
+    '09415987',
+    'Rua Ribeiros dos Mares',
+    '75',
+    'São Bernardo do Campo',
+    'SP',
+    'Centro',
+    'Próximo ao Hospital São Paulo',
+    -27.923916,
+    -46.172981,
     NOW(),
     NULL,
     NULL,
