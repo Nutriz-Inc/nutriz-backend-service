@@ -2,12 +2,12 @@ package usecases
 
 import (
 	"context"
+	"log"
 	"nutriz-backend-service/modules/user/consent/dtos"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
 	fluxgo "github.com/MMortari/FluxGo"
-	"github.com/rs/zerolog/log"
 )
 
 type CreateConsentUseCase struct {
@@ -39,11 +39,8 @@ func (uc *CreateConsentUseCase) Execute(
 
 	err := uc.consentRepo.CreateConsent(ctx, *data, idUser, idConsentLog)
 	if err != nil {
-
-		log.Ctx(ctx).Error().Err(err).
-			Str("id_user", idUser).
-			Str("terms_version", data.TermsVersion).
-			Msg("failed to create consent")
+		log.Printf("failed to create consent - user: %s, terms_version: %s, error: %v",
+			idUser, data.TermsVersion, err)
 
 		return nil, fluxgo.ErrorInternalError("Error to create consent")
 	}
