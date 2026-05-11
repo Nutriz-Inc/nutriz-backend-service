@@ -49,7 +49,7 @@ func TestGetUser(t *testing.T) {
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, id, body["id_user"])
 			assert.NotNil(t, body["babies"])
-			assert.Len(t, body["babies"], 1)
+			assert.Len(t, body["babies"], 2)
 		})
 	})
 
@@ -69,7 +69,7 @@ func TestGetUser(t *testing.T) {
 
 			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
 
-			assert.Equal(t, http.StatusNotFound, status)
+			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "You don't have permission to access this resource", body["message"])
 		})
 	})

@@ -19,3 +19,5 @@ func (u UserBaby) TableName() string {
 func (u UserBaby) PrimaryKey() string {
 	return "id_user_baby"
 }
+
+const MAX_BABY_QUANTITY_PER_USER = 20

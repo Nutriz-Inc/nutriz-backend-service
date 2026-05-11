@@ -40,7 +40,7 @@ func (h *HandlerGetUser) Execute(ctx c.Context, filters *dto.GetUserReq) (*dto.G
 		return nil, fluxgo.ErrorInternalError("Error to get user")
 	}
 	if user == nil {
-		return nil, fluxgo.ErrorBadRequest("User not found", "user.not_found")
+		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 	if user.IdUser != filters.ActionBy {
 		return nil, utils.ErrorForbidden("You don't have permission to access this resource", "user.forbidden")

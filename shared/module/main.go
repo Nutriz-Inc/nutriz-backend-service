@@ -4,11 +4,11 @@ import (
 	"nutriz-backend-service/config"
 	"nutriz-backend-service/modules/auth"
 	"nutriz-backend-service/modules/donation"
+	"nutriz-backend-service/modules/user"
 	"nutriz-backend-service/shared/http"
 	"nutriz-backend-service/shared/repositories"
 
 	fluxgo "github.com/MMortari/FluxGo"
-	"github.com/MMortari/FluxGo/example/full/modules/user"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redis/go-redis/v9"
 )

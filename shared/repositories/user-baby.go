@@ -28,6 +28,7 @@ func (r *UserBabyRepository) GetUserBabyesByUserId(
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
 		Select("ub.*").
 		From("user_baby", "ub").
+		PaginationPaged(1, entities.MAX_BABY_QUANTITY_PER_USER).
 		OrderBy(q.OrderBy{Column: "ub.created_at"}).
 		WhereAnd(q.Where{Column: "ub.removed_at", Type: "IS NULL"}).
 		WhereAnd(q.Where{Column: "ub.id_user", Type: "=", Val: userId})
