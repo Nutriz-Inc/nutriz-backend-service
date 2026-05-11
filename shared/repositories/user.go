@@ -71,11 +71,11 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*ent
 // 		"closing_date": data.ClosingDate,
 // 	}
 
-// 	_, err := r.DB.ReadOnlyDB().NamedExecContext(ctx, query, params)
-// 	if err != nil {
-// 		span.SetError(err)
-// 		return err
-// 	}
-
-// 	return nil
+// 	return utils.Insert(
+// 		ctx,
+// 		r.DB.ReadOnlyDB(),
+// 		span,
+// 		query,
+// 		params,
+// 	)
 // }
