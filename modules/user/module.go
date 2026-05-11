@@ -13,7 +13,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddHandler(handlers.HandlerCreateUserBabyStart)
 	mod.AddHandler(handlers.HandlerGetUserStart)
 
-	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateUserBaby) error {
+	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerCreateUserBaby) error {
 		return mod.HttpRoute(
 			f,
 			"/internal",

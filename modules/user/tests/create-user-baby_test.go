@@ -16,7 +16,7 @@ func TestCreateUserBaby(t *testing.T) {
     fx, app := module.Module().GetTestApp(t)
     defer fx.RequireStart().RequireStop()
 
-    endpoint := "/internal/userbaby"
+    endpoint := "/internal/user/baby"
 
     headers := &utils.TestHeaders
 
@@ -30,8 +30,6 @@ func TestCreateUserBaby(t *testing.T) {
         
         status, body := fluxgo.RunTestRequest(app, "POST", endpoint, data, headers)
         t.Logf("body: %v", body)
-        assert.Equal(t, httpCode.StatusCreated, status)
-
         assert.Equal(t, httpCode.StatusCreated, status)
         assert.NotNil(t, body["id_user_baby"])
         assert.NotEmpty(t, body["id_user_baby"])
