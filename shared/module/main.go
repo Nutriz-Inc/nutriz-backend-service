@@ -6,7 +6,6 @@ import (
 	"nutriz-backend-service/modules/donation"
 	"nutriz-backend-service/modules/job"
 	"nutriz-backend-service/modules/user"
-	"nutriz-backend-service/modules/user/consent"
 	"nutriz-backend-service/shared/http"
 	"nutriz-backend-service/shared/repositories"
 
@@ -44,14 +43,13 @@ func Module() *fluxgo.FluxGo {
 	flux.AddDependency(repositories.UserBabyRepositoryStart)
 	flux.AddDependency(repositories.JobRepositoryStart)
 	flux.AddDependency(repositories.DonationStepRepositoryStart)
-	flux.AddDependency(repositories.ConsentRepositoryStart)
+	flux.AddDependency(repositories.ConsentLogRepositoryStart)
 
 	//Modules
 	flux.AddModule(donation.Module())
 	flux.AddModule(auth.Module())
 	flux.AddModule(user.Module())
 	flux.AddModule(job.Module())
-	flux.AddModule(consent.Module())
 
 	return flux
 }

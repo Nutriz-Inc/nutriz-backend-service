@@ -23,6 +23,7 @@ func GetValidate() *validator.Validate {
 		_ = v.RegisterValidation("id", ValidId)
 		_ = v.RegisterValidation("datetime", ValidDateTime)
 		_ = v.RegisterValidation("email", ValidEmail)
+		_ = v.RegisterValidation("ip", ValidIP)
 
 		validateInstance = v
 	})
@@ -80,7 +81,13 @@ func ValidEmail(fl validator.FieldLevel) bool {
 	return err == nil
 }
 
-func IsValidIP(ip string) bool {
-	_, err := netip.ParseAddr(ip)
+func ValidIP(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	if value == "" {
+		return true
+	}
+
+	_, err := netip.ParseAddr(value)
 	return err == nil
 }

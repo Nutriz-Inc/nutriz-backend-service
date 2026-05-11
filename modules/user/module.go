@@ -12,6 +12,7 @@ func Module() *fluxgo.FluxModule {
 	mod := fluxgo.Module("user")
 
 	mod.AddHandler(handlers.HandlerGetUserStart)
+	mod.AddHandler(handlers.HandlerCreateConsentLogStart)
 
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetUser) error {
 		return mod.HttpRoute(
@@ -27,6 +28,24 @@ func Module() *fluxgo.FluxModule {
 				Validate:   true,
 				Cache:      redis,
 				CacheTTL:   time.Hour,
+			},
+			handler.HandleHttp,
+		)
+	})
+
+	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerCreateConsentLog) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"POST",
+			"/user/consent",
+			fluxgo.RouteIncome{
+				Entity:     dto.CreateConsentReq{},
+				FromBody:   true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      nil,
+				CacheTTL:   0,
 			},
 			handler.HandleHttp,
 		)
