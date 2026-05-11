@@ -2,7 +2,7 @@ package repositories
 
 import (
 	"context"
-	"nutriz-backend-service/modules/consent/dtos"
+	"nutriz-backend-service/modules/user/consent/dtos"
 	"nutriz-backend-service/shared/entities"
 
 	fluxgo "github.com/MMortari/FluxGo"

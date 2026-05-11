@@ -3,8 +3,8 @@ package tests
 import (
 	"context"
 	"errors"
-	"nutriz-backend-service/modules/consent/dtos"
-	"nutriz-backend-service/modules/consent/usecases"
+	"nutriz-backend-service/modules/user/consent/dtos"
+	"nutriz-backend-service/modules/user/consent/usecases"
 	"testing"
 
 	"github.com/stretchr/testify/assert"

@@ -1,8 +1,8 @@
 package handlers
 
 import (
-	"nutriz-backend-service/modules/consent/dtos"
-	"nutriz-backend-service/modules/consent/usecases"
+	"nutriz-backend-service/modules/user/consent/dtos"
+	"nutriz-backend-service/modules/user/consent/usecases"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"

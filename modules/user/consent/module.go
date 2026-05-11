@@ -1,9 +1,9 @@
 package consent
 
 import (
-	dto "nutriz-backend-service/modules/consent/dtos"
-	"nutriz-backend-service/modules/consent/handlers"
-	"nutriz-backend-service/modules/consent/usecases"
+	dto "nutriz-backend-service/modules/user/consent/dtos"
+	"nutriz-backend-service/modules/user/consent/handlers"
+	"nutriz-backend-service/modules/user/consent/usecases"
 	"nutriz-backend-service/shared/repositories"
 
 	fluxgo "github.com/MMortari/FluxGo"

@@ -2,12 +2,11 @@ package usecases
 
 import (
 	"context"
-	"nutriz-backend-service/modules/consent/dtos"
+	"nutriz-backend-service/modules/user/consent/dtos"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
 	fluxgo "github.com/MMortari/FluxGo"
-	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
@@ -36,8 +35,7 @@ func (uc *CreateConsentUseCase) Execute(
 		)
 	}
 
-	idConsentLog := uuid.New().String()
-	//idConsentLog := utils.IdGenerate(utils.ConsentEntity)
+	idConsentLog := utils.IdGenerate(utils.ConsentLogEntity)
 
 	err := uc.consentRepo.CreateConsent(ctx, *data, idUser, idConsentLog)
 	if err != nil {

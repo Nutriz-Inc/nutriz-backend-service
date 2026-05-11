@@ -3,10 +3,10 @@ package module
 import (
 	"nutriz-backend-service/config"
 	"nutriz-backend-service/modules/auth"
-	"nutriz-backend-service/modules/consent"
 	"nutriz-backend-service/modules/donation"
 	"nutriz-backend-service/modules/job"
 	"nutriz-backend-service/modules/user"
+	"nutriz-backend-service/modules/user/consent"
 	"nutriz-backend-service/shared/http"
 	"nutriz-backend-service/shared/repositories"
 
