@@ -57,3 +57,43 @@ func ListQuery[T any](
 
 	return &resp, total, nil
 }
+
+func Insert(
+	ctx context.Context,
+	db *sqlx.DB,
+	span trace.Span,
+	query string,
+	params any,
+) error {
+	_, err := db.NamedExecContext(ctx, query, params)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+func Get[T any](
+	ctx context.Context,
+	db *sqlx.DB,
+	span trace.Span,
+	query string,
+	args ...any,
+) (*T, error) {
+	var data T
+
+	err := db.GetContext(ctx, &data, query, args...)
+	if err == sql.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	return &data, nil
+}

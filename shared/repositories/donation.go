@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
@@ -61,16 +60,11 @@ func (r *DonationRepository) GetDonationById(ctx context.Context, id string) (*e
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	var donation entities.Donation
-
-	err := r.DB.ReadOnlyDB().GetContext(ctx, &donation, `SELECT * FROM "donation" WHERE id_donation = $1`, id)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		span.SetError(err)
-		return nil, err
-	}
-
-	return &donation, nil
+	return utils.Get[entities.Donation](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "donation" WHERE id_donation = $1`,
+		id,
+	)
 }

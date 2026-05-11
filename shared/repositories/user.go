@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"nutriz-backend-service/shared/entities"
+	"nutriz-backend-service/shared/utils"
 
 	fluxgo "github.com/MMortari/FluxGo"
 )
@@ -20,46 +20,26 @@ func (r *UserRepository) GetUserById(ctx context.Context, id string) (*entities.
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	var user entities.User
-
-	err := r.DB.ReadOnlyDB().GetContext(
+	return utils.Get[entities.User](
 		ctx,
-		&user,
+		r.DB.ReadOnlyDB(),
+		span,
 		`SELECT * FROM "user" WHERE id_user = $1`,
 		id,
 	)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		span.SetError(err)
-		return nil, err
-	}
-
-	return &user, nil
 }
 
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*entities.User, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	var user entities.User
-
-	err := r.DB.ReadOnlyDB().GetContext(
+	return utils.Get[entities.User](
 		ctx,
-		&user,
+		r.DB.ReadOnlyDB(),
+		span,
 		`SELECT * FROM "user" WHERE email = $1`,
 		email,
 	)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		span.SetError(err)
-		return nil, err
-	}
-
-	return &user, nil
 }
 
 // func (r *UserRepository) CreateUser(ctx context.Context, data dto.CreateUserReq, idUser string) error {
