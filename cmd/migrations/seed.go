@@ -84,7 +84,7 @@ INSERT INTO donation_point (
 INSERT INTO donation (
     id_donation,
     is_active,
-    quantity,
+    quantity_donated,
     user_feedback,
     created_at,
     created_by,

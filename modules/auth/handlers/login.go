@@ -47,7 +47,7 @@ func (h *HandlerLogin) Execute(ctx c.Context, data *dto.LoginReq) (*dto.LoginRes
 		return nil, fluxgo.ErrorBadRequest("Invalid email or password", "auth.invalid_credentials")
 	}
 
-	addresses, err := h.addressRepo.GetAddressesByUserId(ctx, user.IdUser)
+	addresses, _, err := h.addressRepo.GetAddressesByUserId(ctx, user.IdUser)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get addresses")
 	}
