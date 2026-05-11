@@ -11,7 +11,26 @@ import (
 func Module() *fluxgo.FluxModule {
 	mod := fluxgo.Module("job")
 
+	mod.AddHandler(handlers.HandlerListJobsStart)
 	mod.AddHandler(handlers.HandlerGetJobStart)
+
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListJobs) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"GET",
+			"/job",
+			fluxgo.RouteIncome{
+				Entity:     dto.ListJobsReq{},
+				FromQuery:  true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      redis,
+				CacheTTL:   time.Hour,
+			},
+			handler.HandleHttp,
+		)
+	})
 
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetJob) error {
 		return mod.HttpRoute(
