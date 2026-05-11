@@ -29,22 +29,22 @@ func (h *HandlerCreateUserBaby) HandleHttp(c *fiber.Ctx, income interface{}) (*f
 
 func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyReq) (*dto.CreateUserBabyRes, *fluxgo.GlobalError) {
 	if data.BirthDate.After(time.Now()) {
-        return nil, fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
-    }
+		return nil, fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
+	}
 
 	userBabyId := utils.IdGenerate(utils.UserBabyEntity)
 
 	err := h.userBabyRepo.CreateUserBaby(ctx, &repositories.CreateUserBabyRepositoryReq{
 		IdUserBaby: userBabyId,
-		IdUser:	data.ActionBy,
-		Name:	data.Name,
-		BirthDate: data.BirthDate,
+		IdUser:     data.ActionBy,
+		Name:       data.Name,
+		BirthDate:  data.BirthDate,
 	})
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to create baby")
 	}
 
-	userBaby, err := h.userBabyRepo.GetUserBabybyUserBabyId(ctx, userBabyId)
+	userBaby, err := h.userBabyRepo.GetUserBabyById(ctx, userBabyId)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user baby")
 	}

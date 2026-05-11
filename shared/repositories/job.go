@@ -24,7 +24,7 @@ func (r *JobRepository) GetJobById(ctx context.Context, id string) (*entities.Jo
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
-		`SELECT * FROM "job" WHERE id_job = $1`,
+		`SELECT * FROM "job" WHERE id_job = $1 AND removed_at IS NULL`,
 		id,
 	)
 }

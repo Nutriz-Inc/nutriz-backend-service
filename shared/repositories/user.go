@@ -24,7 +24,7 @@ func (r *UserRepository) GetUserById(ctx context.Context, id string) (*entities.
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
-		`SELECT * FROM "user" WHERE id_user = $1`,
+		`SELECT * FROM "user" WHERE id_user = $1 AND removed_at IS NULL`,
 		id,
 	)
 }
@@ -37,45 +37,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*ent
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
-		`SELECT * FROM "user" WHERE email = $1`,
+		`SELECT * FROM "user" WHERE email = $1 AND removed_at IS NULL`,
 		email,
 	)
 }
-
-// func (r *UserRepository) CreateUser(ctx context.Context, data dto.CreateUserReq, idUser string) error {
-// 	ctx, span := r.StartSpan(ctx)
-// 	defer span.End()
-
-// 	query := `
-// 		INSERT INTO "user" (
-// 			id_user,
-// 			name,
-// 			email,
-// 			password,
-// 			closing_date,
-// 			created_at
-// 		) VALUES (
-// 	        :id_user,
-// 			:name,
-// 			:email,
-// 			:password,
-// 			:closing_date,
-// 			now()
-// 		)
-// 	`
-// 	params := map[string]any{
-// 		"id_user":      idUser,
-// 		"name":         data.Name,
-// 		"email":        data.Email,
-// 		"password":     data.Password,
-// 		"closing_date": data.ClosingDate,
-// 	}
-
-// 	return utils.Insert(
-// 		ctx,
-// 		r.DB.ReadOnlyDB(),
-// 		span,
-// 		query,
-// 		params,
-// 	)
-// }
