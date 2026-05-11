@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net/mail"
+	"net/netip"
 	"sync"
 	"time"
 
@@ -76,5 +77,10 @@ func ValidEmail(fl validator.FieldLevel) bool {
 	}
 
 	_, err := mail.ParseAddress(value)
+	return err == nil
+}
+
+func IsValidIP(ip string) bool {
+	_, err := netip.ParseAddr(ip)
 	return err == nil
 }
