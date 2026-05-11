@@ -193,4 +193,42 @@ INSERT INTO address (
     NULL,
     NULL,
     NULL
+);
+
+INSERT INTO user_baby (
+    id_user_baby,
+    id_user,
+    name,
+    birth_date,
+    created_at,
+    updated_at,
+    removed_at
+)
+VALUES
+(
+    'usb_01JTG8J5F6W9K2M4P7Q1X8Y3ZAL',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'Miguel',
+    '2025-01-15 08:30:00',
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'usb_01JTG8K8N4P2R6T9V1X3Y5Z7BCD',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'Helena',
+    '2024-11-02 14:10:00',
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'usb_01JTG8K8N4P2R6T9V1X3Y5Z7MIP',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    'Arthur',
+    '2025-03-20 06:45:00',
+    NOW(),
+    NULL,
+    NULL
 );`
