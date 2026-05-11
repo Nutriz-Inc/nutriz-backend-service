@@ -8,6 +8,7 @@ import (
 	"nutriz-backend-service/shared/repositories"
 
 	fluxgo "github.com/MMortari/FluxGo"
+	"github.com/MMortari/FluxGo/example/full/modules/user"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/redis/go-redis/v9"
 )
@@ -38,10 +39,12 @@ func Module() *fluxgo.FluxGo {
 	flux.AddDependency(repositories.DonationRepositoryStart)
 	flux.AddDependency(repositories.UserRepositoryStart)
 	flux.AddDependency(repositories.AddressRepositoryStart)
+	flux.AddDependency(repositories.UserBabyRepositoryStart)
 
 	//Modules
 	flux.AddModule(donation.Module())
 	flux.AddModule(auth.Module())
+	flux.AddModule(user.Module())
 
 	return flux
 }
