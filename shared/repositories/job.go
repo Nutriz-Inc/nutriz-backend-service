@@ -2,8 +2,8 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"nutriz-backend-service/shared/entities"
+	"nutriz-backend-service/shared/utils"
 
 	fluxgo "github.com/MMortari/FluxGo"
 )
@@ -20,16 +20,11 @@ func (r *JobRepository) GetJobById(ctx context.Context, id string) (*entities.Jo
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	var job entities.Job
-
-	err := r.DB.ReadOnlyDB().GetContext(ctx, &job, `SELECT * FROM "job" WHERE id_job = $1`, id)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		span.SetError(err)
-		return nil, err
-	}
-
-	return &job, nil
+	return utils.Get[entities.Job](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "job" WHERE id_job = $1`,
+		id,
+	)
 }

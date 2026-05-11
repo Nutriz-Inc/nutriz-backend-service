@@ -2,12 +2,11 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	"nutriz-backend-service/shared/entities"
+	"nutriz-backend-service/shared/utils"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
-	"go.opentelemetry.io/otel/codes"
 )
 
 type AddressRepository struct {
@@ -21,7 +20,7 @@ func AddressRepositoryStart(db *fluxgo.Database) *AddressRepository {
 func (r *AddressRepository) GetAddressesByUserId(
 	ctx context.Context,
 	userId string,
-) (*[]entities.Address, error) {
+) (*[]entities.Address, int, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -33,29 +32,12 @@ func (r *AddressRepository) GetAddressesByUserId(
 		WhereAnd(q.Where{Column: "a.removed_at", Type: "IS NULL"}).
 		WhereAnd(q.Where{Column: "a.id_user", Type: "=", Val: userId})
 
-	query, args := qb.ToSelectSql()
-	resp := make([]entities.Address, 0, entities.MAX_ADDRESS_QUANTITY_PER_USER)
-
-	err := r.DB.ReadOnlyDB().SelectContext(ctx, &resp, query, args...)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	queryTotal, argsTotal := qb.ToSelectTotalSql()
-
-	var total int
-	err = r.DB.ReadOnlyDB().GetContext(ctx, &total, queryTotal, argsTotal...)
-
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, err
-	}
-
-	return &resp, nil
+	return utils.ListQuery[entities.Address](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		qb,
+		utils.IntPtr(entities.MAX_ADDRESS_QUANTITY_PER_USER),
+		false,
+	)
 }

@@ -79,7 +79,7 @@ CREATE TABLE donation (
 
   is_active BOOLEAN NOT NULL,
 
-  quantity NUMERIC(10,2),
+  quantity_donated NUMERIC(10,2),
   user_feedback TEXT,
 
   created_at TIMESTAMP NOT NULL,

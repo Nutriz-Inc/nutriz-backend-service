@@ -5,7 +5,7 @@ import "time"
 type Donation struct {
 	IdDonation      string     `json:"id_donation" db:"id_donation"`
 	IsActive        bool       `json:"is_active" db:"is_active"`
-	Quantity        *float64   `json:"quantity" db:"quantity"`
+	QuantityDonated *float64   `json:"quantity_donated" db:"quantity_donated"`
 	UserFeedback    *string    `json:"user_feedback" db:"user_feedback"`
 	CreatedAt       time.Time  `json:"created_at" db:"created_at"`
 	CreatedBy       string     `json:"created_by" db:"created_by"`
