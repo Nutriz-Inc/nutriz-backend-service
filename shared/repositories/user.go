@@ -53,7 +53,7 @@ func (r *UserRepository) ListUsersByFilters(
 
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
 		Select("u.*").
-		From(`"user"`, "u").
+		From("user", "u").
 		OrderBy(q.OrderBy{Column: "u.created_at"}).
 		PaginationPaged(filter.Page, filter.PageSize).
 		WhereAnd(q.Where{Column: "u.removed_at", Type: "IS NULL"})
