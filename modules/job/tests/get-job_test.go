@@ -34,7 +34,7 @@ func TestGetJob(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		t.Run("Not found", func(t *testing.T) {
-			id := "job_not_exists"
+			id := "job_2veL1FPpuXxUaZcFaEC57Bfpd53"
 			route := fmt.Sprintf("%s/%s", endpoint, id)
 
 			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
