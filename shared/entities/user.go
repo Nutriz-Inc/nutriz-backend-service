@@ -10,7 +10,7 @@ type User struct {
 	BirthDate   time.Time    `json:"birth_date" db:"birth_date"`
 	PhoneNumber string       `json:"phone_number" db:"phone_number"`
 	Email       string       `json:"email" db:"email"`
-	Password    string       `json:"password" db:"password"`
+	Password    string       `json:"-" db:"password"`
 	MilkDonated *float64     `json:"milk_donated" db:"milk_donated"`
 	CreatedAt   time.Time    `json:"created_at" db:"created_at"`
 	CreatedBy   string       `json:"created_by" db:"created_by"`

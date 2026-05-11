@@ -16,6 +16,8 @@ const (
 	FileEntity          EnumEntityType = "file"
 	JobEntity           EnumEntityType = "job"
 	UserEntity          EnumEntityType = "user"
+	UserBabyEntity      EnumEntityType = "user_baby"
+	ConsentLogEntity    EnumEntityType = "consent_log"
 )
 
 var prefixToEntity = map[string]EnumEntityType{
@@ -26,6 +28,8 @@ var prefixToEntity = map[string]EnumEntityType{
 	"don_": DonationEntity,
 	"job_": JobEntity,
 	"usr_": UserEntity,
+	"usb_": UserBabyEntity,
+	"clg_": ConsentLogEntity,
 }
 
 var entityToPrefix = func() map[EnumEntityType]string {

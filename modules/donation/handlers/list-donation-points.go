@@ -31,9 +31,12 @@ func (h *HandlerListDonationPoints) Execute(ctx c.Context, filters *dto.ListDona
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list donation points")
 	}
+	if donationPoints == nil || len(*donationPoints) == 0 {
+		return nil, fluxgo.ErrorNotFound("Donation points not found")
+	}
 
 	return &dto.ListDonationPointsRes{
-		Data: donationPoints,
+		Data: *donationPoints,
 		PaginationRes: utils.PaginationRes{
 			Page:     filters.Page,
 			PageSize: filters.PageSize,
