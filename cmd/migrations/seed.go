@@ -84,7 +84,7 @@ INSERT INTO donation_point (
 INSERT INTO donation (
     id_donation,
     is_active,
-    quantity,
+    quantity_donated,
     user_feedback,
     created_at,
     created_by,
@@ -231,4 +231,85 @@ VALUES
     NOW(),
     NULL,
     NULL
-);`
+);
+
+INSERT INTO donation_step (
+    id_step_donation,
+    id_donation,
+    name,
+    description,
+    status,
+    set_date,
+    created_at,
+    updated_at,
+    completed_at
+) VALUES
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'Coleta inicial',
+    'Coleta agendada com o doador',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcBB',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
+    'Triagem',
+    'Triagem do leite doado',
+    'review',
+    NOW() + INTERVAL '3 days',
+    NOW(),
+    NULL,
+    NULL
+);
+
+INSERT INTO job (
+    id_job,
+    id_user,
+    id_step,
+    name,
+    description,
+    date_set,
+    user_feedback,
+    created_at,
+    created_by,
+    updated_at,
+    updated_by,
+    removed_at,
+    removed_by
+) VALUES
+(
+    'job_2veL1FPpuXxUaZcFaEC57Bfpc01',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
+    'Entrega ao ponto',
+    'Transporte do material para o ponto de coleta',
+    NOW() + INTERVAL '2 days',
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'job_2veL1FPpuXxUaZcFaEC57Bfpc02',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcBB',
+    'Análise laboratorial',
+    'Analisar e aprovar amostras',
+    NOW() + INTERVAL '4 days',
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+`

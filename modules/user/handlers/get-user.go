@@ -50,14 +50,14 @@ func (h *HandlerGetUser) Execute(ctx c.Context, filters *dto.GetUserReq) (*dto.G
 	var babies *[]entities.UserBaby
 
 	if filters.ShowAddress {
-		addresses, err = h.addressRepo.GetAddressesByUserId(ctx, filters.Id)
+		addresses, _, err = h.addressRepo.GetAddressesByUserId(ctx, filters.Id)
 		if err != nil {
 			return nil, fluxgo.ErrorInternalError("Error to get addresses")
 		}
 	}
 
 	if filters.ShowBaby {
-		babies, err = h.babyRepo.GetUserBabiesByUserId(ctx, filters.Id)
+		babies, _, err = h.babyRepo.GetUserBabyesByUserId(ctx, filters.Id)
 		if err != nil {
 			return nil, fluxgo.ErrorInternalError("Error to get babies")
 		}

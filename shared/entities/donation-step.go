@@ -31,3 +31,5 @@ func (d DonationStep) TableName() string {
 func (d DonationStep) PrimaryKey() string {
 	return "id_step_donation"
 }
+
+const NUMBER_OF_DONATION_STEPS = 5 //still not sure

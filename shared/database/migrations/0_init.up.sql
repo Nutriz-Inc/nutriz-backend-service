@@ -79,7 +79,7 @@ CREATE TABLE donation (
 
   is_active BOOLEAN NOT NULL,
 
-  quantity NUMERIC(10,2),
+  quantity_donated NUMERIC(10,2),
   user_feedback TEXT,
 
   created_at TIMESTAMP NOT NULL,
@@ -118,8 +118,8 @@ CREATE TABLE donation_step (
 CREATE TABLE job (
   id_job VARCHAR(36) PRIMARY KEY,
 
-  id_user VARCHAR(36),
-  id_step VARCHAR(36),
+  id_user VARCHAR(36) NOT NULL,
+  id_step VARCHAR(36) NOT NULL,
 
   name VARCHAR(120) NOT NULL,
   description TEXT NOT NULL,

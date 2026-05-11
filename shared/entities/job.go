@@ -4,8 +4,8 @@ import "time"
 
 type Job struct {
 	IdJob        string     `json:"id_job" db:"id_job"`
-	IdUser       *string    `json:"id_user" db:"id_user"`
-	IdStep       *string    `json:"id_step" db:"id_step"`
+	IdUser       string     `json:"id_user" db:"id_user"`
+	IdStep       string     `json:"id_step" db:"id_step"`
 	Name         string     `json:"name" db:"name"`
 	Description  string     `json:"description" db:"description"`
 	DateSet      *time.Time `json:"date_set" db:"date_set"`
