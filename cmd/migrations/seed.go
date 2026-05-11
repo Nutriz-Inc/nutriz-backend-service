@@ -3,6 +3,7 @@ package main
 var seed = `
 INSERT INTO "user" (
     id_user,
+    internal_identifier,
     type,
     name,
     cpf,
@@ -20,6 +21,7 @@ INSERT INTO "user" (
 ) VALUES
 (
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    '234567898765435',
     'common',
     'Maria Silva',
     '47046117012',
@@ -37,6 +39,7 @@ INSERT INTO "user" (
 ),
 (
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    '234567898765436',
     'common',
     'Marta Silveira',
     '72555730028',
