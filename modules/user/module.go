@@ -32,7 +32,6 @@ func Module() *fluxgo.FluxModule {
 			handler.HandleHttp,
 		)
 	})
-
 	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerCreateConsentLog) error {
 		return mod.HttpRoute(
 			f,
@@ -41,6 +40,23 @@ func Module() *fluxgo.FluxModule {
 			"/user/consent",
 			fluxgo.RouteIncome{
 				Entity:     dto.CreateConsentReq{},
+				FromBody:   true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      nil,
+				CacheTTL:   0,
+			},
+			handler.HandleHttp,
+		)
+	})
+	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerCreateAddress) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"POST",
+			"/user/address",
+			fluxgo.RouteIncome{
+				Entity:     dto.CreateAddressReq{},
 				FromBody:   true,
 				FromHeader: true,
 				Validate:   true,
