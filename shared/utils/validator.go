@@ -56,18 +56,15 @@ func ValidId(fl validator.FieldLevel) bool {
 }
 
 func ValidDateTime(fl validator.FieldLevel) bool {
-	field := fl.Field()
+	value := fl.Field().String()
 
-	if t, ok := field.Interface().(time.Time); ok {
-		return !t.IsZero()
-	}
-
-	value := field.String()
 	if value == "" {
 		return true
 	}
+
 	layout := fl.Param()
 	_, err := time.Parse(layout, value)
+
 	return err == nil
 }
 

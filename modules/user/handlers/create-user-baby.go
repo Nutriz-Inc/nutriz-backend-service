@@ -13,10 +13,12 @@ import (
 
 type HandlerCreateUserBaby struct {
 	userBabyRepo *repositories.UserBabyRepository
+	userRepo    *repositories.UserRepository
 }
 
-func HandlerCreateUserBabyStart(userBabyRepo *repositories.UserBabyRepository) *HandlerCreateUserBaby {
-	return &HandlerCreateUserBaby{userBabyRepo}
+func HandlerCreateUserBabyStart(userBabyRepo *repositories.UserBabyRepository,
+	userRepo *repositories.UserRepository) *HandlerCreateUserBaby {
+	return &HandlerCreateUserBaby{userBabyRepo, userRepo}
 }
 
 func (h *HandlerCreateUserBaby) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.GlobalResponse, *fluxgo.GlobalError) {
@@ -28,17 +30,32 @@ func (h *HandlerCreateUserBaby) HandleHttp(c *fiber.Ctx, income interface{}) (*f
 }
 
 func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyReq) (*dto.CreateUserBabyRes, *fluxgo.GlobalError) {
-	if data.BirthDate.After(time.Now()) {
+	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
+    if err != nil {
+        return nil, fluxgo.ErrorInternalError("Error to get user")
+    }
+    if user == nil {
+        return nil, fluxgo.ErrorNotFound("User not found")
+    }
+
+	layout := "2006-01-02"
+
+	birthDateParsed, err := time.Parse(layout, data.BirthDate)
+	if err != nil {
+		return nil, fluxgo.ErrorBadRequest("Invalid birth date format. Use YYYY-MM-DD HH:MM:SS", "user_baby.invalid_format")
+	}
+
+	if birthDateParsed.After(time.Now()) {
 		return nil, fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
 	}
 
 	userBabyId := utils.IdGenerate(utils.UserBabyEntity)
 
-	err := h.userBabyRepo.CreateUserBaby(ctx, &repositories.CreateUserBabyRepositoryReq{
+	err = h.userBabyRepo.CreateUserBaby(ctx, &repositories.CreateUserBabyRepositoryReq{
 		IdUserBaby: userBabyId,
 		IdUser:     data.ActionBy,
 		Name:       data.Name,
-		BirthDate:  data.BirthDate,
+		BirthDate:  birthDateParsed,
 	})
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to create baby")

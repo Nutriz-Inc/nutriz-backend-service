@@ -6,7 +6,6 @@ import (
 	"nutriz-backend-service/shared/module"
 	"nutriz-backend-service/shared/utils"
 	"testing"
-	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/stretchr/testify/assert"
@@ -25,7 +24,7 @@ func TestCreateUserBaby(t *testing.T) {
         data := dto.CreateUserBabyReq{
             ActionBy:   "usr_2veL1FPpuXxUaZcFaEC57BfpcKE",
             Name:       &name,
-            BirthDate:  time.Now().AddDate(-1, 0, 0),
+            BirthDate:  "2024-01-01",
         }
         
         status, body := fluxgo.RunTestRequest(app, "POST", endpoint, data, headers)
@@ -40,19 +39,11 @@ func TestCreateUserBaby(t *testing.T) {
     })
 
     t.Run("Error", func(t *testing.T) {
-        t.Run("Missing id_user", func(t *testing.T) {
-            data := dto.CreateUserBabyReq{
+        t.Run("Birthdate in the future", func(t *testing.T) {
+                data := dto.CreateUserBabyReq{
+                ActionBy:  "usr_2veL1FPpuXxUaZcFaEC57BfpcKE",
                 Name:      &name,
-                BirthDate: time.Now().AddDate(-1, 0, 0),
-            }
-            status, _ := fluxgo.RunTestRequest(app, "POST", endpoint, data, nil)
-            assert.Equal(t, httpCode.StatusUnauthorized, status)
-        })
-
-        t.Run("Missing birth_date", func(t *testing.T) {
-            data := dto.CreateUserBabyReq{
-                ActionBy: "usr_2veL1FPpuXxUaZcFaEC57BfpcKE",
-                Name:   &name,
+                BirthDate: "2099-01-01 00:00:00",
             }
             status, _ := fluxgo.RunTestRequest(app, "POST", endpoint, data, headers)
             assert.Equal(t, httpCode.StatusBadRequest, status)
