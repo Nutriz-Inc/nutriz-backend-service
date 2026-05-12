@@ -6,6 +6,7 @@ CREATE TYPE enum_donation_step_status AS ENUM ('pending', 'review', 'done', 'war
 CREATE TABLE "user" (
   id_user VARCHAR(36) PRIMARY KEY,
 
+  internal_identifier VARCHAR(36) UNIQUE,
   type enum_user_type NOT NULL,
 
   name VARCHAR(120) NOT NULL,

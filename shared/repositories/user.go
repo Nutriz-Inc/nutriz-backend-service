@@ -2,10 +2,12 @@ package repositories
 
 import (
 	"context"
+	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 
 	fluxgo "github.com/MMortari/FluxGo"
+	q "github.com/MMortari/go-query-builder"
 )
 
 type UserRepository struct {
@@ -39,6 +41,54 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*ent
 		span,
 		`SELECT * FROM "user" WHERE email = $1`,
 		email,
+	)
+}
+
+func (r *UserRepository) ListUsersByFilters(
+	ctx context.Context,
+	filter *dto.ListUsersReq,
+) (*[]entities.User, int, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
+		Select("u.*").
+		From("user", "u").
+		OrderBy(q.OrderBy{Column: "u.created_at"}).
+		PaginationPaged(filter.Page, filter.PageSize).
+		WhereAnd(q.Where{Column: "u.removed_at", Type: "IS NULL"})
+
+	if filter.Name != nil {
+		qb.WhereAnd(q.Where{
+			Column: "u.name",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.Name + "%",
+		})
+	}
+
+	if filter.Type != nil {
+		qb.WhereAnd(q.Where{
+			Column: "u.type",
+			Type:   "=",
+			Val:    *filter.Type,
+		})
+	}
+
+	if filter.InternalIdentifier != nil {
+		qb.WhereAnd(q.Where{
+			Column: "u.internal_identifier",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.InternalIdentifier + "%",
+		})
+	}
+
+	return utils.ListQuery[entities.User](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		qb,
+		utils.IntPtr(filter.PageSize),
+		true,
 	)
 }
 
