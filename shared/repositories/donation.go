@@ -64,7 +64,7 @@ func (r *DonationRepository) GetDonationById(ctx context.Context, id string) (*e
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
-		`SELECT * FROM "donation" WHERE id_donation = $1`,
+		`SELECT * FROM "donation" WHERE id_donation = $1 AND removed_at IS NULL`,
 		id,
 	)
 }

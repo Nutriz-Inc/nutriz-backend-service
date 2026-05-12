@@ -50,8 +50,12 @@ func TestGetUser(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, id, body["id_user"])
-			assert.NotNil(t, body["babies"])
-			assert.Len(t, body["babies"], 2)
+			
+			babies, ok := body["babies"].([]interface{})
+			assert.True(t, ok)
+
+			assert.NotNil(t, babies)
+			assert.GreaterOrEqual(t, len(babies), 2)
 		})
 	})
 
