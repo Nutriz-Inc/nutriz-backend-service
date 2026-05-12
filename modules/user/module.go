@@ -52,7 +52,7 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
-	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerGetUser) error {
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetUser) error {
 		return mod.HttpRoute(
 			f,
 			"/internal",
@@ -64,8 +64,8 @@ func Module() *fluxgo.FluxModule {
 				FromQuery:  true,
 				FromHeader: true,
 				Validate:   true,
-				Cache:      nil,
-				CacheTTL:   0,
+				Cache:      redis,
+				CacheTTL:   time.Hour,
 			},
 			handler.HandleHttp,
 		)
