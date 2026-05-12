@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/provider/location"
@@ -47,14 +48,9 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	provider, err := location.NewLocationProvider(h.config)
+	coordinates, err := h.GetCoordinatesByZipCode(ctx, data.ZipCode)
 	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error initializing location provider")
-	}
-
-	addressData, err := provider.GetAddressByZipCode(ctx, data.ZipCode)
-	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error getting address by zipcode")
+		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
 
 	idAddress := utils.IdGenerate(utils.AddressEntity)
@@ -69,8 +65,8 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 		State:        data.State,
 		Neighborhood: data.Neighborhood,
 		Complement:   data.Complement,
-		Latitude:     addressData.Location.Coordinates.Latitude,
-		Longitude:    addressData.Location.Coordinates.Longitude,
+		Latitude:     coordinates.Latitude,
+		Longitude:    coordinates.Longitude,
 	}
 
 	err = h.addressRepo.CreateAddress(ctx, repoData)
@@ -89,4 +85,42 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 	return &dto.CreateAddressRes{
 		Address: *address,
 	}, nil
+}
+
+func (h *HandlerCreateAddress) GetCoordinatesByZipCode(ctx context.Context, zipcode string) (*dto.Coordinates, error) {
+	provider, err := location.NewLocationProvider(h.config)
+	if err != nil {
+		return nil, fmt.Errorf("Error to initialize location provider: %v", err)
+	}
+
+	addressData, err := provider.GetAddressByZipCode(ctx, zipcode)
+	if err != nil {
+		return nil, fmt.Errorf("Error getting address by zipcode: %v", err)
+	}
+
+	var res *dto.Coordinates
+
+	if addressData.Location != nil && addressData.Location.Coordinates != nil && addressData.Location.Coordinates.Latitude != nil && addressData.Location.Coordinates.Longitude != nil {
+		res.Latitude = utils.Float64Ptr(utils.StringToFloat64(*addressData.Location.Coordinates.Latitude))
+		res.Longitude = utils.Float64Ptr(utils.StringToFloat64(*addressData.Location.Coordinates.Longitude))
+
+		return res, nil
+	}
+
+	query := fmt.Sprintf(
+		"%s %s %s Brazil",
+		addressData.Street,
+		addressData.City,
+		addressData.State,
+	)
+
+	coordinates, err := provider.GetCoordinatesByAddress(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("Error getting coordinates by address: %v", err)
+	}
+
+	res.Latitude = utils.Float64Ptr(utils.StringToFloat64(coordinates.Lat))
+	res.Longitude = utils.Float64Ptr(utils.StringToFloat64(coordinates.Lon))
+
+	return res, nil
 }

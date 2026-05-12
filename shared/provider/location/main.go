@@ -3,17 +3,19 @@ package location
 import (
 	c "context"
 	"nutriz-backend-service/config"
-	brasilapi "nutriz-backend-service/shared/provider/location/brasilapi"
 )
 
 type LocationProvider interface {
-	GetAddressByZipCode(ctx c.Context, zipcode string) (*brasilapi.GetAddressByZipCodeRes, error)
+	//BrasilApi
+	GetAddressByZipCode(ctx c.Context, zipcode string) (*GetAddressByZipCodeRes, error)
+	//Nominatim
+	GetCoordinatesByAddress(ctx c.Context, address string) (*GetCoordinatesByAddressRes, error)
 }
 
 func NewLocationProvider(cfg *config.Env) (LocationProvider, error) {
 	if cfg.IsTest() {
-		return &brasilapi.BrasilApiMock{}, nil
+		return &LocationMock{}, nil
 	}
 
-	return brasilapi.NewBrasilApiService(), nil
+	return NewLocationService(), nil
 }

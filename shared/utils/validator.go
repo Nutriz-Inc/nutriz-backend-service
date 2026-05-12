@@ -24,6 +24,7 @@ func GetValidate() *validator.Validate {
 		_ = v.RegisterValidation("datetime", ValidDateTime)
 		_ = v.RegisterValidation("email", ValidEmail)
 		_ = v.RegisterValidation("ip", ValidIP)
+		_ = v.RegisterValidation("cep", ValidCEP)
 
 		validateInstance = v
 	})
@@ -90,4 +91,14 @@ func ValidIP(fl validator.FieldLevel) bool {
 
 	_, err := netip.ParseAddr(value)
 	return err == nil
+}
+
+func ValidCEP(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	if value == "" {
+		return true
+	}
+
+	return brdoc.IsCEP(value)
 }

@@ -17,6 +17,11 @@ type CreateAddressReq struct {
 	Complement   *string              `json:"complement" validate:"omitempty,max=150"`
 }
 
+type Coordinates struct {
+	Longitude *float64
+	Latitude  *float64
+}
+
 type CreateAddressRes struct {
 	entities.Address
 }

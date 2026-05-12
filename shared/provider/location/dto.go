@@ -1,5 +1,6 @@
-package brasilapi
+package location
 
+// BrasilApi
 type GetAddressByZipCodeRes struct {
 	Cep          string    `json:"cep"`
 	State        string    `json:"state"`
@@ -16,6 +17,12 @@ type Location struct {
 }
 
 type Coordinates struct {
-	Longitude string `json:"longitude"`
-	Latitude  string `json:"latitude"`
+	Longitude *string `json:"longitude"`
+	Latitude  *string `json:"latitude"`
+}
+
+// Nominatim
+type GetCoordinatesByAddressRes struct {
+	Lat string `json:"lat"`
+	Lon string `json:"lon"`
 }
