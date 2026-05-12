@@ -3,6 +3,7 @@ package main
 var seed = `
 INSERT INTO "user" (
     id_user,
+    internal_identifier,
     type,
     name,
     cpf,
@@ -20,6 +21,7 @@ INSERT INTO "user" (
 ) VALUES
 (
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    '234567898765435',
     'common',
     'Maria Silva',
     '47046117012',
@@ -37,6 +39,7 @@ INSERT INTO "user" (
 ),
 (
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    '234567898765436',
     'common',
     'Marta Silveira',
     '72555730028',
@@ -288,7 +291,7 @@ INSERT INTO job (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
     'Entrega ao ponto',
     'Transporte do material para o ponto de coleta',
-    NOW() + INTERVAL '2 days',
+    CURRENT_DATE + INTERVAL '2 days',
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
@@ -303,7 +306,7 @@ INSERT INTO job (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcBB',
     'Análise laboratorial',
     'Analisar e aprovar amostras',
-    NOW() + INTERVAL '4 days',
+    CURRENT_DATE + INTERVAL '4 days',
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',

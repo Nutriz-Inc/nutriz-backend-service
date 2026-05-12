@@ -1,0 +1,19 @@
+package dtos
+
+import (
+	"nutriz-backend-service/shared/entities"
+	"nutriz-backend-service/shared/utils"
+)
+
+type ListUsersReq struct {
+	Name               *string                 `query:"name" validate:"omitempty,max=120"`
+	Type               *entities.EnumUserType  `query:"type" validate:"omitempty,oneof=common adm nurse"`
+	InternalIdentifier *string                 `query:"internal_identifier" validate:"omitempty,max=36"`
+	ActionBy           string                  `reqHeader:"action-by" validate:"required,id"`
+	utils.PaginationReq
+}
+
+type ListUsersRes struct {
+	Data []entities.User `json:"data"`
+	utils.PaginationRes
+}
