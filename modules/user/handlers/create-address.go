@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/user/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/provider/location"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -46,6 +47,22 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 	}
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+
+	_, totalAdresses, err := h.addressRepo.GetAddressesByUserId(ctx, user.IdUser)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get addresses by user id")
+	}
+	if totalAdresses >= entities.MAX_ADDRESS_QUANTITY_PER_USER {
+		return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("User can have up to %d addresses", entities.MAX_ADDRESS_QUANTITY_PER_USER), "address.max_quantity_reached")
+	}
+
+	addressWithSameZipcode, err := h.addressRepo.GetAddressByZipcode(ctx, data.ZipCode)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get address by zipcode")
+	}
+	if addressWithSameZipcode != nil {
+		return nil, fluxgo.ErrorBadRequest("Address with same zipcode already exists", "address.already_exists")
 	}
 
 	coordinates, err := h.GetCoordinatesByZipCode(ctx, data.ZipCode)
@@ -98,7 +115,7 @@ func (h *HandlerCreateAddress) GetCoordinatesByZipCode(ctx context.Context, zipc
 		return nil, fmt.Errorf("Error getting address by zipcode: %v", err)
 	}
 
-	var res *dto.Coordinates
+	res := &dto.Coordinates{}
 
 	if addressData.Location != nil && addressData.Location.Coordinates != nil && addressData.Location.Coordinates.Latitude != nil && addressData.Location.Coordinates.Longitude != nil {
 		res.Latitude = utils.Float64Ptr(utils.StringToFloat64(*addressData.Location.Coordinates.Latitude))

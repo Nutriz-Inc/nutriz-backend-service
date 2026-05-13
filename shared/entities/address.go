@@ -34,4 +34,4 @@ func (a Address) PrimaryKey() string {
 	return "id_address"
 }
 
-const MAX_ADDRESS_QUANTITY_PER_USER = 10
+const MAX_ADDRESS_QUANTITY_PER_USER = 5

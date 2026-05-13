@@ -7,7 +7,6 @@ import (
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
-	"github.com/paemuri/brdoc/v2"
 )
 
 type AddressRepository struct {
@@ -39,7 +38,7 @@ func (r *AddressRepository) GetAddressesByUserId(
 		span,
 		qb,
 		utils.IntPtr(entities.MAX_ADDRESS_QUANTITY_PER_USER),
-		false,
+		true,
 	)
 }
 
@@ -51,8 +50,21 @@ func (r *AddressRepository) GetAddressById(ctx context.Context, id string) (*ent
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
-		`SELECT * FROM "address" WHERE id_address = $1`,
+		`SELECT * FROM "address" WHERE id_address = $1 AND removed_at IS NULL`,
 		id,
+	)
+}
+
+func (r *AddressRepository) GetAddressByZipcode(ctx context.Context, zipcode string) (*entities.Address, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.Get[entities.Address](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "address" WHERE zipcode = $1 AND removed_at IS NULL`,
+		zipcode,
 	)
 }
 
@@ -63,7 +75,7 @@ type CreateAddressRepositoryReq struct {
 	Street       string
 	Number       *string
 	City         string
-	State        brdoc.FederativeUnit
+	State        string
 	Neighborhood string
 	Complement   *string
 	Latitude     *float64
