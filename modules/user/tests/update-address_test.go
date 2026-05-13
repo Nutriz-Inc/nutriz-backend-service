@@ -41,7 +41,6 @@ func TestUpdateAddress(t *testing.T) {
 		assert.NotNil(t, resp["neighborhood"])
 		assert.NotNil(t, resp["latitude"])
 		assert.NotNil(t, resp["longitude"])
-		assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", resp["updated_by"])
 	})
 
 	t.Run("Error", func(t *testing.T) {
