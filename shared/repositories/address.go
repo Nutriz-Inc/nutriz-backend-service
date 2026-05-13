@@ -4,6 +4,7 @@ import (
 	"context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
@@ -55,7 +56,7 @@ func (r *AddressRepository) GetAddressById(ctx context.Context, id string) (*ent
 	)
 }
 
-func (r *AddressRepository) GetAddressByZipcode(ctx context.Context, zipcode string) (*entities.Address, error) {
+func (r *AddressRepository) GetAddressByZipcodeAndIdUser(ctx context.Context, zipcode string, userId string) (*entities.Address, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -63,8 +64,9 @@ func (r *AddressRepository) GetAddressByZipcode(ctx context.Context, zipcode str
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
-		`SELECT * FROM "address" WHERE zipcode = $1 AND removed_at IS NULL`,
+		`SELECT * FROM "address" WHERE zipcode = $1 AND id_user = $2 AND removed_at IS NULL`,
 		zipcode,
+		userId,
 	)
 }
 
@@ -134,6 +136,90 @@ func (r *AddressRepository) CreateAddress(
 	}
 
 	return utils.Insert(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		params,
+	)
+}
+
+type UpdateAddressRepositoryReq struct {
+	IdAddress    string
+	IdUser       string
+	Zipcode      *string
+	Street       *string
+	Number       *string
+	City         *string
+	State        *string
+	Neighborhood *string
+	Complement   *string
+	Latitude     *float64
+	Longitude    *float64
+}
+
+func (r *AddressRepository) UpdateAddress(ctx context.Context, data UpdateAddressRepositoryReq) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	sets := []string{}
+	params := map[string]any{
+		"id_address": data.IdAddress,
+		"updated_by": data.IdUser,
+	}
+
+	if data.Zipcode != nil {
+		sets = append(sets, "zipcode = :zipcode")
+		params["zipcode"] = data.Zipcode
+	}
+	if data.Street != nil {
+		sets = append(sets, "street = :street")
+		params["street"] = data.Street
+	}
+	if data.Number != nil {
+		sets = append(sets, "number = :number")
+		params["number"] = data.Number
+	}
+	if data.City != nil {
+		sets = append(sets, "city = :city")
+		params["city"] = data.City
+	}
+	if data.State != nil {
+		sets = append(sets, "state = :state")
+		params["state"] = data.State
+	}
+	if data.Neighborhood != nil {
+		sets = append(sets, "neighborhood = :neighborhood")
+		params["neighborhood"] = data.Neighborhood
+	}
+	if data.Complement != nil {
+		sets = append(sets, "complement = :complement")
+		params["complement"] = data.Complement
+	}
+	if data.Latitude != nil {
+		sets = append(sets, "latitude = :latitude")
+		params["latitude"] = data.Latitude
+	}
+	if data.Longitude != nil {
+		sets = append(sets, "longitude = :longitude")
+		params["longitude"] = data.Longitude
+	}
+
+	if len(sets) == 0 {
+		return nil
+	}
+
+	query := `
+		UPDATE address
+		SET ` + strings.Join(sets, ", ") + `,
+		    updated_at = now(),
+		    updated_by = :updated_by
+		WHERE id_address = :id_address
+		  AND removed_at IS NULL
+		  AND id_user = :updated_by
+	`
+
+	return utils.Update(
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,

@@ -6,7 +6,6 @@ import (
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
-	"nutriz-backend-service/shared/provider/location"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -57,7 +56,7 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 		return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("User can have up to %d addresses", entities.MAX_ADDRESS_QUANTITY_PER_USER), "address.max_quantity_reached")
 	}
 
-	addressWithSameZipcode, err := h.addressRepo.GetAddressByZipcode(ctx, data.ZipCode)
+	addressWithSameZipcode, err := h.addressRepo.GetAddressByZipcodeAndIdUser(ctx, data.ZipCode, user.IdUser)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get address by zipcode")
 	}
@@ -65,7 +64,7 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 		return nil, fluxgo.ErrorBadRequest("Address with same zipcode already exists", "address.already_exists")
 	}
 
-	coordinates, err := h.GetCoordinatesByZipCode(ctx, data.ZipCode)
+	addressData, err := utils.GetAddressByZipCode(ctx, data.ZipCode, h.config)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
@@ -76,14 +75,14 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 		IdAddress:    idAddress,
 		IdUser:       user.IdUser,
 		Zipcode:      data.ZipCode,
-		Street:       data.Street,
+		Street:       addressData.Street,
 		Number:       data.Number,
-		City:         data.City,
-		State:        data.State,
-		Neighborhood: data.Neighborhood,
+		City:         addressData.City,
+		State:        addressData.State,
+		Neighborhood: addressData.Neighborhood,
 		Complement:   data.Complement,
-		Latitude:     coordinates.Latitude,
-		Longitude:    coordinates.Longitude,
+		Latitude:     addressData.Latitude,
+		Longitude:    addressData.Longitude,
 	}
 
 	err = h.addressRepo.CreateAddress(ctx, repoData)
@@ -102,42 +101,4 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 	return &dto.CreateAddressRes{
 		Address: *address,
 	}, nil
-}
-
-func (h *HandlerCreateAddress) GetCoordinatesByZipCode(ctx context.Context, zipcode string) (*dto.Coordinates, error) {
-	provider, err := location.NewLocationProvider(h.config)
-	if err != nil {
-		return nil, fmt.Errorf("error to initialize location provider: %v", err)
-	}
-
-	addressData, err := provider.GetAddressByZipCode(ctx, zipcode)
-	if err != nil {
-		return nil, fmt.Errorf("error getting address by zipcode: %v", err)
-	}
-
-	res := &dto.Coordinates{}
-
-	if addressData.Location != nil && addressData.Location.Coordinates != nil && addressData.Location.Coordinates.Latitude != nil && addressData.Location.Coordinates.Longitude != nil {
-		res.Latitude = utils.Float64Ptr(utils.StringToFloat64(*addressData.Location.Coordinates.Latitude))
-		res.Longitude = utils.Float64Ptr(utils.StringToFloat64(*addressData.Location.Coordinates.Longitude))
-
-		return res, nil
-	}
-
-	query := fmt.Sprintf(
-		"%s %s %s Brazil",
-		addressData.Street,
-		addressData.City,
-		addressData.State,
-	)
-
-	coordinates, err := provider.GetCoordinatesByAddress(ctx, query)
-	if err != nil {
-		return nil, fmt.Errorf("error getting coordinates by address: %v", err)
-	}
-
-	res.Latitude = utils.Float64Ptr(utils.StringToFloat64(coordinates.Lat))
-	res.Longitude = utils.Float64Ptr(utils.StringToFloat64(coordinates.Lon))
-
-	return res, nil
 }

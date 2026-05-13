@@ -16,6 +16,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddHandler(handlers.HandlerGetUserStart)
 	mod.AddHandler(handlers.HandlerCreateConsentLogStart)
 	mod.AddHandler(handlers.HandlerCreateAddressStart)
+	mod.AddHandler(handlers.HandlerUpdateAddressStart)
 
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListUsers) error {
 		return mod.HttpRoute(
@@ -60,6 +61,24 @@ func Module() *fluxgo.FluxModule {
 			fluxgo.RouteIncome{
 				Entity:          dto.CreateAddressReq{},
 				FromBody:        true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/user"},
+			},
+			handler.HandleHttp,
+		)
+	})
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerUpdateAddress) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"PUT",
+			"/user/address/:id",
+			fluxgo.RouteIncome{
+				Entity:          dto.UpdateAddressReq{},
+				FromBody:        true,
+				FromParam:       true,
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
