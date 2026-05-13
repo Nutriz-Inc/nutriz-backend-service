@@ -40,8 +40,12 @@ func TestGetUser(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, id, body["id_user"])
-			assert.NotNil(t, body["addresses"])
-			assert.Len(t, body["addresses"], 1)
+
+			addresses, ok := body["addresses"].([]interface{})
+			assert.True(t, ok)
+
+			assert.NotNil(t, addresses)
+			assert.GreaterOrEqual(t, len(addresses), 2)
 		})
 		t.Run("With baby", func(t *testing.T) {
 			route := fmt.Sprintf("%s/%s?show_baby=true", endpoint, id)
@@ -50,7 +54,7 @@ func TestGetUser(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, id, body["id_user"])
-			
+
 			babies, ok := body["babies"].([]interface{})
 			assert.True(t, ok)
 

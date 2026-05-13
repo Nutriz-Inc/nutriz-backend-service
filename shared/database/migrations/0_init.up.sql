@@ -8,12 +8,10 @@ CREATE TABLE "user" (
 
   internal_identifier VARCHAR(36) UNIQUE,
   type enum_user_type NOT NULL,
-
   name VARCHAR(120) NOT NULL,
   cpf VARCHAR(11) NOT NULL UNIQUE,
   birth_date TIMESTAMP NOT NULL,
   phone_number VARCHAR(20) NOT NULL UNIQUE,
-
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   milk_donated NUMERIC,
@@ -35,7 +33,6 @@ CREATE TABLE donation_point (
 
   name VARCHAR(150) NOT NULL,
   description TEXT,
-
   has_home BOOLEAN NOT NULL,
   phone_number VARCHAR(20),
   email VARCHAR(255),
@@ -78,9 +75,8 @@ CREATE TABLE address (
 CREATE TABLE donation (
   id_donation VARCHAR(36) PRIMARY KEY,
 
-  is_active BOOLEAN NOT NULL,
-
   quantity_donated NUMERIC(10,2),
+  is_active BOOLEAN NOT NULL,
   user_feedback TEXT,
 
   created_at TIMESTAMP NOT NULL,
@@ -103,9 +99,7 @@ CREATE TABLE donation_step (
 
   name VARCHAR(100) NOT NULL,
   description TEXT NOT NULL,
-
   status enum_donation_step_status NOT NULL,
-
   set_date TIMESTAMP,
 
   created_at TIMESTAMP NOT NULL,
@@ -125,7 +119,6 @@ CREATE TABLE job (
   name VARCHAR(120) NOT NULL,
   description TEXT NOT NULL,
   date_set TIMESTAMP,
-
   user_feedback TEXT,
 
   created_at TIMESTAMP NOT NULL,
@@ -143,27 +136,27 @@ CREATE TABLE job (
   CONSTRAINT fk_job_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
 );
 
--- FILE
-CREATE TABLE file (
-  id_file VARCHAR(36) PRIMARY KEY,
+-- -- FILE
+-- CREATE TABLE file (
+--   id_file VARCHAR(36) PRIMARY KEY,
 
-  id_job VARCHAR(36),
+--   id_job VARCHAR(36),
 
-  file_path VARCHAR(500) NOT NULL,
+--   file_path VARCHAR(500) NOT NULL,
 
-  created_at TIMESTAMP NOT NULL,
-  created_by VARCHAR(36) NOT NULL,
-  updated_at TIMESTAMP,
-  updated_by VARCHAR(36),
-  removed_at TIMESTAMP,
-  removed_by VARCHAR(36),
+--   created_at TIMESTAMP NOT NULL,
+--   created_by VARCHAR(36) NOT NULL,
+--   updated_at TIMESTAMP,
+--   updated_by VARCHAR(36),
+--   removed_at TIMESTAMP,
+--   removed_by VARCHAR(36),
 
-  CONSTRAINT fk_file_job FOREIGN KEY (id_job) REFERENCES job(id_job),
+--   CONSTRAINT fk_file_job FOREIGN KEY (id_job) REFERENCES job(id_job),
 
-  CONSTRAINT fk_file_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
-  CONSTRAINT fk_file_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
-  CONSTRAINT fk_file_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
-);
+--   CONSTRAINT fk_file_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
+--   CONSTRAINT fk_file_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
+--   CONSTRAINT fk_file_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
+-- );
 
 -- CONSENT LOG
 CREATE TABLE consent_log (
@@ -172,9 +165,7 @@ CREATE TABLE consent_log (
   id_user VARCHAR(36) NOT NULL,
 
   terms_version VARCHAR(50) NOT NULL,
-
   accepted_at TIMESTAMP NOT NULL,
-
   ip_address VARCHAR(45) NOT NULL,
   user_agent TEXT NOT NULL,
 
