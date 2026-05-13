@@ -12,8 +12,6 @@ func Module() *fluxgo.FluxModule {
 	mod := fluxgo.Module("job")
 
 	mod.AddHandler(handlers.HandlerListJobsStart)
-	mod.AddHandler(handlers.HandlerGetJobStart)
-
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListJobs) error {
 		return mod.HttpRoute(
 			f,
@@ -32,6 +30,7 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
+	mod.AddHandler(handlers.HandlerGetJobStart)
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetJob) error {
 		return mod.HttpRoute(
 			f,
