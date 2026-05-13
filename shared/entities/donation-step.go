@@ -10,7 +10,9 @@ type DonationStep struct {
 	Status         EnumDonationStepStatus `json:"status" db:"status"`
 	SetDate        *time.Time             `json:"set_date" db:"set_date"`
 	CreatedAt      time.Time              `json:"created_at" db:"created_at"`
+	CreatedBy      string                 `json:"created_by" db:"created_by"`
 	UpdatedAt      *time.Time             `json:"updated_at" db:"updated_at"`
+	UpdatedBy      *string                `json:"updated_by" db:"updated_by"`
 	CompletedAt    *time.Time             `json:"completed_at" db:"completed_at"`
 }
 
@@ -38,7 +40,12 @@ func (d DonationStep) TableName() string {
 }
 
 func (d DonationStep) PrimaryKey() string {
-	return "id_step_donation"
+	return "id_donation_step"
 }
 
-const NUMBER_OF_DONATION_STEPS = 4 //still not sure
+const NUMBER_OF_DONATION_STEPS = 4
+
+var PREVIOUS_DONATION_STEPS_STATUS_THAT_ALLOW_NEXT_STEP = map[EnumDonationStepStatus]struct{}{
+	EnumDonationStepStatusDone: {},
+	EnumDonationStepStatusWarn: {},
+}

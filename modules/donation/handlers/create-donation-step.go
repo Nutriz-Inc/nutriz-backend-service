@@ -45,6 +45,9 @@ func (h *HandlerCreateDonationStep) Execute(ctx context.Context, data *dto.Creat
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
+	if user.Type != entities.EnumUserTypeAdm {
+		return nil, utils.ErrorForbidden("User does not have permission to create donation step", "user.forbidden")
+	}
 
 	donation, err := h.donationRepo.GetDonationById(ctx, data.IdDonation)
 	if err != nil {
@@ -62,10 +65,13 @@ func (h *HandlerCreateDonationStep) Execute(ctx context.Context, data *dto.Creat
 		return nil, fluxgo.ErrorInternalError("Error to get donation steps")
 	}
 
-	if donationSteps != nil && len(*donationSteps) >= 0 {
+	if donationSteps != nil && len(*donationSteps) > 0 {
 		for _, step := range *donationSteps {
-			if step.Status != entities.EnumDonationStepStatusDone && step.Status != entities.EnumDonationStepStatusWarn {
-				return nil, fluxgo.ErrorBadRequest("Previous donation step is not completed", "previous_step.incomplete")
+			if _, ok := entities.PREVIOUS_DONATION_STEPS_STATUS_THAT_ALLOW_NEXT_STEP[step.Status]; !ok {
+				return nil, fluxgo.ErrorBadRequest(
+					"Previous donation step is not completed",
+					"previous_step.incomplete",
+				)
 			}
 		}
 	}

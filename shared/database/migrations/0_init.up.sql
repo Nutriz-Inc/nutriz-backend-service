@@ -105,10 +105,33 @@ CREATE TABLE donation_step (
   set_date TIMESTAMP,
 
   created_at TIMESTAMP NOT NULL,
+  created_by VARCHAR(36) NOT NULL,
   updated_at TIMESTAMP,
+  updated_by VARCHAR(36),
   completed_at TIMESTAMP,
 
-  CONSTRAINT fk_step_donation FOREIGN KEY (id_donation) REFERENCES donation(id_donation)
+  CONSTRAINT fk_step_donation FOREIGN KEY (id_donation) REFERENCES donation(id_donation),
+
+  CONSTRAINT fk_donation_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
+  CONSTRAINT fk_donation_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user)
+);
+
+-- DONATION STEP TIMELINE
+CREATE TABLE donation_step_timeline (
+  id_donation_step_timeline VARCHAR(36) PRIMARY KEY,
+
+  id_donation_step VARCHAR(36) NOT NULL,
+
+  description TEXT NOT NULL,
+  status enum_donation_step_status NOT NULL,
+  set_date TIMESTAMP,
+
+  created_at TIMESTAMP NOT NULL,
+  created_by VARCHAR(36) NOT NULL,
+
+  CONSTRAINT fk_timeline_donation_step FOREIGN KEY (id_donation_step) REFERENCES donation_step(id_donation_step),
+
+  CONSTRAINT fk_donation_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user)
 );
 
 -- JOB
