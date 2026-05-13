@@ -34,36 +34,36 @@ func Module() *fluxgo.FluxModule {
 			handler.HandleHttp,
 		)
 	})
-	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerCreateUserBaby) error {
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateUserBaby) error {
 		return mod.HttpRoute(
 			f,
 			"/internal",
 			"POST",
 			"/user/baby",
 			fluxgo.RouteIncome{
-				Entity:     dto.CreateUserBabyReq{},
-				FromBody:   true,
-				FromHeader: true,
-				Validate:   true,
-				Cache:      nil,
-				CacheTTL:   0,
+				Entity:          dto.CreateUserBabyReq{},
+				FromBody:        true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/user"},
 			},
 			handler.HandleHttp,
 		)
 	})
-	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerCreateAddress) error {
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateAddress) error {
 		return mod.HttpRoute(
 			f,
 			"/internal",
 			"POST",
 			"/user/address",
 			fluxgo.RouteIncome{
-				Entity:     dto.CreateAddressReq{},
-				FromBody:   true,
-				FromHeader: true,
-				Validate:   true,
-				Cache:      nil,
-				CacheTTL:   0,
+				Entity:          dto.CreateAddressReq{},
+				FromBody:        true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/user"},
 			},
 			handler.HandleHttp,
 		)
@@ -86,7 +86,7 @@ func Module() *fluxgo.FluxModule {
 			handler.HandleHttp,
 		)
 	})
-	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerCreateConsentLog) error {
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateConsentLog) error {
 		return mod.HttpRoute(
 			f,
 			"/internal",
@@ -97,8 +97,7 @@ func Module() *fluxgo.FluxModule {
 				FromBody:   true,
 				FromHeader: true,
 				Validate:   true,
-				Cache:      nil,
-				CacheTTL:   0,
+				Cache:      redis,
 			},
 			handler.HandleHttp,
 		)
