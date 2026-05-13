@@ -2,7 +2,6 @@ package location
 
 import (
 	c "context"
-	"nutriz-backend-service/shared/utils"
 )
 
 type LocationMock struct{}
@@ -16,11 +15,8 @@ func (m *LocationMock) GetAddressByZipCode(ctx c.Context, zipcode string) (*GetA
 		Street:       "Praça da Sé",
 		Service:      "open-cep",
 		Location: &Location{
-			Type: "Point",
-			Coordinates: &Coordinates{
-				Longitude: utils.StringPtr("-46.633309"),
-				Latitude:  utils.StringPtr("-23.550187"),
-			},
+			Type:        "Point",
+			Coordinates: &Coordinates{},
 		},
 	}
 
