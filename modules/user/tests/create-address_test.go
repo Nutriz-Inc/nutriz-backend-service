@@ -57,7 +57,7 @@ func TestCreateAddress(t *testing.T) {
 		})
 
 		t.Run("User can have up to %d addresses", func(t *testing.T) {
-			setupZipcodes := []string{"01002000", "01003000"}
+			setupZipcodes := []string{"01002000"}
 
 			for _, zipcode := range setupZipcodes {
 				body := makeBody(zipcode)

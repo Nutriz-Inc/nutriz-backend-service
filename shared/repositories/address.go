@@ -212,8 +212,7 @@ func (r *AddressRepository) UpdateAddress(ctx context.Context, data UpdateAddres
 	query := `
 		UPDATE address
 		SET ` + strings.Join(sets, ", ") + `,
-		    updated_at = now(),
-		    updated_by = :updated_by
+		    updated_at = now()
 		WHERE id_address = :id_address
 		  AND removed_at IS NULL
 		  AND id_user = :updated_by
@@ -225,5 +224,25 @@ func (r *AddressRepository) UpdateAddress(ctx context.Context, data UpdateAddres
 		span,
 		query,
 		params,
+	)
+}
+
+func (r *AddressRepository) RemoveAddress(ctx context.Context, id, actionBy string) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE address
+		SET removed_at = now()
+		WHERE id_address = $1 AND id_user = $2 AND removed_at IS NULL
+	`
+
+	return utils.Delete(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		id,
+		actionBy,
 	)
 }

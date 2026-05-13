@@ -60,15 +60,10 @@ CREATE TABLE address (
 
   created_at TIMESTAMP NOT NULL,
   updated_at TIMESTAMP,
-  updated_by VARCHAR(36),
   removed_at TIMESTAMP,
-  removed_by VARCHAR(36),
 
   CONSTRAINT fk_address_user FOREIGN KEY (id_user) REFERENCES "user"(id_user),
-  CONSTRAINT fk_address_dp FOREIGN KEY (id_donation_point) REFERENCES donation_point(id_donation_point),
-
-  CONSTRAINT fk_address_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
-  CONSTRAINT fk_address_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
+  CONSTRAINT fk_address_dp FOREIGN KEY (id_donation_point) REFERENCES donation_point(id_donation_point)
 );
 
 -- DONATION
@@ -135,28 +130,6 @@ CREATE TABLE job (
   CONSTRAINT fk_job_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_job_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
 );
-
--- -- FILE
--- CREATE TABLE file (
---   id_file VARCHAR(36) PRIMARY KEY,
-
---   id_job VARCHAR(36),
-
---   file_path VARCHAR(500) NOT NULL,
-
---   created_at TIMESTAMP NOT NULL,
---   created_by VARCHAR(36) NOT NULL,
---   updated_at TIMESTAMP,
---   updated_by VARCHAR(36),
---   removed_at TIMESTAMP,
---   removed_by VARCHAR(36),
-
---   CONSTRAINT fk_file_job FOREIGN KEY (id_job) REFERENCES job(id_job),
-
---   CONSTRAINT fk_file_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
---   CONSTRAINT fk_file_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
---   CONSTRAINT fk_file_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
--- );
 
 -- CONSENT LOG
 CREATE TABLE consent_log (

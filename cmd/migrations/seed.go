@@ -136,9 +136,7 @@ INSERT INTO address (
     longitude,
     created_at,
     updated_at,
-    updated_by,
-    removed_at,
-    removed_by
+    removed_at
 ) VALUES
 (
     'adr_01JTG8J5F6W9K2M4P7Q1X8Y3ZAL',
@@ -154,8 +152,6 @@ INSERT INTO address (
     -23.561399,
     -46.656571,
     NOW(),
-    NULL,
-    NULL,
     NULL,
     NULL
 ),
@@ -174,8 +170,6 @@ INSERT INTO address (
     -43.182482,
     NOW(),
     NULL,
-    NULL,
-    NULL,
     NULL
 ),
 (
@@ -192,8 +186,6 @@ INSERT INTO address (
     -27.923916,
     -46.172981,
     NOW(),
-    NULL,
-    NULL,
     NULL,
     NULL
 ),
@@ -212,8 +204,6 @@ INSERT INTO address (
     -46.637636,
     NOW(),
     NULL,
-    NULL,
-    NULL,
     NULL
 ),
 (
@@ -231,7 +221,22 @@ INSERT INTO address (
     -41.637736,
     NOW(),
     NULL,
+    NULL
+),
+(
+    'adr_01JTX0H1V8N5Q3W7E2R4T6Y8ZXE',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
     NULL,
+    '01546022',
+    'Rua das Flores',
+    '111',
+    'Belo Horizonte',
+    'MG',
+    'Jardim América',
+    'Casa 1209',
+    -13.559511,
+    -36.737330,
+    NOW(),
     NULL,
     NULL
 );

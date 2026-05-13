@@ -11,10 +11,27 @@ import (
 func Module() *fluxgo.FluxModule {
 	mod := fluxgo.Module("donation")
 
+	// donation point
 	mod.AddHandler(handlers.HandlerListDonationPointsStart)
-	mod.AddHandler(handlers.HandlerListDonationsStart)
-	mod.AddHandler(handlers.HandlerGetDonationStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonationPoints) error {
+		return mod.HttpRoute(
+			f,
+			"/public",
+			"GET",
+			"/donation/point",
+			fluxgo.RouteIncome{
+				Entity:    dto.ListDonationPointsReq{},
+				FromQuery: true,
+				Validate:  true,
+				Cache:     redis,
+				CacheTTL:  time.Hour,
+			},
+			handler.HandleHttp,
+		)
+	})
 
+	// donation
+	mod.AddHandler(handlers.HandlerListDonationsStart)
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonations) error {
 		return mod.HttpRoute(
 			f,
@@ -32,22 +49,8 @@ func Module() *fluxgo.FluxModule {
 			handler.HandleHttp,
 		)
 	})
-	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonationPoints) error {
-		return mod.HttpRoute(
-			f,
-			"/public",
-			"GET",
-			"/donation/point",
-			fluxgo.RouteIncome{
-				Entity:    dto.ListDonationPointsReq{},
-				FromQuery: true,
-				Validate:  true,
-				Cache:     redis,
-				CacheTTL:  time.Hour,
-			},
-			handler.HandleHttp,
-		)
-	})
+
+	mod.AddHandler(handlers.HandlerGetDonationStart)
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetDonation) error {
 		return mod.HttpRoute(
 			f,

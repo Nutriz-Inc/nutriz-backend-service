@@ -19,9 +19,7 @@ type Address struct {
 	Longitude       *float64   `json:"longitude" db:"longitude"`
 	CreatedAt       time.Time  `json:"created_at" db:"created_at"`
 	UpdatedAt       *time.Time `json:"updated_at" db:"updated_at"`
-	UpdatedBy       *string    `json:"updated_by" db:"updated_by"`
 	RemovedAt       *time.Time `json:"removed_at" db:"removed_at"`
-	RemovedBy       *string    `json:"removed_by" db:"removed_by"`
 }
 
 func (a Address) TableName() string {
