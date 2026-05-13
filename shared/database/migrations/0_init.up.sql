@@ -1,6 +1,12 @@
 -- ENUMS
 CREATE TYPE enum_user_type AS ENUM ('common', 'adm', 'nurse');
 CREATE TYPE enum_donation_step_status AS ENUM ('pending', 'review', 'done', 'warn', 'failed');
+CREATE TYPE enum_donation_steps as ENUM (
+  'Exame de sangue',
+  'Entregar kit de ordenha',
+  'Coletar leite',
+  'Análise de leite'
+);
 
 -- USER
 CREATE TABLE "user" (
@@ -89,11 +95,11 @@ CREATE TABLE donation (
 
 -- DONATION STEP
 CREATE TABLE donation_step (
-  id_step_donation VARCHAR(36) PRIMARY KEY,
+  id_donation_step VARCHAR(36) PRIMARY KEY,
 
   id_donation VARCHAR(36) NOT NULL,
 
-  name VARCHAR(100) NOT NULL,
+  name enum_donation_steps NOT NULL,
   description TEXT NOT NULL,
   status enum_donation_step_status NOT NULL,
   set_date TIMESTAMP,
@@ -125,7 +131,7 @@ CREATE TABLE job (
   removed_by VARCHAR(36),
 
   CONSTRAINT fk_job_user FOREIGN KEY (id_user) REFERENCES "user"(id_user),
-  CONSTRAINT fk_job_step FOREIGN KEY (id_step) REFERENCES donation_step(id_step_donation),
+  CONSTRAINT fk_job_step FOREIGN KEY (id_step) REFERENCES donation_step(id_donation_step),
 
   CONSTRAINT fk_job_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_job_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),

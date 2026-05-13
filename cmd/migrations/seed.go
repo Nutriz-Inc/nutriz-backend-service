@@ -296,7 +296,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKE',
-    'Coleta inicial',
+    'Exame de sangue',
     'Coleta agendada com o doador',
     'pending',
     NOW() + INTERVAL '2 days',
@@ -307,8 +307,8 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcBB',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
-    'Triagem',
-    'Triagem do leite doado',
+    'Entregar kit de ordenha',
+    'Entregar kit de ordenha ao doador',
     'review',
     NOW() + INTERVAL '3 days',
     NOW(),

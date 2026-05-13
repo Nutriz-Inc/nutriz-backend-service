@@ -40,3 +40,74 @@ func (r *DonationStepRepository) GetDonationStepsByIdDonation(
 		false,
 	)
 }
+
+func (r *DonationStepRepository) GetDonationStepById(ctx context.Context, id string) (*entities.DonationStep, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.Get[entities.DonationStep](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "donation_step" WHERE id = $1`,
+		id,
+	)
+}
+
+type CreateDonationStepRepositoryReq struct {
+	IdDonationStep string
+	IdDonation     string
+	IdUser         string
+	Name           entities.EnumDonationSteps
+	Description    string
+	Status         entities.EnumDonationStepStatus
+	SetDate        *string
+}
+
+func (r *DonationStepRepository) CreateDonationStep(
+	ctx context.Context,
+	data *CreateDonationStepRepositoryReq,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		INSERT INTO donation_step (
+			id_donation_step,
+			id_donation,
+			name,
+			description,
+			status,
+			set_date,
+			created_at,
+			created_by
+		) VALUES (
+			:id_donation_step,
+			:id_donation,
+			:name,
+			:description,
+			:status,
+			:set_date,
+			now(),
+			:id_user
+		)
+	`
+
+	params := map[string]any{
+		"id_donation_step": data.IdDonationStep,
+		"id_donation":      data.IdDonation,
+		"id_user":          data.IdUser,
+		"name":             data.Name,
+		"description":      data.Description,
+		"status":           data.Status,
+		"set_date":         data.SetDate,
+	}
+
+	return utils.Insert(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		params,
+	)
+}

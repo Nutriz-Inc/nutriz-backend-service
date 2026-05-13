@@ -3,9 +3,9 @@ package entities
 import "time"
 
 type DonationStep struct {
-	IdStepDonation string                 `json:"id_step_donation" db:"id_step_donation"`
+	IdDonationStep string                 `json:"id_donation_step" db:"id_donation_step"`
 	IdDonation     string                 `json:"id_donation" db:"id_donation"`
-	Name           string                 `json:"name" db:"name"`
+	Name           EnumDonationSteps      `json:"name" db:"name"`
 	Description    string                 `json:"description" db:"description"`
 	Status         EnumDonationStepStatus `json:"status" db:"status"`
 	SetDate        *time.Time             `json:"set_date" db:"set_date"`
@@ -13,6 +13,15 @@ type DonationStep struct {
 	UpdatedAt      *time.Time             `json:"updated_at" db:"updated_at"`
 	CompletedAt    *time.Time             `json:"completed_at" db:"completed_at"`
 }
+
+type EnumDonationSteps string
+
+const (
+	EnumDonationStepBloodTest         EnumDonationSteps = "Exame de sangue"
+	EnumDonationStepDeliverMilkingKit EnumDonationSteps = "Entregar kit de ordenha"
+	EnumDonationStepCollectMilk       EnumDonationSteps = "Coletar leite"
+	EnumDonationStepMilkAnalysis      EnumDonationSteps = "Análise de leite"
+)
 
 type EnumDonationStepStatus string
 
@@ -32,4 +41,4 @@ func (d DonationStep) PrimaryKey() string {
 	return "id_step_donation"
 }
 
-const NUMBER_OF_DONATION_STEPS = 5 //still not sure
+const NUMBER_OF_DONATION_STEPS = 4 //still not sure
