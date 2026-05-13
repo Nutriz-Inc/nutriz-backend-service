@@ -1,0 +1,88 @@
+package handlers
+
+import (
+	"context"
+	"fmt"
+	dto "nutriz-backend-service/modules/donation/dtos"
+	"nutriz-backend-service/shared/entities"
+	"nutriz-backend-service/shared/repositories"
+	"nutriz-backend-service/shared/utils"
+
+	fluxgo "github.com/MMortari/FluxGo"
+	"github.com/gofiber/fiber/v2"
+)
+
+type HandlerCreateDonation struct {
+	donationRepo *repositories.DonationRepository
+	userRepo     *repositories.UserRepository
+}
+
+func HandlerCreateDonationStart(
+	donationRepo *repositories.DonationRepository,
+	userRepo *repositories.UserRepository,
+) *HandlerCreateDonation {
+	return &HandlerCreateDonation{
+		donationRepo,
+		userRepo,
+	}
+}
+
+func (h *HandlerCreateDonation) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.GlobalResponse, *fluxgo.GlobalError) {
+	resp, err := h.Execute(c.UserContext(), income.(*dto.CreateDonationReq))
+	if err != nil {
+		return nil, err
+	}
+	return &fluxgo.GlobalResponse{Content: resp, Status: 200}, nil
+}
+
+func (h *HandlerCreateDonation) Execute(ctx context.Context, data *dto.CreateDonationReq) (*dto.CreateDonationRes, *fluxgo.GlobalError) {
+	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get user")
+	}
+	if user == nil {
+		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+
+	_, totalDonationsActive, err := h.donationRepo.ListDonationByFilters(ctx, &dto.ListDonationReq{
+		IsActive: utils.BoolPtr(true),
+		ActionBy: data.ActionBy,
+		PaginationReq: utils.PaginationReq{
+			PageSize: 1,
+			Page:     1,
+		},
+	})
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get donations active by user id")
+	}
+	if totalDonationsActive >= entities.MAX_DONATION_ACTIVE_QUANTITY_PER_USER {
+		return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("User can have up to %d active donations", entities.MAX_DONATION_ACTIVE_QUANTITY_PER_USER), "donation.max_active_quantity_reached")
+	}
+
+	idDonation := utils.IdGenerate(utils.DonationEntity)
+	defaultDescription := "Sua doação foi criada! Entre em contato com nosso suporte no WhatsApp para mais informações e para combinar os detalhes da doação."
+
+	repoData := &repositories.CreateDonationRepositoryReq{
+		IdDonation:  idDonation,
+		IdUser:      user.IdUser,
+		IsActive:    true, // default value for new donation
+		Description: defaultDescription,
+	}
+
+	err = h.donationRepo.CreateDonation(ctx, repoData)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to create donation")
+	}
+
+	donation, err := h.donationRepo.GetDonationById(ctx, idDonation)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get donation")
+	}
+	if donation == nil {
+		return nil, fluxgo.ErrorNotFound("Donation not found")
+	}
+
+	return &dto.CreateDonationRes{
+		Donation: *donation,
+	}, nil
+}

@@ -68,3 +68,49 @@ func (r *DonationRepository) GetDonationById(ctx context.Context, id string) (*e
 		id,
 	)
 }
+
+type CreateDonationRepositoryReq struct {
+	IdDonation  string
+	IdUser      string
+	IsActive    bool
+	Description string
+}
+
+func (r *DonationRepository) CreateDonation(
+	ctx context.Context,
+	data *CreateDonationRepositoryReq,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		INSERT INTO donation (
+			id_donation,
+			is_active,
+			description,
+			created_by,
+			created_at
+		) VALUES (
+		 	:id_donation,
+			:is_active,
+			:description,
+			:id_user,
+			now()
+		)
+	`
+
+	params := map[string]any{
+		"id_donation": data.IdDonation,
+		"id_user":     data.IdUser,
+		"is_active":   data.IsActive,
+		"description": data.Description,
+	}
+
+	return utils.Insert(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		params,
+	)
+}

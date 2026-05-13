@@ -87,6 +87,7 @@ INSERT INTO donation_point (
 INSERT INTO donation (
     id_donation,
     is_active,
+    description,
     quantity_donated,
     user_feedback,
     created_at,
@@ -98,7 +99,8 @@ INSERT INTO donation (
 ) VALUES
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKE',
-    true,
+    false,
+    'Sua doação foi encerrada! Agradecemos imensamente por sua generosidade e por fazer a diferença na vida de alguém!',
     1.5,
     'Doação realizada com sucesso',
     NOW(),
@@ -111,8 +113,9 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
     true,
-    2.0,
-    'Equipe muito atenciosa',
+    'Sua doação foi criada! Entre em contato com nosso suporte no WhatsApp para mais informações e para combinar os detalhes da doação.',
+    0,
+    NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
     NULL,
