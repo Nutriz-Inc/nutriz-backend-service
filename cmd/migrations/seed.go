@@ -3,6 +3,7 @@ package main
 var seed = `
 INSERT INTO "user" (
     id_user,
+    internal_identifier,
     type,
     name,
     cpf,
@@ -20,6 +21,7 @@ INSERT INTO "user" (
 ) VALUES
 (
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    '234567898765435',
     'common',
     'Maria Silva',
     '47046117012',
@@ -37,6 +39,7 @@ INSERT INTO "user" (
 ),
 (
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    '234567898765436',
     'common',
     'Marta Silveira',
     '72555730028',
@@ -84,7 +87,7 @@ INSERT INTO donation_point (
 INSERT INTO donation (
     id_donation,
     is_active,
-    quantity,
+    quantity_donated,
     user_feedback,
     created_at,
     created_by,
@@ -193,4 +196,123 @@ INSERT INTO address (
     NULL,
     NULL,
     NULL
-);`
+);
+
+INSERT INTO user_baby (
+    id_user_baby,
+    id_user,
+    name,
+    birth_date,
+    created_at,
+    updated_at,
+    removed_at
+)
+VALUES
+(
+    'usb_01JTG8J5F6W9K2M4P7Q1X8Y3ZAL',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'Miguel',
+    '2025-01-15 08:30:00',
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'usb_01JTG8K8N4P2R6T9V1X3Y5Z7BCD',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'Helena',
+    '2024-11-02 14:10:00',
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'usb_01JTG8K8N4P2R6T9V1X3Y5Z7MIP',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    'Arthur',
+    '2025-03-20 06:45:00',
+    NOW(),
+    NULL,
+    NULL
+);
+
+INSERT INTO donation_step (
+    id_step_donation,
+    id_donation,
+    name,
+    description,
+    status,
+    set_date,
+    created_at,
+    updated_at,
+    completed_at
+) VALUES
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'Coleta inicial',
+    'Coleta agendada com o doador',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcBB',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
+    'Triagem',
+    'Triagem do leite doado',
+    'review',
+    NOW() + INTERVAL '3 days',
+    NOW(),
+    NULL,
+    NULL
+);
+
+INSERT INTO job (
+    id_job,
+    id_user,
+    id_step,
+    name,
+    description,
+    date_set,
+    user_feedback,
+    created_at,
+    created_by,
+    updated_at,
+    updated_by,
+    removed_at,
+    removed_by
+) VALUES
+(
+    'job_2veL1FPpuXxUaZcFaEC57Bfpc01',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
+    'Entrega ao ponto',
+    'Transporte do material para o ponto de coleta',
+    CURRENT_DATE + INTERVAL '2 days',
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'job_2veL1FPpuXxUaZcFaEC57Bfpc02',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcBB',
+    'Análise laboratorial',
+    'Analisar e aprovar amostras',
+    CURRENT_DATE + INTERVAL '4 days',
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+`

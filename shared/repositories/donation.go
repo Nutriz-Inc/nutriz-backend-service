@@ -2,13 +2,12 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
+	"nutriz-backend-service/shared/utils"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
-	"go.opentelemetry.io/otel/codes"
 )
 
 type DonationRepository struct {
@@ -22,7 +21,7 @@ func DonationRepositoryStart(db *fluxgo.Database) *DonationRepository {
 func (r *DonationRepository) ListDonationByFilters(
 	ctx context.Context,
 	filter *dto.ListDonationReq,
-) ([]entities.Donation, int, error) {
+) (*[]entities.Donation, int, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -47,29 +46,25 @@ func (r *DonationRepository) ListDonationByFilters(
 		Val:    filter.ActionBy,
 	})
 
-	query, args := qb.ToSelectSql()
-	resp := make([]entities.Donation, 0, filter.PageSize)
+	return utils.ListQuery[entities.Donation](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		qb,
+		utils.IntPtr(filter.PageSize),
+		true,
+	)
+}
 
-	err := r.DB.ReadOnlyDB().SelectContext(ctx, &resp, query, args...)
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, 0, err
-	}
+func (r *DonationRepository) GetDonationById(ctx context.Context, id string) (*entities.Donation, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
 
-	queryTotal, argsTotal := qb.ToSelectTotalSql()
-
-	var total int
-	err = r.DB.ReadOnlyDB().GetContext(ctx, &total, queryTotal, argsTotal...)
-
-	if err == sql.ErrNoRows {
-		return nil, total, nil
-	}
-	if err != nil {
-		span.RecordError(err)
-		span.SetStatus(codes.Error, err.Error())
-		return nil, total, err
-	}
-
-	return resp, total, nil
+	return utils.Get[entities.Donation](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "donation" WHERE id_donation = $1 AND removed_at IS NULL`,
+		id,
+	)
 }

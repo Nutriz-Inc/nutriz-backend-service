@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net/mail"
+	"net/netip"
 	"sync"
 	"time"
 
@@ -22,6 +23,8 @@ func GetValidate() *validator.Validate {
 		_ = v.RegisterValidation("id", ValidId)
 		_ = v.RegisterValidation("datetime", ValidDateTime)
 		_ = v.RegisterValidation("email", ValidEmail)
+		_ = v.RegisterValidation("ip", ValidIP)
+		_ = v.RegisterValidation("cep", ValidCEP)
 
 		validateInstance = v
 	})
@@ -77,4 +80,25 @@ func ValidEmail(fl validator.FieldLevel) bool {
 
 	_, err := mail.ParseAddress(value)
 	return err == nil
+}
+
+func ValidIP(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	if value == "" {
+		return true
+	}
+
+	_, err := netip.ParseAddr(value)
+	return err == nil
+}
+
+func ValidCEP(fl validator.FieldLevel) bool {
+	value := fl.Field().String()
+
+	if value == "" {
+		return true
+	}
+
+	return brdoc.IsCEP(value)
 }

@@ -1,11 +1,24 @@
 package utils
 
-import fluxgo "github.com/MMortari/FluxGo"
+import "strconv"
 
-var TestHeaders = fluxgo.Headers{
-	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGNLRSIsImlhdCI6MTc2ODYwNzY5NX0.nu3pikK27PucdmX3ZobAvKCuEwZehbHtSnk4AweJix0",
+func IntPtr(v int) *int {
+	return &v
 }
 
-var InvalidTestHeaders = fluxgo.Headers{
-	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGNMViIsImlhdCI6MTc2ODU4NzA2OX0.eMkzXrc9lJ_Ah_VLvj0YgTyzrgp42SJ8rtlVm7vg_Ps",
+func Float64Ptr(v float64) *float64 {
+	return &v
+}
+
+func StringPtr(v string) *string {
+	return &v
+}
+
+func StringToFloat64(value string) float64 {
+	parsed, err := strconv.ParseFloat(value, 64)
+	if err != nil {
+		return 0
+	}
+
+	return parsed
 }

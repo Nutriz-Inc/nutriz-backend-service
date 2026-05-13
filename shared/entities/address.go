@@ -1,6 +1,8 @@
 package entities
 
-import "time"
+import (
+	"time"
+)
 
 type Address struct {
 	IdAddress       string     `json:"id_address" db:"id_address"`
@@ -30,4 +32,4 @@ func (a Address) PrimaryKey() string {
 	return "id_address"
 }
 
-const MAX_ADDRESS_QUANTITY_PER_USER = 10
+const MAX_ADDRESS_QUANTITY_PER_USER = 5

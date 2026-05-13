@@ -13,6 +13,7 @@ func Module() *fluxgo.FluxModule {
 
 	mod.AddHandler(handlers.HandlerListDonationPointsStart)
 	mod.AddHandler(handlers.HandlerListDonationsStart)
+	mod.AddHandler(handlers.HandlerGetDonationStart)
 
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonations) error {
 		return mod.HttpRoute(
@@ -43,6 +44,23 @@ func Module() *fluxgo.FluxModule {
 				Validate:  true,
 				Cache:     redis,
 				CacheTTL:  time.Hour,
+			},
+			handler.HandleHttp,
+		)
+	})
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetDonation) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"GET",
+			"/donation/:id",
+			fluxgo.RouteIncome{
+				Entity:     dto.GetDonationReq{},
+				FromParam:  true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      redis,
+				CacheTTL:   time.Hour,
 			},
 			handler.HandleHttp,
 		)

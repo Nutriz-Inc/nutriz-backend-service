@@ -2,10 +2,12 @@ package repositories
 
 import (
 	"context"
-	"database/sql"
+	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
+	"nutriz-backend-service/shared/utils"
 
 	fluxgo "github.com/MMortari/FluxGo"
+	q "github.com/MMortari/go-query-builder"
 )
 
 type UserRepository struct {
@@ -20,82 +22,72 @@ func (r *UserRepository) GetUserById(ctx context.Context, id string) (*entities.
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	var user entities.User
-
-	err := r.DB.ReadOnlyDB().GetContext(
+	return utils.Get[entities.User](
 		ctx,
-		&user,
-		`SELECT * FROM "user" WHERE id_user = $1`,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "user" WHERE id_user = $1 AND removed_at IS NULL`,
 		id,
 	)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		span.SetError(err)
-		return nil, err
-	}
-
-	return &user, nil
 }
 
 func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*entities.User, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	var user entities.User
-
-	err := r.DB.ReadOnlyDB().GetContext(
+	return utils.Get[entities.User](
 		ctx,
-		&user,
-		`SELECT * FROM "user" WHERE email = $1`,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "user" WHERE email = $1 AND removed_at IS NULL`,
 		email,
 	)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		span.SetError(err)
-		return nil, err
-	}
-
-	return &user, nil
 }
 
-// func (r *UserRepository) CreateUser(ctx context.Context, data dto.CreateUserReq, idUser string) error {
-// 	ctx, span := r.StartSpan(ctx)
-// 	defer span.End()
+func (r *UserRepository) ListUsersByFilters(
+	ctx context.Context,
+	filter *dto.ListUsersReq,
+) (*[]entities.User, int, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
 
-// 	query := `
-// 		INSERT INTO "user" (
-// 			id_user,
-// 			name,
-// 			email,
-// 			password,
-// 			closing_date,
-// 			created_at
-// 		) VALUES (
-// 	        :id_user,
-// 			:name,
-// 			:email,
-// 			:password,
-// 			:closing_date,
-// 			now()
-// 		)
-// 	`
-// 	params := map[string]any{
-// 		"id_user":      idUser,
-// 		"name":         data.Name,
-// 		"email":        data.Email,
-// 		"password":     data.Password,
-// 		"closing_date": data.ClosingDate,
-// 	}
+	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
+		Select("u.*").
+		From("user", "u").
+		OrderBy(q.OrderBy{Column: "u.created_at"}).
+		PaginationPaged(filter.Page, filter.PageSize).
+		WhereAnd(q.Where{Column: "u.removed_at", Type: "IS NULL"})
 
-// 	_, err := r.DB.ReadOnlyDB().NamedExecContext(ctx, query, params)
-// 	if err != nil {
-// 		span.SetError(err)
-// 		return err
-// 	}
+	if filter.Name != nil {
+		qb.WhereAnd(q.Where{
+			Column: "u.name",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.Name + "%",
+		})
+	}
 
-// 	return nil
-// }
+	if filter.Type != nil {
+		qb.WhereAnd(q.Where{
+			Column: "u.type",
+			Type:   "=",
+			Val:    *filter.Type,
+		})
+	}
+
+	if filter.InternalIdentifier != nil {
+		qb.WhereAnd(q.Where{
+			Column: "u.internal_identifier",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.InternalIdentifier + "%",
+		})
+	}
+
+	return utils.ListQuery[entities.User](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		qb,
+		utils.IntPtr(filter.PageSize),
+		true,
+	)
+}
