@@ -273,6 +273,15 @@ VALUES
     NULL
 ),
 (
+    'usb_01JTG8K8N4P2R6T9V1X3Y5Z7DEL',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'Baby Para Deletar',
+    '2025-06-01 00:00:00',
+    NOW(),
+    NULL,
+    NULL
+),
+(
     'usb_01JTG8K8N4P2R6T9V1X3Y5Z7MIP',
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
     'Arthur',
