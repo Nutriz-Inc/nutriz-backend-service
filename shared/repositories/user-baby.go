@@ -101,3 +101,23 @@ func (r *UserBabyRepository) CreateUserBaby(ctx context.Context, data *CreateUse
 		params,
 	)
 }
+
+func (r *UserBabyRepository) RemoveUserBaby(ctx context.Context, id, actionBy string) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE user_baby
+		SET removed_at = now()
+		WHERE id_user_baby = $1 AND id_user = $2 AND removed_at IS NULL 
+	`
+
+	return utils.Delete(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		id,
+		actionBy,
+	)
+}
