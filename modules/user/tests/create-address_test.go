@@ -23,13 +23,9 @@ func TestCreateAddress(t *testing.T) {
 
 	makeBody := func(zipcode string) dto.CreateAddressReq {
 		return dto.CreateAddressReq{
-			ZipCode:      zipcode,
-			Street:       "Rua das Flores",
-			Number:       utils.StringPtr("123"),
-			City:         "São Paulo",
-			State:        "SP",
-			Neighborhood: "Centro",
-			Complement:   utils.StringPtr("Apto 2"),
+			ZipCode:    zipcode,
+			Number:     utils.StringPtr("123"),
+			Complement: utils.StringPtr("Apto 2"),
 		}
 	}
 
@@ -43,10 +39,10 @@ func TestCreateAddress(t *testing.T) {
 			assert.NotNil(t, resp["id_address"])
 			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", resp["id_user"])
 			assert.Equal(t, body.ZipCode, resp["zipcode"])
-			assert.Equal(t, body.Street, resp["street"])
-			assert.Equal(t, body.City, resp["city"])
-			assert.Equal(t, body.State, resp["state"])
-			assert.Equal(t, body.Neighborhood, resp["neighborhood"])
+			assert.NotNil(t, resp["street"])
+			assert.NotNil(t, resp["city"])
+			assert.NotNil(t, resp["state"])
+			assert.NotNil(t, resp["neighborhood"])
 		})
 	})
 
@@ -61,7 +57,7 @@ func TestCreateAddress(t *testing.T) {
 		})
 
 		t.Run("User can have up to %d addresses", func(t *testing.T) {
-			setupZipcodes := []string{"01002000", "01003000", "01004000"}
+			setupZipcodes := []string{"01002000", "01003000"}
 
 			for _, zipcode := range setupZipcodes {
 				body := makeBody(zipcode)

@@ -196,6 +196,44 @@ INSERT INTO address (
     NULL,
     NULL,
     NULL
+),
+(
+    'adr_01JTX0H1V8N5Q3W7E2R4T6Y8UPD',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NULL,
+    '01545000',
+    'Rua Teste Atualizacao',
+    '101',
+    'São Paulo',
+    'SP',
+    'Vila Mariana',
+    'Casa 1',
+    -23.589523,
+    -46.637636,
+    NOW(),
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'adr_01JTX0H1V8N5Q3W7E2R4T6Y8MBL',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    '01545001',
+    'Rua Teste Atualizacao 2',
+    '102',
+    'São Paulo',
+    'SP',
+    'Vila Madalena',
+    'Casa 5',
+    -22.589923,
+    -41.637736,
+    NOW(),
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO user_baby (
