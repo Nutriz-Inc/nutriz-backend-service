@@ -21,6 +21,7 @@ func TestGetUser(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		id := "usr_2veL1FPpuXxUaZcFaEC57BfpcKE"
+		internalIdentifier := "234567898765435"
 
 		t.Run("Normal", func(t *testing.T) {
 			route := fmt.Sprintf("%s/%s", endpoint, id)
@@ -29,6 +30,7 @@ func TestGetUser(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, id, body["id_user"])
+			assert.Equal(t, internalIdentifier, body["internal_identifier"])
 			assert.Nil(t, body["password"])
 		})
 		t.Run("With address", func(t *testing.T) {
@@ -48,8 +50,12 @@ func TestGetUser(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, id, body["id_user"])
-			assert.NotNil(t, body["babies"])
-			assert.Len(t, body["babies"], 2)
+			
+			babies, ok := body["babies"].([]interface{})
+			assert.True(t, ok)
+
+			assert.NotNil(t, babies)
+			assert.GreaterOrEqual(t, len(babies), 2)
 		})
 	})
 

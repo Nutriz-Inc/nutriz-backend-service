@@ -11,10 +11,46 @@ import (
 func Module() *fluxgo.FluxModule {
 	mod := fluxgo.Module("user")
 
+	mod.AddHandler(handlers.HandlerCreateUserBabyStart)
+	mod.AddHandler(handlers.HandlerListUsersStart)
 	mod.AddHandler(handlers.HandlerGetUserStart)
 	mod.AddHandler(handlers.HandlerCreateConsentLogStart)
 	mod.AddHandler(handlers.HandlerCreateAddressStart)
 
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListUsers) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"GET",
+			"/user",
+			fluxgo.RouteIncome{
+				Entity:     dto.ListUsersReq{},
+				FromQuery:  true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      redis,
+				CacheTTL:   time.Hour,
+			},
+			handler.HandleHttp,
+		)
+	})
+	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerCreateUserBaby) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"POST",
+			"/user/baby",
+			fluxgo.RouteIncome{
+				Entity:     dto.CreateUserBabyReq{},
+				FromBody:   true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      nil,
+				CacheTTL:   0,
+			},
+			handler.HandleHttp,
+		)
+	})
 	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerCreateAddress) error {
 		return mod.HttpRoute(
 			f,
