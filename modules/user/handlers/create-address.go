@@ -107,12 +107,12 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 func (h *HandlerCreateAddress) GetCoordinatesByZipCode(ctx context.Context, zipcode string) (*dto.Coordinates, error) {
 	provider, err := location.NewLocationProvider(h.config)
 	if err != nil {
-		return nil, fmt.Errorf("Error to initialize location provider: %v", err)
+		return nil, fmt.Errorf("error to initialize location provider: %v", err)
 	}
 
 	addressData, err := provider.GetAddressByZipCode(ctx, zipcode)
 	if err != nil {
-		return nil, fmt.Errorf("Error getting address by zipcode: %v", err)
+		return nil, fmt.Errorf("error getting address by zipcode: %v", err)
 	}
 
 	res := &dto.Coordinates{}
@@ -133,7 +133,7 @@ func (h *HandlerCreateAddress) GetCoordinatesByZipCode(ctx context.Context, zipc
 
 	coordinates, err := provider.GetCoordinatesByAddress(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("Error getting coordinates by address: %v", err)
+		return nil, fmt.Errorf("error getting coordinates by address: %v", err)
 	}
 
 	res.Latitude = utils.Float64Ptr(utils.StringToFloat64(coordinates.Lat))
