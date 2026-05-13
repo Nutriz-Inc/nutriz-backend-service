@@ -5,6 +5,7 @@ import "time"
 type Donation struct {
 	IdDonation      string     `json:"id_donation" db:"id_donation"`
 	IsActive        bool       `json:"is_active" db:"is_active"`
+	Description     string     `json:"description" db:"description"`
 	QuantityDonated *float64   `json:"quantity_donated" db:"quantity_donated"`
 	UserFeedback    *string    `json:"user_feedback" db:"user_feedback"`
 	CreatedAt       time.Time  `json:"created_at" db:"created_at"`
@@ -22,3 +23,5 @@ func (d Donation) TableName() string {
 func (d Donation) PrimaryKey() string {
 	return "id_donation"
 }
+
+const MAX_DONATION_ACTIVE_QUANTITY_PER_USER = 1
