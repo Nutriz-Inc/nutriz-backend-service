@@ -36,7 +36,7 @@ func (h *HandlerListUsers) Execute(ctx c.Context, filters *dto.ListUsersReq) (*d
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type == entities.EnumUserTypeDonor {
+	if user.Type == entities.EnumUserTypeCommon {
 		return nil, utils.ErrorForbidden("User does not have permission to list users", "user.forbidden")
 	}
 

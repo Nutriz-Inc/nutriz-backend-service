@@ -33,15 +33,20 @@ func (h *HandlerListJobs) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.
 }
 
 func (h *HandlerListJobs) Execute(ctx c.Context, filters *dto.ListJobsReq) (*dto.ListJobsRes, *fluxgo.GlobalError) {
-	user, err := h.userRepo.GetUserById(ctx, filters.ActionBy)
+	user, err := h.userRepo.GetUserById(ctx, *filters.ActionBy)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user")
 	}
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type == entities.EnumUserTypeDonor {
+
+	if user.Type == entities.EnumUserTypeCommon {
 		return nil, utils.ErrorForbidden("User does not have permission to list jobs", "user.forbidden")
+	}
+
+	if user.Type == entities.EnumUserTypeAdmin {
+		filters.ActionBy = nil
 	}
 
 	jobs, total, err := h.jobRepo.ListJobsByFilters(ctx, filters)

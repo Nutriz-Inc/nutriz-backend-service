@@ -38,7 +38,7 @@ func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyR
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type != entities.EnumUserTypeDonor {
+	if user.Type != entities.EnumUserTypeCommon {
 		return nil, utils.ErrorForbidden("User does not have permission to create baby", "user.forbidden")
 	}
 

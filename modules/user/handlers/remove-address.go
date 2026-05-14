@@ -42,8 +42,8 @@ func (h *HandlerRemoveAddress) Execute(ctx context.Context, data *dto.RemoveAddr
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type != entities.EnumUserTypeDonor {
-		return nil, utils.ErrorForbidden("User does not have permission to create baby", "user.forbidden")
+	if user.Type != entities.EnumUserTypeCommon {
+		return nil, utils.ErrorForbidden("User does not have permission to delete address", "user.forbidden")
 	}
 
 	address, err := h.addressRepo.GetAddressById(ctx, data.Id)

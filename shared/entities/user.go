@@ -24,9 +24,9 @@ type User struct {
 type EnumUserType string
 
 const (
-	EnumUserTypeDonor    EnumUserType = "common"
-	EnumUserTypeReceiver EnumUserType = "adm"
-	EnumUserTypeNurse    EnumUserType = "nurse"
+	EnumUserTypeCommon EnumUserType = "common"
+	EnumUserTypeAdmin  EnumUserType = "adm"
+	EnumUserTypeNurse  EnumUserType = "nurse"
 )
 
 func (u User) TableName() string {

@@ -36,7 +36,7 @@ func (h *HandlerListDonations) Execute(ctx c.Context, filters *dto.ListDonationR
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type != entities.EnumUserTypeDonor {
+	if user.Type != entities.EnumUserTypeCommon {
 		filters.ActionBy = nil
 	}
 

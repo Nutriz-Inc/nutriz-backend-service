@@ -47,6 +47,16 @@ func TestCreateAddress(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		t.Run("No permission", func(t *testing.T) {
+			invalidHeader := &utils.TestHeadersAdmin
+			body := makeBody("01001000")
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, invalidHeader)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "User does not have permission to create address", resp["message"])
+		})
+
 		t.Run("Address with same zipcode already exists", func(t *testing.T) {
 			body := makeBody("09415987")
 

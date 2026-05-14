@@ -51,7 +51,7 @@ func (h *HandlerGetDonation) Execute(ctx c.Context, filters *dto.GetDonationReq)
 		return nil, fluxgo.ErrorNotFound("Donation not found")
 	}
 
-	if user.Type == entities.EnumUserTypeDonor {
+	if user.Type == entities.EnumUserTypeCommon {
 		if donation.CreatedBy != filters.ActionBy {
 			return nil, utils.ErrorForbidden("You don't have permission to access this resource", "donation.forbidden")
 		}

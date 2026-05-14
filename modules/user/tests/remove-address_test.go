@@ -28,6 +28,16 @@ func TestRemoveAddress(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		t.Run("No permission", func(t *testing.T) {
+			invalidHeader := &utils.TestHeadersAdmin
+			addressID := "adr_01JTX0H1V8N5Q3W7E2R4T6Y8ZXE"
+			endpoint := fmt.Sprintf("/internal/user/address/%s", addressID)
+
+			status, resp := fluxgo.RunTestRequest(app, "DELETE", endpoint, nil, invalidHeader)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "User does not have permission to delete address", resp["message"])
+		})
 		t.Run("Address not found", func(t *testing.T) {
 			route := "/internal/user/address/adr_01JTX0H1V8N5Q3W7E2R4T6Y8ZZZ"
 

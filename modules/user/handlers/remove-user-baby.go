@@ -42,8 +42,8 @@ func (h *HandlerRemoveUserBaby) Execute(ctx context.Context, data *dto.RemoveUse
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type != entities.EnumUserTypeDonor {
-		return nil, utils.ErrorForbidden("User does not have permission to create baby", "user.forbidden")
+	if user.Type != entities.EnumUserTypeCommon {
+		return nil, utils.ErrorForbidden("User does not have permission to remove baby", "user.forbidden")
 	}
 
 	userBaby, err := h.userBabyRepo.GetUserBabyById(ctx, data.Id)

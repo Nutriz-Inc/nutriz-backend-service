@@ -2,6 +2,7 @@ package tests
 
 import (
 	"fmt"
+	"net/http"
 	httpCode "net/http"
 	"nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/module"
@@ -44,6 +45,19 @@ func TestUpdateAddress(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		t.Run("No permission", func(t *testing.T) {
+			invalidHeader := &utils.TestHeadersAdmin
+			body := dtos.UpdateAddressReq{
+				ZipCode:    utils.StringPtr("22250040"),
+				Complement: utils.StringPtr("Apto 17"),
+				Number:     utils.StringPtr("17"),
+			}
+
+			status, resp := fluxgo.RunTestRequest(app, "PUT", endpoint, body, invalidHeader)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "User does not have permission to update address", resp["message"])
+		})
 		t.Run("Address not found", func(t *testing.T) {
 			body := dtos.UpdateAddressReq{
 				ZipCode: utils.StringPtr("22250040"),

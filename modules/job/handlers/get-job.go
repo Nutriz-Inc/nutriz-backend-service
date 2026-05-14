@@ -41,7 +41,7 @@ func (h *HandlerGetJob) Execute(ctx c.Context, filters *dto.GetJobReq) (*dto.Get
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type == entities.EnumUserTypeDonor {
+	if user.Type == entities.EnumUserTypeCommon {
 		return nil, utils.ErrorForbidden("User does not have permission to get job", "user.forbidden")
 	}
 
@@ -52,8 +52,11 @@ func (h *HandlerGetJob) Execute(ctx c.Context, filters *dto.GetJobReq) (*dto.Get
 	if job == nil {
 		return nil, fluxgo.ErrorNotFound("Job not found")
 	}
-	if job.IdUser != filters.ActionBy {
-		return nil, utils.ErrorForbidden("You don't have permission to access this resource", "job.forbidden")
+
+	if user.Type == entities.EnumUserTypeNurse {
+		if job.IdUser != filters.ActionBy {
+			return nil, utils.ErrorForbidden("You don't have permission to access this resource", "job.forbidden")
+		}
 	}
 
 	return &dto.GetJobRes{

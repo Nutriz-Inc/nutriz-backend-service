@@ -36,4 +36,20 @@ func TestCreateConsentLog(t *testing.T) {
 			assert.NotNil(t, resp["accepted_at"])
 		})
 	})
+	t.Run("Error", func(t *testing.T) {
+		t.Run("No permission", func(t *testing.T) {
+			invalidHeader := &utils.TestHeadersAdmin
+
+			body := dtos.CreateConsentReq{
+				IpAddress:    "192.168.1.1",
+				TermsVersion: "v1",
+				UserAgent:    "Mozilla",
+			}
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, invalidHeader)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "User does not have permission to create consent log", resp["message"])
+		})
+	})
 }
