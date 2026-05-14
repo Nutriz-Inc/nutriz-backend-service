@@ -19,7 +19,7 @@ func TestListDonation(t *testing.T) {
 	headers := &utils.TestHeaders
 
 	t.Run("Success", func(t *testing.T) {
-		t.Run("No filters", func(t *testing.T) {
+		t.Run("No filters (common user)", func(t *testing.T) {
 			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, headers)
 
 			assert.Equal(t, int(http.StatusOK), status)
@@ -37,6 +37,36 @@ func TestListDonation(t *testing.T) {
 					t,
 					"usr_2veL1FPpuXxUaZcFaEC57BfpcKE",
 					row["created_by"],
+				)
+			}
+
+			assert.Equal(t, float64(25), body["page_size"])
+			assert.Equal(t, float64(1), body["page"])
+			assert.GreaterOrEqual(t, body["total"], float64(1))
+		})
+
+		t.Run("No filters (admin)", func(t *testing.T) {
+			adminHeaders := &utils.TestHeadersAdmin
+			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			first := fluxgo.ConvertToMap(data[0])
+			assert.NotEmpty(t, first["id_donation"])
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				createdBy := row["created_by"]
+				assert.Contains(
+					t,
+					[]string{
+						"usr_2veL1FPpuXxUaZcFaEC57BfpcKE",
+						"usr_2veL1FPpuXxUaZcFaEC57BfpcKL",
+					},
+					createdBy,
 				)
 			}
 

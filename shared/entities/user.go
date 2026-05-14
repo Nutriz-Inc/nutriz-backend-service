@@ -25,7 +25,7 @@ type EnumUserType string
 
 const (
 	EnumUserTypeCommon EnumUserType = "common"
-	EnumUserTypeAdm    EnumUserType = "adm"
+	EnumUserTypeAdmin  EnumUserType = "adm"
 	EnumUserTypeNurse  EnumUserType = "nurse"
 )
 

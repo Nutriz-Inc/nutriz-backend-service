@@ -17,7 +17,7 @@ func TestListJobs(t *testing.T) {
 	defer fx.RequireStart().RequireStop()
 
 	endpoint := "/internal/job?page=1&page_size=25"
-	headers := &utils.TestHeaders
+	headers := &utils.TestHeadersNurse
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("No filters", func(t *testing.T) {
@@ -33,7 +33,37 @@ func TestListJobs(t *testing.T) {
 
 			for _, item := range data {
 				row := fluxgo.ConvertToMap(item)
-				assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", row["id_user"])
+				assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfplNV", row["id_user"])
+			}
+
+			assert.Equal(t, float64(25), body["page_size"])
+			assert.Equal(t, float64(1), body["page"])
+			assert.GreaterOrEqual(t, body["total"], float64(1))
+		})
+
+		t.Run("No filters (admin)", func(t *testing.T) {
+			adminHeaders := &utils.TestHeadersAdmin
+			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			first := fluxgo.ConvertToMap(data[0])
+			assert.NotEmpty(t, first["id_job"])
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				idUser := row["id_user"]
+				assert.Contains(
+					t,
+					[]string{
+						"usr_2veL1FPpuXxUaZcFaEC57BfplNV",
+						"usr_2veL1FPpuXxUaZcFaEC57BfpcKL",
+					},
+					idUser,
+				)
 			}
 
 			assert.Equal(t, float64(25), body["page_size"])
@@ -53,7 +83,16 @@ func TestListJobs(t *testing.T) {
 			item := fluxgo.ConvertToMap(data[0])
 
 			assert.Contains(t, item["date_set"], dateSet)
-			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", item["id_user"])
+			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfplNV", item["id_user"])
+		})
+	})
+	t.Run("Error", func(t *testing.T) {
+		t.Run("No permission", func(t *testing.T) {
+			commonHeaders := &utils.TestHeaders
+			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, commonHeaders)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "User does not have permission to list jobs", body["message"])
 		})
 	})
 }
