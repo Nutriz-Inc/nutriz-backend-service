@@ -111,7 +111,7 @@ func (h *HandlerCreateDonationStep) Execute(ctx context.Context, data *dto.Creat
 			SetDate:        setDateTime,
 		})
 		if err != nil {
-			return fmt.Errorf("error to create donation step", err)
+			return fmt.Errorf("error to create donation step: %w", err)
 		}
 
 		idDonationStepTimeline := utils.IdGenerate(utils.DonationStepTimelineEntity)
@@ -124,7 +124,7 @@ func (h *HandlerCreateDonationStep) Execute(ctx context.Context, data *dto.Creat
 			IdUser:                 data.ActionBy,
 		})
 		if err != nil {
-			return fmt.Errorf("error to create donation step timeline", err)
+			return fmt.Errorf("error to create donation step timeline: %w", err)
 		}
 
 		return nil

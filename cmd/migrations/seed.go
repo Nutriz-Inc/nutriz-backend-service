@@ -155,6 +155,42 @@ INSERT INTO donation (
     NULL,
     NULL,
     NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKG',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKH',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKI',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO address (
@@ -325,14 +361,16 @@ VALUES
 );
 
 INSERT INTO donation_step (
-    id_step_donation,
+    id_donation_step,
     id_donation,
     name,
     description,
     status,
     set_date,
     created_at,
+    created_by,
     updated_at,
+    updated_by,
     completed_at
 ) VALUES
 (
@@ -343,6 +381,8 @@ INSERT INTO donation_step (
     'pending',
     NOW() + INTERVAL '2 days',
     NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
     NULL,
     NULL
 ),
@@ -354,6 +394,8 @@ INSERT INTO donation_step (
     'review',
     NOW() + INTERVAL '3 days',
     NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
     NULL,
     NULL
 );

@@ -51,7 +51,7 @@ func (r *DonationStepRepository) GetDonationStepById(ctx context.Context, id str
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
-		`SELECT * FROM "donation_step" WHERE id = $1`,
+		`SELECT * FROM "donation_step" WHERE id_donation_step = $1`,
 		id,
 	)
 }

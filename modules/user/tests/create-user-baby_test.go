@@ -27,7 +27,7 @@ func TestCreateUserBaby(t *testing.T) {
 		}
 
 		status, body := fluxgo.RunTestRequest(app, "POST", endpoint, data, headers)
-		t.Logf("body: %v", body)
+
 		assert.Equal(t, http.StatusCreated, status)
 		assert.NotNil(t, body["id_user_baby"])
 		assert.NotEmpty(t, body["id_user_baby"])

@@ -45,7 +45,7 @@ func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyR
 		return nil, fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
 	}
 
-	birthDateTime, err := utils.StringToTime(data.BirthDate)
+	birthDateTime, err := utils.StringToDate(data.BirthDate)
 	if err != nil {
 		return nil, fluxgo.ErrorBadRequest("Invalid birth date format", "user_baby.invalid_birth_date_format")
 	}
