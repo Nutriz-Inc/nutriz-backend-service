@@ -72,10 +72,9 @@ func (r *DonationRepository) GetDonationById(ctx context.Context, id string) (*e
 }
 
 type CreateDonationRepositoryReq struct {
-	IdDonation  string
-	IdUser      string
-	IsActive    bool
-	Description string
+	IdDonation string
+	IdUser     string
+	IsActive   bool
 }
 
 func (r *DonationRepository) CreateDonation(
@@ -89,13 +88,11 @@ func (r *DonationRepository) CreateDonation(
 		INSERT INTO donation (
 			id_donation,
 			is_active,
-			description,
 			created_by,
 			created_at
 		) VALUES (
 		 	:id_donation,
 			:is_active,
-			:description,
 			:id_user,
 			now()
 		)
@@ -105,7 +102,6 @@ func (r *DonationRepository) CreateDonation(
 		"id_donation": data.IdDonation,
 		"id_user":     data.IdUser,
 		"is_active":   data.IsActive,
-		"description": data.Description,
 	}
 
 	return utils.Insert(

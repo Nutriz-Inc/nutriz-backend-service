@@ -79,7 +79,6 @@ CREATE TABLE donation (
   quantity_donated NUMERIC(10,2),
   is_active BOOLEAN NOT NULL,
   user_feedback TEXT,
-  description VARCHAR(255) NOT NULL,
 
   created_at TIMESTAMP NOT NULL,
   created_by VARCHAR(36) NOT NULL,

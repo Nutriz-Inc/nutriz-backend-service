@@ -2,29 +2,38 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 )
 
 type HandlerCreateDonationStep struct {
-	donationRepo     *repositories.DonationRepository
-	donationStepRepo *repositories.DonationStepRepository
-	userRepo         *repositories.UserRepository
+	db                       *fluxgo.Database
+	donationRepo             *repositories.DonationRepository
+	donationStepRepo         *repositories.DonationStepRepository
+	donationStepTimelineRepo *repositories.DonationStepTimelineRepository
+	userRepo                 *repositories.UserRepository
 }
 
 func HandlerCreateDonationStepStart(
+	db *fluxgo.Database,
 	donationRepo *repositories.DonationRepository,
 	donationStepRepo *repositories.DonationStepRepository,
+	donationStepTimelineRepo *repositories.DonationStepTimelineRepository,
 	userRepo *repositories.UserRepository,
 ) *HandlerCreateDonationStep {
 	return &HandlerCreateDonationStep{
+		db,
 		donationRepo,
 		donationStepRepo,
+		donationStepTimelineRepo,
 		userRepo,
 	}
 }
@@ -45,7 +54,7 @@ func (h *HandlerCreateDonationStep) Execute(ctx context.Context, data *dto.Creat
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type != entities.EnumUserTypeAdm {
+	if user.Type != entities.EnumUserTypeAdmin {
 		return nil, utils.ErrorForbidden("User does not have permission to create donation step", "user.forbidden")
 	}
 
@@ -67,7 +76,7 @@ func (h *HandlerCreateDonationStep) Execute(ctx context.Context, data *dto.Creat
 
 	if donationSteps != nil && len(*donationSteps) > 0 {
 		for _, step := range *donationSteps {
-			if _, ok := entities.PREVIOUS_DONATION_STEPS_STATUS_THAT_ALLOW_NEXT_STEP[step.Status]; !ok {
+			if step.Status != entities.EnumDonationStepStatusDone {
 				return nil, fluxgo.ErrorBadRequest(
 					"Previous donation step is not completed",
 					"previous_step.incomplete",
@@ -76,30 +85,55 @@ func (h *HandlerCreateDonationStep) Execute(ctx context.Context, data *dto.Creat
 		}
 	}
 
+	var setDateTime *time.Time
+
 	if data.SetDate != nil {
 		if !utils.IsFutureDate(*data.SetDate) {
 			return nil, fluxgo.ErrorBadRequest("Set date must be in the future", "set_date.invalid")
 		}
+
+		setDateTime, err = utils.StringToTime(*data.SetDate)
+		if err != nil {
+			return nil, fluxgo.ErrorBadRequest("Invalid set date format", "donation_step.invalid_set_date_format")
+		}
 	}
 
-	idDonation := utils.IdGenerate(utils.DonationStepEntity)
+	idDonationStep := utils.IdGenerate(utils.DonationStepEntity)
 
-	reqData := repositories.CreateDonationStepRepositoryReq{
-		IdDonationStep: idDonation,
-		IdDonation:     data.IdDonation,
-		IdUser:         data.ActionBy,
-		Name:           data.Name,
-		Description:    data.Description,
-		Status:         entities.EnumDonationStepStatusPending,
-		SetDate:        data.SetDate,
-	}
+	err = h.db.RunTransaction(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+		err := h.donationStepRepo.CreateDonationStepTx(ctx, tx, &repositories.CreateDonationStepRepositoryReq{
+			IdDonationStep: idDonationStep,
+			IdDonation:     data.IdDonation,
+			IdUser:         data.ActionBy,
+			Name:           data.Name,
+			Description:    data.Description,
+			Status:         entities.EnumDonationStepStatusPending,
+			SetDate:        setDateTime,
+		})
+		if err != nil {
+			return fmt.Errorf("error to create donation step", err)
+		}
 
-	err = h.donationStepRepo.CreateDonationStep(ctx, &reqData)
+		idDonationStepTimeline := utils.IdGenerate(utils.DonationStepTimelineEntity)
+		err = h.donationStepTimelineRepo.CreateDonationStepTimelineTx(ctx, tx, &repositories.CreateDonationStepTimelineRepositoryReq{
+			IdDonationStepTimeline: idDonationStepTimeline,
+			IdDonationStep:         idDonationStep,
+			Description:            data.Description,
+			Status:                 entities.EnumDonationStepStatusPending,
+			SetDate:                setDateTime,
+			IdUser:                 data.ActionBy,
+		})
+		if err != nil {
+			return fmt.Errorf("error to create donation step timeline", err)
+		}
+
+		return nil
+	})
 	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to create donation step")
+		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
 
-	donationStep, err := h.donationStepRepo.GetDonationStepById(ctx, idDonation)
+	donationStep, err := h.donationStepRepo.GetDonationStepById(ctx, idDonationStep)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get donation step")
 	}

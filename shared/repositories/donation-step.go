@@ -4,9 +4,11 @@ import (
 	"context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
+	"github.com/jmoiron/sqlx"
 )
 
 type DonationStepRepository struct {
@@ -61,11 +63,12 @@ type CreateDonationStepRepositoryReq struct {
 	Name           entities.EnumDonationSteps
 	Description    string
 	Status         entities.EnumDonationStepStatus
-	SetDate        *string
+	SetDate        *time.Time
 }
 
-func (r *DonationStepRepository) CreateDonationStep(
+func (r *DonationStepRepository) createDonationStep(
 	ctx context.Context,
+	exec sqlx.ExtContext,
 	data *CreateDonationStepRepositoryReq,
 ) error {
 	ctx, span := r.StartSpan(ctx)
@@ -103,11 +106,35 @@ func (r *DonationStepRepository) CreateDonationStep(
 		"set_date":         data.SetDate,
 	}
 
-	return utils.Insert(
+	_, err := sqlx.NamedExecContext(
 		ctx,
-		r.DB.ReadOnlyDB(),
-		span,
+		exec,
 		query,
 		params,
+	)
+
+	return err
+}
+
+func (r *DonationStepRepository) CreateDonationStepTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	data *CreateDonationStepRepositoryReq,
+) error {
+	return r.createDonationStep(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *DonationStepRepository) CreateDonationStep(
+	ctx context.Context,
+	data *CreateDonationStepRepositoryReq,
+) error {
+	return r.createDonationStep(
+		ctx,
+		r.DB.WriteDB(),
+		data,
 	)
 }

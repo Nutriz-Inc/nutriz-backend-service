@@ -44,8 +44,3 @@ func (d DonationStep) PrimaryKey() string {
 }
 
 const NUMBER_OF_DONATION_STEPS = 4
-
-var PREVIOUS_DONATION_STEPS_STATUS_THAT_ALLOW_NEXT_STEP = map[EnumDonationStepStatus]struct{}{
-	EnumDonationStepStatusDone: {},
-	EnumDonationStepStatusWarn: {},
-}

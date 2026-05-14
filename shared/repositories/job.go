@@ -48,6 +48,14 @@ func (r *JobRepository) ListJobsByFilters(
 		})
 	}
 
+	if filter.IdStep != nil {
+		qb.WhereAnd(q.Where{
+			Column: "j.id_step",
+			Type:   "=",
+			Val:    *filter.IdStep,
+		})
+	}
+
 	return utils.ListQuery[entities.Job](
 		ctx,
 		r.DB.ReadOnlyDB(),
