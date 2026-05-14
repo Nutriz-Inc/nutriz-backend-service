@@ -71,6 +71,25 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
+	mod.AddHandler(handlers.HandlerRemoveUserBabyStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerRemoveUserBaby) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"DELETE",
+			"user/baby/:id",
+			fluxgo.RouteIncome{
+				Entity:				dto.RemoveUserBabyReq{},
+				FromParam: 			true,
+				FromHeader:			true,
+				Validate:			true,
+				Cache: 				redis,
+				CacheInvalidate:	[]string{"/internal/user"},
+			},
+			handler.HandleHttp,
+		)
+	})
+
 	// address
 	mod.AddHandler(handlers.HandlerCreateAddressStart)
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateAddress) error {
