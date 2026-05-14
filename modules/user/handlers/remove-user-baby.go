@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	dto "nutriz-backend-service/modules/user/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -11,16 +12,20 @@ import (
 )
 
 type HandlerRemoveUserBaby struct {
-	userBabyRepo	*repositories.UserBabyRepository
+	userBabyRepo *repositories.UserBabyRepository
+	userRepo     *repositories.UserRepository
 }
 
 func HandlerRemoveUserBabyStart(
 	userBabyRepo *repositories.UserBabyRepository,
+	userRepo *repositories.UserRepository,
 ) *HandlerRemoveUserBaby {
 	return &HandlerRemoveUserBaby{
 		userBabyRepo,
+		userRepo,
 	}
 }
+
 func (h *HandlerRemoveUserBaby) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.GlobalResponse, *fluxgo.GlobalError) {
 	resp, err := h.Execute(c.UserContext(), income.(*dto.RemoveUserBabyReq))
 	if err != nil {
@@ -30,6 +35,17 @@ func (h *HandlerRemoveUserBaby) HandleHttp(c *fiber.Ctx, income interface{}) (*f
 }
 
 func (h *HandlerRemoveUserBaby) Execute(ctx context.Context, data *dto.RemoveUserBabyReq) (*dto.RemoveUserBabyRes, *fluxgo.GlobalError) {
+	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get user")
+	}
+	if user == nil {
+		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+	if user.Type != entities.EnumUserTypeCommon {
+		return nil, utils.ErrorForbidden("User does not have permission to delete baby", "user.forbidden")
+	}
+
 	userBaby, err := h.userBabyRepo.GetUserBabyById(ctx, data.Id)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user baby")
@@ -46,7 +62,6 @@ func (h *HandlerRemoveUserBaby) Execute(ctx context.Context, data *dto.RemoveUse
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to remove user baby")
 	}
-
 
 	userBaby, err = h.userBabyRepo.GetUserBabyById(ctx, data.Id)
 	if err != nil {

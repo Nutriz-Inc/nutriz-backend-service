@@ -2,7 +2,7 @@ package tests
 
 import (
 	"fmt"
-	httpCode "net/http"
+	"net/http"
 	"nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/module"
 	"nutriz-backend-service/shared/utils"
@@ -31,7 +31,7 @@ func TestUpdateAddress(t *testing.T) {
 
 		status, resp := fluxgo.RunTestRequest(app, "PUT", endpoint, body, headers)
 
-		assert.Equal(t, httpCode.StatusOK, status)
+		assert.Equal(t, http.StatusOK, status)
 		assert.Equal(t, addressID, resp["id_address"])
 		assert.Equal(t, "22250040", resp["zipcode"])
 		assert.NotNil(t, resp["updated_at"])
@@ -44,6 +44,19 @@ func TestUpdateAddress(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		t.Run("No permission", func(t *testing.T) {
+			invalidHeader := &utils.TestHeadersAdmin
+			body := dtos.UpdateAddressReq{
+				ZipCode:    utils.StringPtr("22250040"),
+				Complement: utils.StringPtr("Apto 17"),
+				Number:     utils.StringPtr("17"),
+			}
+
+			status, resp := fluxgo.RunTestRequest(app, "PUT", endpoint, body, invalidHeader)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "User does not have permission to update address", resp["message"])
+		})
 		t.Run("Address not found", func(t *testing.T) {
 			body := dtos.UpdateAddressReq{
 				ZipCode: utils.StringPtr("22250040"),
@@ -52,7 +65,7 @@ func TestUpdateAddress(t *testing.T) {
 
 			status, resp := fluxgo.RunTestRequest(app, "PUT", route, body, headers)
 
-			assert.Equal(t, httpCode.StatusNotFound, status)
+			assert.Equal(t, http.StatusNotFound, status)
 			assert.Equal(t, "Address not found", resp["message"])
 		})
 
@@ -64,7 +77,7 @@ func TestUpdateAddress(t *testing.T) {
 
 			status, resp := fluxgo.RunTestRequest(app, "PUT", route, body, headers)
 
-			assert.Equal(t, httpCode.StatusForbidden, status)
+			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "You don't have permission to access this resource", resp["message"])
 		})
 
@@ -75,7 +88,7 @@ func TestUpdateAddress(t *testing.T) {
 
 			status, resp := fluxgo.RunTestRequest(app, "PUT", endpoint, body, headers)
 
-			assert.Equal(t, httpCode.StatusBadRequest, status)
+			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "Address with same zipcode already exists", resp["message"])
 		})
 
@@ -88,7 +101,7 @@ func TestUpdateAddress(t *testing.T) {
 
 			status, resp := fluxgo.RunTestRequest(app, "PUT", endpoint, body, headers)
 
-			assert.Equal(t, httpCode.StatusBadRequest, status)
+			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "At least one field must be different to update", resp["message"])
 		})
 	})

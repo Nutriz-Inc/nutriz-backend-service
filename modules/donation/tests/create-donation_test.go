@@ -32,6 +32,13 @@ func TestCreateDonation(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		t.Run("No permission", func(t *testing.T) {
+			invalidHeader := &utils.TestHeadersAdmin
+			status, body := fluxgo.RunTestRequest(app, "POST", endpoint, nil, invalidHeader)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "User does not have permission to create donation", body["message"])
+		})
 		t.Run("User can have up to %d active donations", func(t *testing.T) {
 			status, body := fluxgo.RunTestRequest(app, "POST", endpoint, nil, headers)
 
