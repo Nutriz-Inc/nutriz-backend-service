@@ -25,7 +25,7 @@ func GetValidate() *validator.Validate {
 		_ = v.RegisterValidation("email", ValidEmail)
 		_ = v.RegisterValidation("ip", ValidIP)
 		_ = v.RegisterValidation("cep", ValidCEP)
-
+		_ = v.RegisterValidation("future", ValidFuture)
 		validateInstance = v
 	})
 
@@ -101,4 +101,17 @@ func ValidCEP(fl validator.FieldLevel) bool {
 	}
 
 	return brdoc.IsCEP(value)
+}
+
+func ValidFuture(fl validator.FieldLevel) bool {
+	value, ok := fl.Field().Interface().(time.Time)
+	if !ok {
+		return false
+	}
+
+	if value.IsZero() {
+		return true
+	}
+
+	return value.After(time.Now())
 }

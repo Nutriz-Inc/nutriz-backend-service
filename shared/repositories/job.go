@@ -5,6 +5,7 @@ import (
 	dto "nutriz-backend-service/modules/job/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
@@ -61,5 +62,67 @@ func (r *JobRepository) GetJobById(ctx context.Context, id string) (*entities.Jo
 		span,
 		`SELECT * FROM "job" WHERE id_job = $1 AND removed_at IS NULL`,
 		id,
+	)
+}
+
+type CreateJobRepositoryReq struct {
+	IdJob        string
+	IdUser       string
+	IdStep       string
+	Name         string
+	Description  string
+	DateSet      *time.Time
+	UserFeedback *string
+	CreatedBy    string
+}
+
+func (r *JobRepository) CreateJob(
+	ctx context.Context,
+	data *CreateJobRepositoryReq,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		INSERT INTO job (
+			id_job,
+			id_user,
+			id_step,
+			name,
+			description,
+			date_set,
+			user_feedback,
+			created_at,
+			created_by
+		) VALUES (
+			:id_job,
+			:id_user,
+			:id_step,
+			:name,
+			:description,
+			:date_set,
+			:user_feedback,
+			now(),
+			:created_by
+		)
+	`
+
+	params := map[string]any{
+		"id_job":        data.IdJob,
+		"id_user":       data.IdUser,
+		"id_step":       data.IdStep,
+		"name":          data.Name,
+		"description":   data.Description,
+		"date_set":      data.DateSet,
+		"user_feedback": data.UserFeedback,
+		"created_by":    data.CreatedBy,
+	}
+
+	return utils.Insert(
+		ctx,
+		r.DB.WriteDB(),
+		span,
+		query,
+		params,
 	)
 }

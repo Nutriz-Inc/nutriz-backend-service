@@ -40,3 +40,16 @@ func (r *DonationStepRepository) GetDonationStepsByIdDonation(
 		false,
 	)
 }
+
+func (r *DonationStepRepository) GetDonationStepById(ctx context.Context, id string) (*entities.DonationStep, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.Get[entities.DonationStep](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "donation_step" WHERE id_step_donation = $1`,
+		id,
+	)
+}

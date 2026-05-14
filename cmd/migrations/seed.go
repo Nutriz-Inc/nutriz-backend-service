@@ -54,6 +54,24 @@ INSERT INTO "user" (
     NULL,
     NULL,
     NULL
+),
+(
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcNF',
+    '234567898765437',
+    'nurse',
+    'Ana Oliveira',
+    '52998224725',
+    CURRENT_DATE - INTERVAL '28 years',
+    '11999999979',
+    'ana.enfermeira@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    0,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcNF',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO donation_point (
