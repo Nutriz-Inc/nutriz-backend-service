@@ -56,6 +56,42 @@ INSERT INTO "user" (
     NULL
 ),
 (
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    '234567898765437',
+    'adm',
+    'Roberto Carlos',
+    '52020984059',
+    CURRENT_DATE - INTERVAL '30 years',
+    '11999999997',
+    'roberto@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    0,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'usr_2veL1FPpuXxUaZcFaEC57BfplNV',
+    '234567898765438',
+    'nurse',
+    'Paula Fernandes',
+    '23183437058',
+    CURRENT_DATE - INTERVAL '15 years',
+    '11999999996',
+    'paula@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    0,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfplNV',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
     'usr_2veL1FPpuXxUaZcFaEC57BfpcNF',
     '234567898765437',
     'nurse',
@@ -389,7 +425,7 @@ INSERT INTO job (
 ) VALUES
 (
     'job_2veL1FPpuXxUaZcFaEC57Bfpc01',
-    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    'usr_2veL1FPpuXxUaZcFaEC57BfplNV',
     'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
     'Entrega ao ponto',
     'Transporte do material para o ponto de coleta',

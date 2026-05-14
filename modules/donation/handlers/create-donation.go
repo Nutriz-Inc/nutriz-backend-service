@@ -43,10 +43,13 @@ func (h *HandlerCreateDonation) Execute(ctx context.Context, data *dto.CreateDon
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
+	if user.Type != entities.EnumUserTypeCommon {
+		return nil, utils.ErrorForbidden("User does not have permission to create donation", "user.forbidden")
+	}
 
 	_, totalDonationsActive, err := h.donationRepo.ListDonationByFilters(ctx, &dto.ListDonationReq{
 		IsActive: utils.BoolPtr(true),
-		ActionBy: data.ActionBy,
+		ActionBy: &data.ActionBy,
 		PaginationReq: utils.PaginationReq{
 			PageSize: 1,
 			Page:     1,

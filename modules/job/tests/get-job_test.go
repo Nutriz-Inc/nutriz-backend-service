@@ -17,7 +17,7 @@ func TestGetJob(t *testing.T) {
 	defer fx.RequireStart().RequireStop()
 
 	endpoint := "/internal/job"
-	headers := &utils.TestHeaders
+	headers := &utils.TestHeadersAdmin
 
 	t.Run("Success", func(t *testing.T) {
 		id := "job_2veL1FPpuXxUaZcFaEC57Bfpc01"
@@ -43,11 +43,25 @@ func TestGetJob(t *testing.T) {
 			assert.Equal(t, "Job not found", body["message"])
 		})
 
-		t.Run("No permission", func(t *testing.T) {
+		t.Run("No permission (common user)", func(t *testing.T) {
+			commonHeaders := &utils.TestHeaders
+
 			id := "job_2veL1FPpuXxUaZcFaEC57Bfpc02"
 			route := fmt.Sprintf("%s/%s", endpoint, id)
 
-			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, commonHeaders)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "User does not have permission to get job", body["message"])
+		})
+
+		t.Run("No permission (another nurse)", func(t *testing.T) {
+			nurseHeaders := &utils.TestHeadersNurse
+
+			id := "job_2veL1FPpuXxUaZcFaEC57Bfpc02"
+			route := fmt.Sprintf("%s/%s", endpoint, id)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, nurseHeaders)
 
 			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "You don't have permission to access this resource", body["message"])

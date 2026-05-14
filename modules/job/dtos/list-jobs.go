@@ -6,7 +6,7 @@ import (
 )
 
 type ListJobsReq struct {
-	ActionBy string  `reqHeader:"action-by" validate:"required,id"`
+	ActionBy *string `reqHeader:"action-by" validate:"required,id"`
 	DateSet  *string `query:"date_set" validate:"omitempty,datetime=2006-01-02"`
 	utils.PaginationReq
 }

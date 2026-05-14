@@ -45,7 +45,6 @@ func Module() *fluxgo.FluxModule {
 				FromHeader: true,
 				Validate:   true,
 				Cache:      redis,
-				CacheTTL:   time.Hour,
 			},
 			handler.HandleHttp,
 		)
@@ -79,12 +78,12 @@ func Module() *fluxgo.FluxModule {
 			"DELETE",
 			"user/baby/:id",
 			fluxgo.RouteIncome{
-				Entity:				dto.RemoveUserBabyReq{},
-				FromParam: 			true,
-				FromHeader:			true,
-				Validate:			true,
-				Cache: 				redis,
-				CacheInvalidate:	[]string{"/internal/user"},
+				Entity:          dto.RemoveUserBabyReq{},
+				FromParam:       true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/user"},
 			},
 			handler.HandleHttp,
 		)

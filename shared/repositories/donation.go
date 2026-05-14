@@ -40,11 +40,13 @@ func (r *DonationRepository) ListDonationByFilters(
 		})
 	}
 
-	qb.WhereAnd(q.Where{
-		Column: "d.created_by",
-		Type:   "=",
-		Val:    filter.ActionBy,
-	})
+	if filter.ActionBy != nil {
+		qb.WhereAnd(q.Where{
+			Column: "d.created_by",
+			Type:   "=",
+			Val:    *filter.ActionBy,
+		})
+	}
 
 	return utils.ListQuery[entities.Donation](
 		ctx,

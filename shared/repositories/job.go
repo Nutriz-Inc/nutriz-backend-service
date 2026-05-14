@@ -31,14 +31,21 @@ func (r *JobRepository) ListJobsByFilters(
 		From("job", "j").
 		OrderBy(q.OrderBy{Column: "j.date_set"}).
 		PaginationPaged(filter.Page, filter.PageSize).
-		WhereAnd(q.Where{Column: "j.removed_at", Type: "IS NULL"}).
-		WhereAnd(q.Where{Column: "j.id_user", Type: "=", Val: filter.ActionBy})
+		WhereAnd(q.Where{Column: "j.removed_at", Type: "IS NULL"})
 
 	if filter.DateSet != nil {
 		qb.WhereAnd(q.Where{
 			Column: "DATE(j.date_set)",
 			Type:   "=",
 			Val:    *filter.DateSet,
+		})
+	}
+
+	if filter.ActionBy != nil {
+		qb.WhereAnd(q.Where{
+			Column: "j.id_user",
+			Type:   "=",
+			Val:    *filter.ActionBy,
 		})
 	}
 

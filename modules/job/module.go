@@ -24,7 +24,6 @@ func Module() *fluxgo.FluxModule {
 				FromHeader: true,
 				Validate:   true,
 				Cache:      redis,
-				CacheTTL:   time.Hour,
 			},
 			handler.HandleHttp,
 		)
