@@ -28,7 +28,7 @@ func TestRemoveUserBaby(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		t.Run("No permission", func(t *testing.T) {
+		t.Run("No permission access endpoint", func(t *testing.T) {
 			invalidHeader := &utils.TestHeadersAdmin
 			userBabyId := "usb_01JTG8K8N4P2R6T9V1X3Y5Z7DEL"
 			endpoint := fmt.Sprintf("/internal/user/baby/%s", userBabyId)
@@ -36,19 +36,23 @@ func TestRemoveUserBaby(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", endpoint, nil, invalidHeader)
 
 			assert.Equal(t, http.StatusForbidden, status)
-			assert.Equal(t, "User does not have permission to remove baby", resp["message"])
+			assert.Equal(t, "User does not have permission to delete baby", resp["message"])
 		})
 		t.Run("Baby not found", func(t *testing.T) {
 			route := "/internal/user/baby/usb_2veL1FPpuXxUaZcFaEC57BfpcZZ"
+
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", route, nil, headers)
+
 			assert.Equal(t, http.StatusNotFound, status)
 			assert.Equal(t, "User baby not found", resp["message"])
 		})
 
-		t.Run("No permission", func(t *testing.T) {
+		t.Run("No permission to delete baby", func(t *testing.T) {
 			userBabyId := "usb_01JTG8K8N4P2R6T9V1X3Y5Z7MIP"
 			route := fmt.Sprintf("/internal/user/baby/%s", userBabyId)
+
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", route, nil, headers)
+
 			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "You don't have permission to access this resource", resp["message"])
 		})
