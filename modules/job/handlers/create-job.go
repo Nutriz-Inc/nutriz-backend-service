@@ -2,8 +2,6 @@ package handlers
 
 import (
 	"context"
-	"time"
-
 	dto "nutriz-backend-service/modules/job/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
@@ -43,18 +41,48 @@ func (h *HandlerCreateJob) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo
 }
 
 func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) (*dto.CreateJobRes, *fluxgo.GlobalError) {
-	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
+	creator, err := h.userRepo.GetUserById(ctx, data.ActionBy)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user")
 	}
-	if user == nil {
+	if creator == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	if user.Type != "nurse" {
+	if creator.Type != entities.EnumUserTypeReceiver {
 		return nil, utils.ErrorForbidden(
-			"Only nurses can create jobs",
+			"Only adms can create jobs",
 			"job.forbidden",
+		)
+	}
+
+	assignee, err := h.userRepo.GetUserById(ctx, data.IdUser)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get assignee user")
+	}
+	if assignee == nil {
+		return nil, fluxgo.ErrorNotFound("Assignee user not found")
+	}
+
+	if assignee.Type != entities.EnumUserTypeNurse {
+		return nil, utils.ErrorForbidden(
+			"Jobs can only be assigned to nurses",
+			"job.invalid_assignee",
+		)
+	}
+
+	if !utils.IsFutureDate(data.DateSet) {
+		return nil, fluxgo.ErrorBadRequest(
+			"Set date cannot be in the past",
+			"job.invalid_set_date",
+		)
+	}
+
+	setDateTime, err := utils.StringToTime(data.DateSet)
+	if err != nil {
+		return nil, fluxgo.ErrorBadRequest(
+			"Invalid set date format",
+			"job.invalid_set_date_format",
 		)
 	}
 
@@ -81,25 +109,16 @@ func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) 
 		)
 	}
 
-	if donationStep.Status != entities.EnumDonationStepStatusPending {
-		return nil, fluxgo.ErrorBadRequest(
-			"Donation step is not pending",
-			"STEP_NOT_PENDING",
-		)
-	}
-
 	idJob := utils.IdGenerate(utils.JobEntity)
-	now := time.Now()
 
 	repoData := &repositories.CreateJobRepositoryReq{
-		IdJob:        idJob,
-		IdUser:       user.IdUser,
-		IdStep:       data.IdStep,
-		Name:         data.Name,
-		Description:  data.Description,
-		DateSet:      data.DateSet,
-		UserFeedback: data.UserFeedback,
-		CreatedBy:    user.IdUser,
+		IdJob:       idJob,
+		IdUser:      data.IdUser,
+		IdStep:      data.IdStep,
+		Name:        data.Name,
+		Description: data.Description,
+		DateSet:     &setDateTime,
+		CreatedBy:   data.ActionBy,
 	}
 
 	err = h.jobRepo.CreateJob(ctx, repoData)
@@ -107,17 +126,15 @@ func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) 
 		return nil, fluxgo.ErrorInternalError("Error to create job")
 	}
 
+	job, err := h.jobRepo.GetJobById(ctx, idJob)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get created job")
+	}
+	if job == nil {
+		return nil, fluxgo.ErrorNotFound("Created job not found")
+	}
+
 	return &dto.CreateJobRes{
-		Job: entities.Job{
-			IdJob:        idJob,
-			IdUser:       user.IdUser,
-			IdStep:       data.IdStep,
-			Name:         data.Name,
-			Description:  data.Description,
-			DateSet:      data.DateSet,
-			UserFeedback: data.UserFeedback,
-			CreatedAt:    now,
-			CreatedBy:    user.IdUser,
-		},
+		Job: *job,
 	}, nil
 }

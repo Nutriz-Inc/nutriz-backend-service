@@ -72,6 +72,24 @@ INSERT INTO "user" (
     NULL,
     NULL,
     NULL
+),
+(
+	'usr_2veL1FPpuXxUaZcFaEC57BfpcAD',
+	'234567898765438',
+	'adm',
+	'Carlos Administrador',
+	'88267441020',
+	CURRENT_DATE - INTERVAL '35 years',
+	'11966666666',
+	'admin@email.com',
+	'2b9643d9671363af30ebed5463130ee7',
+	0,
+	NOW(),
+	'usr_2veL1FPpuXxUaZcFaEC57BfpcAD',
+	NULL,
+ 	NULL,
+ 	NULL,
+ 	NULL
 );
 
 INSERT INTO donation_point (

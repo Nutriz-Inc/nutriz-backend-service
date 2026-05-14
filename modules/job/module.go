@@ -58,11 +58,12 @@ func Module() *fluxgo.FluxModule {
 			"POST",
 			"/job",
 			fluxgo.RouteIncome{
-				Entity:     dto.CreateJobReq{},
-				FromBody:   true,
-				FromHeader: true,
-				Validate:   true,
-				Cache:      redis,
+				Entity:          dto.CreateJobReq{},
+				FromBody:        true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/job"},
 			},
 			handler.HandleHttp,
 		)
