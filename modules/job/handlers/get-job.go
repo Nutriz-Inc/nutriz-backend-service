@@ -2,6 +2,7 @@ package handlers
 
 import (
 	c "context"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 
 	dto "nutriz-backend-service/modules/job/dtos"
@@ -13,12 +14,14 @@ import (
 )
 
 type HandlerGetJob struct {
-	jobRepo *repositories.JobRepository
+	jobRepo  *repositories.JobRepository
+	userRepo *repositories.UserRepository
 }
 
-func HandlerGetJobStart(jobRepo *repositories.JobRepository) *HandlerGetJob {
+func HandlerGetJobStart(jobRepo *repositories.JobRepository, userRepo *repositories.UserRepository) *HandlerGetJob {
 	return &HandlerGetJob{
-		jobRepo: jobRepo,
+		jobRepo,
+		userRepo,
 	}
 }
 
@@ -31,6 +34,17 @@ func (h *HandlerGetJob) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.Gl
 }
 
 func (h *HandlerGetJob) Execute(ctx c.Context, filters *dto.GetJobReq) (*dto.GetJobRes, *fluxgo.GlobalError) {
+	user, err := h.userRepo.GetUserById(ctx, filters.ActionBy)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get user")
+	}
+	if user == nil {
+		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+	if user.Type == entities.EnumUserTypeDonor {
+		return nil, utils.ErrorForbidden("User does not have permission to get job", "user.forbidden")
+	}
+
 	job, err := h.jobRepo.GetJobById(ctx, filters.Id)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get job")

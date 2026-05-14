@@ -3,6 +3,7 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 	"time"
@@ -13,7 +14,7 @@ import (
 
 type HandlerCreateUserBaby struct {
 	userBabyRepo *repositories.UserBabyRepository
-	userRepo    *repositories.UserRepository
+	userRepo     *repositories.UserRepository
 }
 
 func HandlerCreateUserBabyStart(userBabyRepo *repositories.UserBabyRepository,
@@ -31,12 +32,15 @@ func (h *HandlerCreateUserBaby) HandleHttp(c *fiber.Ctx, income interface{}) (*f
 
 func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyReq) (*dto.CreateUserBabyRes, *fluxgo.GlobalError) {
 	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
-    if err != nil {
-        return nil, fluxgo.ErrorInternalError("Error to get user")
-    }
-    if user == nil {
-        return nil, fluxgo.ErrorNotFound("User not found")
-    }
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get user")
+	}
+	if user == nil {
+		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+	if user.Type != entities.EnumUserTypeDonor {
+		return nil, utils.ErrorForbidden("User does not have permission to create baby", "user.forbidden")
+	}
 
 	layout := "2006-01-02"
 

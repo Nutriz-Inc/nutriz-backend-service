@@ -2,6 +2,7 @@ package handlers
 
 import (
 	c "context"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -14,12 +15,14 @@ import (
 type HandlerGetDonation struct {
 	donationRepo     *repositories.DonationRepository
 	donationStepRepo *repositories.DonationStepRepository
+	userRepo         *repositories.UserRepository
 }
 
-func HandlerGetDonationStart(donationRepo *repositories.DonationRepository, donationStepRepo *repositories.DonationStepRepository) *HandlerGetDonation {
+func HandlerGetDonationStart(donationRepo *repositories.DonationRepository, donationStepRepo *repositories.DonationStepRepository, userRepo *repositories.UserRepository) *HandlerGetDonation {
 	return &HandlerGetDonation{
-		donationRepo:     donationRepo,
-		donationStepRepo: donationStepRepo,
+		donationRepo,
+		donationStepRepo,
+		userRepo,
 	}
 }
 
@@ -32,6 +35,14 @@ func (h *HandlerGetDonation) HandleHttp(c *fiber.Ctx, income interface{}) (*flux
 }
 
 func (h *HandlerGetDonation) Execute(ctx c.Context, filters *dto.GetDonationReq) (*dto.GetDonationRes, *fluxgo.GlobalError) {
+	user, err := h.userRepo.GetUserById(ctx, filters.ActionBy)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get user")
+	}
+	if user == nil {
+		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+
 	donation, err := h.donationRepo.GetDonationById(ctx, filters.Id)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get donation")
@@ -39,8 +50,11 @@ func (h *HandlerGetDonation) Execute(ctx c.Context, filters *dto.GetDonationReq)
 	if donation == nil {
 		return nil, fluxgo.ErrorNotFound("Donation not found")
 	}
-	if donation.CreatedBy != filters.ActionBy {
-		return nil, utils.ErrorForbidden("You don't have permission to access this resource", "donation.forbidden")
+
+	if user.Type == entities.EnumUserTypeDonor {
+		if donation.CreatedBy != filters.ActionBy {
+			return nil, utils.ErrorForbidden("You don't have permission to access this resource", "donation.forbidden")
+		}
 	}
 
 	donationSteps, _, err := h.donationStepRepo.GetDonationStepsByIdDonation(ctx, filters.Id)

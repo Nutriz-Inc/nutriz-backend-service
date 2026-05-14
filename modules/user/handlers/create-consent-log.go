@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	dto "nutriz-backend-service/modules/user/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -40,6 +41,9 @@ func (h *HandlerCreateConsentLog) Execute(ctx context.Context, data *dto.CreateC
 	}
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+	if user.Type != entities.EnumUserTypeDonor {
+		return nil, utils.ErrorForbidden("User does not have permission to create consent log", "user.forbidden")
 	}
 
 	idConsentLog := utils.IdGenerate(utils.ConsentLogEntity)

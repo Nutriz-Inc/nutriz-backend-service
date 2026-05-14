@@ -3,6 +3,7 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -28,6 +29,17 @@ func (h *HandlerListUsers) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo
 }
 
 func (h *HandlerListUsers) Execute(ctx c.Context, filters *dto.ListUsersReq) (*dto.ListUsersRes, *fluxgo.GlobalError) {
+	user, err := h.userRepo.GetUserById(ctx, filters.ActionBy)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get user")
+	}
+	if user == nil {
+		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+	if user.Type == entities.EnumUserTypeDonor {
+		return nil, utils.ErrorForbidden("User does not have permission to list users", "user.forbidden")
+	}
+
 	users, total, err := h.userRepo.ListUsersByFilters(ctx, filters)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list users")
