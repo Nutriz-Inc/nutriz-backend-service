@@ -359,6 +359,17 @@ INSERT INTO donation_step (
     NOW(),
     NULL,
     NULL
+),
+(
+   	'dst_2veL1FPpuXxUaZcFaEC57BfpcCC',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
+    'Coleta para teste',
+    'Step reservado para testes de criação de job',
+    'pending',
+    NOW() + INTERVAL '5 days',
+    NOW(),
+    NULL,
+    NULL
 );
 
 INSERT INTO job (
