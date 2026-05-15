@@ -25,7 +25,7 @@ type UpdateDonationOptionalFields struct {
 
 func (c UpdateDonationReq) ValidateUpdateDonationOptionalFields() UpdateDonationOptionalFields {
 	return UpdateDonationOptionalFields{
-		HasIsActive:        c.IsActive != nil && *c.IsActive == false,
+		HasIsActive:        c.IsActive != nil && !*c.IsActive,
 		HasQuantityDonated: c.QuantityDonated != nil && *c.QuantityDonated > 0,
 		HasUserFeedback:    c.UserFeedback != nil && *c.UserFeedback != "",
 	}
