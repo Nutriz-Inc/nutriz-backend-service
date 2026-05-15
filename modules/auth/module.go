@@ -11,7 +11,6 @@ func Module() *fluxgo.FluxModule {
 	mod := fluxgo.Module("auth")
 
 	mod.AddHandler(handlers.HandlerLoginStart)
-
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerLogin) error {
 		return mod.HttpRoute(
 			f,

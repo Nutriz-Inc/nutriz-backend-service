@@ -1,5 +1,4 @@
 -- DROP TABLES (ordem reversa por FK)
-
 DROP TABLE IF EXISTS user_baby;
 DROP TABLE IF EXISTS consent_log;
 DROP TABLE IF EXISTS file;

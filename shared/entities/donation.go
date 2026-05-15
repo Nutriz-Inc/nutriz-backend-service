@@ -22,3 +22,5 @@ func (d Donation) TableName() string {
 func (d Donation) PrimaryKey() string {
 	return "id_donation"
 }
+
+const MAX_DONATION_ACTIVE_QUANTITY_PER_USER = 1

@@ -5,6 +5,7 @@ import (
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
@@ -40,11 +41,13 @@ func (r *DonationRepository) ListDonationByFilters(
 		})
 	}
 
-	qb.WhereAnd(q.Where{
-		Column: "d.created_by",
-		Type:   "=",
-		Val:    filter.ActionBy,
-	})
+	if filter.ActionBy != nil {
+		qb.WhereAnd(q.Where{
+			Column: "d.created_by",
+			Type:   "=",
+			Val:    *filter.ActionBy,
+		})
+	}
 
 	return utils.ListQuery[entities.Donation](
 		ctx,
@@ -66,5 +69,100 @@ func (r *DonationRepository) GetDonationById(ctx context.Context, id string) (*e
 		span,
 		`SELECT * FROM "donation" WHERE id_donation = $1 AND removed_at IS NULL`,
 		id,
+	)
+}
+
+type CreateDonationRepositoryReq struct {
+	IdDonation string
+	IdUser     string
+	IsActive   bool
+}
+
+func (r *DonationRepository) CreateDonation(
+	ctx context.Context,
+	data *CreateDonationRepositoryReq,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		INSERT INTO donation (
+			id_donation,
+			is_active,
+			created_by,
+			created_at
+		) VALUES (
+		 	:id_donation,
+			:is_active,
+			:id_user,
+			now()
+		)
+	`
+
+	params := map[string]any{
+		"id_donation": data.IdDonation,
+		"id_user":     data.IdUser,
+		"is_active":   data.IsActive,
+	}
+
+	return utils.Insert(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		params,
+	)
+}
+
+type UpdateDonationRepositoryReq struct {
+	IdDonation      string
+	IdUser          string
+	IsActive        *bool
+	QuantityDonated *float64
+	UserFeedback    *string
+}
+
+func (r *DonationRepository) UpdateDonation(ctx context.Context, data UpdateDonationRepositoryReq) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	sets := []string{}
+	params := map[string]any{
+		"id_donation": data.IdDonation,
+		"updated_by":  data.IdUser,
+	}
+
+	if data.IsActive != nil {
+		sets = append(sets, "is_active = :is_active")
+		params["is_active"] = data.IsActive
+	}
+	if data.QuantityDonated != nil {
+		sets = append(sets, "quantity_donated = :quantity_donated")
+		params["quantity_donated"] = data.QuantityDonated
+	}
+	if data.UserFeedback != nil {
+		sets = append(sets, "user_feedback = :user_feedback")
+		params["user_feedback"] = data.UserFeedback
+	}
+
+	if len(sets) == 0 {
+		return nil
+	}
+
+	query := `
+		UPDATE donation
+		SET ` + strings.Join(sets, ", ") + `,
+		    updated_at = now(),
+			updated_by = :updated_by
+		WHERE id_donation = :id_donation
+		  AND removed_at IS NULL
+	`
+
+	return utils.Update(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		params,
 	)
 }

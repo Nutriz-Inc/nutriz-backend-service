@@ -3,9 +3,9 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
-	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"
@@ -13,7 +13,7 @@ import (
 
 type HandlerCreateUserBaby struct {
 	userBabyRepo *repositories.UserBabyRepository
-	userRepo    *repositories.UserRepository
+	userRepo     *repositories.UserRepository
 }
 
 func HandlerCreateUserBabyStart(userBabyRepo *repositories.UserBabyRepository,
@@ -31,22 +31,23 @@ func (h *HandlerCreateUserBaby) HandleHttp(c *fiber.Ctx, income interface{}) (*f
 
 func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyReq) (*dto.CreateUserBabyRes, *fluxgo.GlobalError) {
 	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
-    if err != nil {
-        return nil, fluxgo.ErrorInternalError("Error to get user")
-    }
-    if user == nil {
-        return nil, fluxgo.ErrorNotFound("User not found")
-    }
-
-	layout := "2006-01-02"
-
-	birthDateParsed, err := time.Parse(layout, data.BirthDate)
 	if err != nil {
-		return nil, fluxgo.ErrorBadRequest("Invalid birth date format. Use YYYY-MM-DD HH:MM:SS", "user_baby.invalid_format")
+		return nil, fluxgo.ErrorInternalError("Error to get user")
+	}
+	if user == nil {
+		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+	if user.Type != entities.EnumUserTypeCommon {
+		return nil, utils.ErrorForbidden("User does not have permission to create baby", "user.forbidden")
 	}
 
-	if birthDateParsed.After(time.Now()) {
+	if utils.IsFutureDate(data.BirthDate) {
 		return nil, fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
+	}
+
+	birthDateTime, err := utils.StringToDate(data.BirthDate)
+	if err != nil {
+		return nil, fluxgo.ErrorBadRequest("Invalid birth date format", "user_baby.invalid_birth_date_format")
 	}
 
 	userBabyId := utils.IdGenerate(utils.UserBabyEntity)
@@ -55,7 +56,7 @@ func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyR
 		IdUserBaby: userBabyId,
 		IdUser:     data.ActionBy,
 		Name:       data.Name,
-		BirthDate:  birthDateParsed,
+		BirthDate:  *birthDateTime,
 	})
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to create baby")

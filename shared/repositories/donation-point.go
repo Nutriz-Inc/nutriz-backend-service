@@ -74,9 +74,7 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 		a.longitude          AS "address.longitude",
 		a.created_at         AS "address.created_at",
 		a.updated_at         AS "address.updated_at",
-		a.updated_by         AS "address.updated_by",
-		a.removed_at         AS "address.removed_at",
-		a.removed_by         AS "address.removed_by"
+		a.removed_at         AS "address.removed_at"
 	`)
 	}
 

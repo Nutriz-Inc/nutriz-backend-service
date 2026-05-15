@@ -12,8 +12,6 @@ func Module() *fluxgo.FluxModule {
 	mod := fluxgo.Module("job")
 
 	mod.AddHandler(handlers.HandlerListJobsStart)
-	mod.AddHandler(handlers.HandlerGetJobStart)
-
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListJobs) error {
 		return mod.HttpRoute(
 			f,
@@ -26,12 +24,12 @@ func Module() *fluxgo.FluxModule {
 				FromHeader: true,
 				Validate:   true,
 				Cache:      redis,
-				CacheTTL:   time.Hour,
 			},
 			handler.HandleHttp,
 		)
 	})
 
+	mod.AddHandler(handlers.HandlerGetJobStart)
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetJob) error {
 		return mod.HttpRoute(
 			f,
@@ -46,6 +44,25 @@ func Module() *fluxgo.FluxModule {
 				Validate:   true,
 				Cache:      redis,
 				CacheTTL:   time.Hour,
+			},
+			handler.HandleHttp,
+		)
+	})
+
+	mod.AddHandler(handlers.HandlerCreateJobStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateJob) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"POST",
+			"/job",
+			fluxgo.RouteIncome{
+				Entity:          dto.CreateJobReq{},
+				FromBody:        true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/job"},
 			},
 			handler.HandleHttp,
 		)

@@ -9,15 +9,16 @@ const PREFIX_LENGTH = 4
 type EnumEntityType string
 
 const (
-	AddressEntity       EnumEntityType = "address"
-	DonationPointEntity EnumEntityType = "donation_point"
-	DonationStepEntity  EnumEntityType = "donation_step"
-	DonationEntity      EnumEntityType = "donation"
-	FileEntity          EnumEntityType = "file"
-	JobEntity           EnumEntityType = "job"
-	UserEntity          EnumEntityType = "user"
-	UserBabyEntity      EnumEntityType = "user_baby"
-	ConsentLogEntity    EnumEntityType = "consent_log"
+	AddressEntity              EnumEntityType = "address"
+	DonationPointEntity        EnumEntityType = "donation_point"
+	DonationStepEntity         EnumEntityType = "donation_step"
+	DonationStepTimelineEntity EnumEntityType = "donation_step_timeline"
+	DonationEntity             EnumEntityType = "donation"
+	FileEntity                 EnumEntityType = "file"
+	JobEntity                  EnumEntityType = "job"
+	UserEntity                 EnumEntityType = "user"
+	UserBabyEntity             EnumEntityType = "user_baby"
+	ConsentLogEntity           EnumEntityType = "consent_log"
 )
 
 var prefixToEntity = map[string]EnumEntityType{
@@ -25,6 +26,7 @@ var prefixToEntity = map[string]EnumEntityType{
 	"dpt_": DonationPointEntity,
 	"fil_": FileEntity,
 	"dst_": DonationStepEntity,
+	"dtl_": DonationStepTimelineEntity,
 	"don_": DonationEntity,
 	"job_": JobEntity,
 	"usr_": UserEntity,

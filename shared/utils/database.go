@@ -75,6 +75,23 @@ func Insert(
 	return nil
 }
 
+func Update(
+	ctx context.Context,
+	db *sqlx.DB,
+	span trace.Span,
+	query string,
+	params any,
+) error {
+	_, err := db.NamedExecContext(ctx, query, params)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+
+	return nil
+}
+
 func Get[T any](
 	ctx context.Context,
 	db *sqlx.DB,
@@ -96,4 +113,21 @@ func Get[T any](
 	}
 
 	return &data, nil
+}
+
+func Delete(
+	ctx context.Context,
+	db *sqlx.DB,
+	span trace.Span,
+	query string,
+	args ...any,
+) error {
+	_, err := db.ExecContext(ctx, query, args...)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return err
+	}
+
+	return nil
 }

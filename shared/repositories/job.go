@@ -5,6 +5,7 @@ import (
 	dto "nutriz-backend-service/modules/job/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
@@ -30,14 +31,29 @@ func (r *JobRepository) ListJobsByFilters(
 		From("job", "j").
 		OrderBy(q.OrderBy{Column: "j.date_set"}).
 		PaginationPaged(filter.Page, filter.PageSize).
-		WhereAnd(q.Where{Column: "j.removed_at", Type: "IS NULL"}).
-		WhereAnd(q.Where{Column: "j.id_user", Type: "=", Val: filter.ActionBy})
+		WhereAnd(q.Where{Column: "j.removed_at", Type: "IS NULL"})
 
 	if filter.DateSet != nil {
 		qb.WhereAnd(q.Where{
 			Column: "DATE(j.date_set)",
 			Type:   "=",
 			Val:    *filter.DateSet,
+		})
+	}
+
+	if filter.ActionBy != nil {
+		qb.WhereAnd(q.Where{
+			Column: "j.id_user",
+			Type:   "=",
+			Val:    *filter.ActionBy,
+		})
+	}
+
+	if filter.IdStep != nil {
+		qb.WhereAnd(q.Where{
+			Column: "j.id_step",
+			Type:   "=",
+			Val:    *filter.IdStep,
 		})
 	}
 
@@ -61,5 +77,71 @@ func (r *JobRepository) GetJobById(ctx context.Context, id string) (*entities.Jo
 		span,
 		`SELECT * FROM "job" WHERE id_job = $1 AND removed_at IS NULL`,
 		id,
+	)
+}
+
+type CreateJobRepositoryReq struct {
+	IdJob        string
+	IdUser       string
+	IdStep       string
+	Status       entities.EnumJobStatus
+	Name         string
+	Description  string
+	DateSet      *time.Time
+	UserFeedback *string
+	CreatedBy    string
+}
+
+func (r *JobRepository) CreateJob(
+	ctx context.Context,
+	data *CreateJobRepositoryReq,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		INSERT INTO job (
+			id_job,
+			id_user,
+			id_step,
+			status,
+			name,
+			description,
+			date_set,
+			user_feedback,
+			created_at,
+			created_by
+		) VALUES (
+			:id_job,
+			:id_user,
+			:id_step,
+			:status,
+			:name,
+			:description,
+			:date_set,
+			:user_feedback,
+			now(),
+			:created_by
+		)
+	`
+
+	params := map[string]any{
+		"id_job":        data.IdJob,
+		"id_user":       data.IdUser,
+		"id_step":       data.IdStep,
+		"status":        data.Status,
+		"name":          data.Name,
+		"description":   data.Description,
+		"date_set":      data.DateSet,
+		"user_feedback": data.UserFeedback,
+		"created_by":    data.CreatedBy,
+	}
+
+	return utils.Insert(
+		ctx,
+		r.DB.WriteDB(),
+		span,
+		query,
+		params,
 	)
 }

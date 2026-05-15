@@ -17,7 +17,7 @@ func TestListUsers(t *testing.T) {
 	defer fx.RequireStart().RequireStop()
 
 	endpoint := "/internal/user?page=1&page_size=25"
-	headers := &utils.TestHeaders
+	headers := &utils.TestHeadersAdmin
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("No filters", func(t *testing.T) {
@@ -75,6 +75,15 @@ func TestListUsers(t *testing.T) {
 			item := fluxgo.ConvertToMap(data[0])
 
 			assert.Equal(t, identifier, item["internal_identifier"])
+		})
+	})
+	t.Run("Error", func(t *testing.T) {
+		t.Run("No permission", func(t *testing.T) {
+			commonHeaders := &utils.TestHeaders
+			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, commonHeaders)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "User does not have permission to list users", body["message"])
 		})
 	})
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/donation/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -12,10 +13,11 @@ import (
 
 type HandlerListDonations struct {
 	donationRepo *repositories.DonationRepository
+	userRepo     *repositories.UserRepository
 }
 
-func HandlerListDonationsStart(donationRepo *repositories.DonationRepository) *HandlerListDonations {
-	return &HandlerListDonations{donationRepo}
+func HandlerListDonationsStart(donationRepo *repositories.DonationRepository, userRepo *repositories.UserRepository) *HandlerListDonations {
+	return &HandlerListDonations{donationRepo, userRepo}
 }
 
 func (h *HandlerListDonations) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.GlobalResponse, *fluxgo.GlobalError) {
@@ -27,6 +29,17 @@ func (h *HandlerListDonations) HandleHttp(c *fiber.Ctx, income interface{}) (*fl
 }
 
 func (h *HandlerListDonations) Execute(ctx c.Context, filters *dto.ListDonationReq) (*dto.ListDonationRes, *fluxgo.GlobalError) {
+	user, err := h.userRepo.GetUserById(ctx, *filters.ActionBy)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get user")
+	}
+	if user == nil {
+		return nil, fluxgo.ErrorNotFound("User not found")
+	}
+	if user.Type != entities.EnumUserTypeCommon {
+		filters.ActionBy = nil
+	}
+
 	donations, total, err := h.donationRepo.ListDonationByFilters(ctx, filters)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list donations")
