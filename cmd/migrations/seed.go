@@ -438,16 +438,17 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcCC',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
-    'Coleta para teste',
+    'Coletar leite',                          -- ← corrigido
     'Step reservado para testes de criação de job',
     'pending',
     NOW() + INTERVAL '5 days',
     NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcAD',
     NULL,
     NULL,
-    NULL,
-    NULL 
+    NULL
 );
+
 INSERT INTO job (
     id_job,
     id_user,
