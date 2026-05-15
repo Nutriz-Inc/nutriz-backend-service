@@ -81,14 +81,13 @@ func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) 
 			)
 		}
 
-		t, err := utils.StringToTime(*data.DateSet)
+		setDateTime, err = utils.StringToTime(*data.DateSet)
 		if err != nil {
 			return nil, fluxgo.ErrorBadRequest(
 				"Invalid set date format",
 				"job.invalid_set_date_format",
 			)
 		}
-		setDateTime = t
 	}
 
 	donationStep, err := h.donationStepRepo.GetDonationStepById(ctx, data.IdStep)
@@ -115,11 +114,13 @@ func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) 
 	}
 
 	idJob := utils.IdGenerate(utils.JobEntity)
+	initalStatus := entities.EnumJobStatusPending // All new jobs start with pending status, and it's the nurse's responsibility to update it to done or failed when they complete the job
 
 	repoData := &repositories.CreateJobRepositoryReq{
 		IdJob:       idJob,
 		IdUser:      data.IdUser,
 		IdStep:      data.IdStep,
+		Status:      initalStatus,
 		Name:        data.Name,
 		Description: data.Description,
 		DateSet:     setDateTime,

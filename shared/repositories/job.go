@@ -84,6 +84,7 @@ type CreateJobRepositoryReq struct {
 	IdJob        string
 	IdUser       string
 	IdStep       string
+	Status       entities.EnumJobStatus
 	Name         string
 	Description  string
 	DateSet      *time.Time
@@ -103,6 +104,7 @@ func (r *JobRepository) CreateJob(
 			id_job,
 			id_user,
 			id_step,
+			status,
 			name,
 			description,
 			date_set,
@@ -113,6 +115,7 @@ func (r *JobRepository) CreateJob(
 			:id_job,
 			:id_user,
 			:id_step,
+			:status,
 			:name,
 			:description,
 			:date_set,
@@ -126,6 +129,7 @@ func (r *JobRepository) CreateJob(
 		"id_job":        data.IdJob,
 		"id_user":       data.IdUser,
 		"id_step":       data.IdStep,
+		"status":        data.Status,
 		"name":          data.Name,
 		"description":   data.Description,
 		"date_set":      data.DateSet,
