@@ -12,9 +12,7 @@ CREATE TABLE conversation (
   created_at TIMESTAMP NOT NULL,
   last_message_at TIMESTAMP NOT NULL,
 
-  CONSTRAINT fk_conversation_user
-    FOREIGN KEY (id_user)
-    REFERENCES "user"(id_user)
+  CONSTRAINT fk_conversation_user FOREIGN KEY (id_user) REFERENCES "user"(id_user)
 );
 
 -- MESSAGE
@@ -29,9 +27,7 @@ CREATE TABLE message (
 
   created_at TIMESTAMP NOT NULL,
 
-  CONSTRAINT fk_message_conversation
-    FOREIGN KEY (id_conversation)
-    REFERENCES conversation(id_conversation)
+  CONSTRAINT fk_message_conversation FOREIGN KEY (id_conversation) REFERENCES conversation(id_conversation)
 );
 
 -- KNOWLEDGE BASE CHUNKS
@@ -45,11 +41,9 @@ CREATE TABLE kb_chunk (
   embedding TEXT NOT NULL,
   metadata TEXT,
 
-  created_at TIMESTAMP NOT NULL
+  created_at TIMESTAMP NOT NULL,
 
-  CONSTRAINT fk_conversation_user
-    FOREIGN KEY (id_user)
-    REFERENCES "user"(id_user)
+  CONSTRAINT fk_kb_chunk_user FOREIGN KEY (id_user) REFERENCES "user"(id_user)
 );
 
 -- LLM AUDIT
@@ -71,11 +65,7 @@ CREATE TABLE llm_audit (
 
   created_at TIMESTAMP NOT NULL,
 
-  CONSTRAINT fk_llm_audit_user
-    FOREIGN KEY (id_user)
-    REFERENCES "user"(id_user),
+  CONSTRAINT fk_llm_audit_user FOREIGN KEY (id_user) REFERENCES "user"(id_user),
 
-  CONSTRAINT fk_llm_audit_message
-    FOREIGN KEY (id_message)
-    REFERENCES message(id_message)
+  CONSTRAINT fk_llm_audit_message FOREIGN KEY (id_message) REFERENCES message(id_message)
 );
