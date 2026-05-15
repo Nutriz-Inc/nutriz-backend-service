@@ -444,9 +444,10 @@ INSERT INTO donation_step (
     NOW() + INTERVAL '5 days',
     NOW(),
     NULL,
-    NULL
+    NULL,
+    NULL,
+    NULL 
 );
-
 INSERT INTO job (
     id_job,
     id_user,
