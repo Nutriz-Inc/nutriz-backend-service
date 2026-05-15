@@ -12,8 +12,8 @@ import (
 )
 
 type HandlerUpdateUserBaby struct {
-	userBabyRepo	*repositories.UserBabyRepository
-	userRepo		*repositories.UserRepository
+	userBabyRepo *repositories.UserBabyRepository
+	userRepo     *repositories.UserRepository
 }
 
 func HandlerUpdateUserBabyStart(
@@ -56,34 +56,34 @@ func (h *HandlerUpdateUserBaby) Execute(ctx context.Context, data *dto.UpdateUse
 
 	fieldsToUpdate := 0
 	req := repositories.UpdateUserBabyRepositoryReq{
-		IdUserBaby:	data.Id,
-		IdUser:		data.ActionBy,
+		IdUserBaby: data.Id,
+		IdUser:     data.ActionBy,
 	}
-	
+
 	validator := data.ValidateUpdateUserBabyOptionalFields()
 
-	if validator.HasName {
-		if userBaby.Name == nil || *data.Name != *userBaby.Name {
-			req.Name = data.Name
-			fieldsToUpdate++
-		}
+	canUpdateName := validator.HasName && (userBaby.Name == nil || *data.Name != *userBaby.Name)
+	canUpdateBirthDate := validator.HasBirthDate && (userBaby.BirthDate.Format("2006-01-02") != *data.BirthDate)
+
+	if canUpdateName {
+		req.Name = data.Name
+		fieldsToUpdate++
 	}
 
-	if validator.HasBirthDate {
-		if *data.BirthDate != userBaby.BirthDate.Format("2006-01-02") {
-			if utils.IsFutureDate(*data.BirthDate) {
-				return nil, fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
-			}
-
-			birthDateTime, err := utils.StringToDate(*data.BirthDate)
-			if err != nil {
-				return nil, fluxgo.ErrorBadRequest("Invalid birth date format", "user_baby.invalid_birth_date_format")
-			}
-			req.BirthDate = birthDateTime
-			fieldsToUpdate++
+	if canUpdateBirthDate {
+		if utils.IsFutureDate(*data.BirthDate) {
+			return nil, fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
 		}
+
+		birthDateTime, err := utils.StringToDate(*data.BirthDate)
+		if err != nil {
+			return nil, fluxgo.ErrorBadRequest("Invalid birth date format", "user_baby.invalid_birth_date_format")
+		}
+
+		req.BirthDate = birthDateTime
+		fieldsToUpdate++
 	}
-		
+
 	if fieldsToUpdate == 0 {
 		return nil, fluxgo.ErrorBadRequest("At least one field must be different to update", "no_fields_to_update")
 	}
