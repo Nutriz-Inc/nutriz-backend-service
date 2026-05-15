@@ -43,6 +43,7 @@ func Module() *fluxgo.FluxGo {
 	flux.AddDependency(repositories.UserBabyRepositoryStart)
 	flux.AddDependency(repositories.JobRepositoryStart)
 	flux.AddDependency(repositories.DonationStepRepositoryStart)
+	flux.AddDependency(repositories.DonationStepTimelineRepositoryStart)
 	flux.AddDependency(repositories.ConsentLogRepositoryStart)
 
 	//Modules

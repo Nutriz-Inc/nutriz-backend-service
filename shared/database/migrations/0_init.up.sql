@@ -1,6 +1,12 @@
 -- ENUMS
 CREATE TYPE enum_user_type AS ENUM ('common', 'adm', 'nurse');
 CREATE TYPE enum_donation_step_status AS ENUM ('pending', 'review', 'done', 'warn', 'failed');
+CREATE TYPE enum_donation_steps as ENUM (
+  'Exame de sangue',
+  'Entregar kit de ordenha',
+  'Coletar leite',
+  'Análise de leite'
+);
 
 -- USER
 CREATE TABLE "user" (
@@ -73,7 +79,6 @@ CREATE TABLE donation (
   quantity_donated NUMERIC(10,2),
   is_active BOOLEAN NOT NULL,
   user_feedback TEXT,
-  description VARCHAR(255) NOT NULL,
 
   created_at TIMESTAMP NOT NULL,
   created_by VARCHAR(36) NOT NULL,
@@ -89,20 +94,43 @@ CREATE TABLE donation (
 
 -- DONATION STEP
 CREATE TABLE donation_step (
-  id_step_donation VARCHAR(36) PRIMARY KEY,
+  id_donation_step VARCHAR(36) PRIMARY KEY,
 
   id_donation VARCHAR(36) NOT NULL,
 
-  name VARCHAR(100) NOT NULL,
+  name enum_donation_steps NOT NULL,
   description TEXT NOT NULL,
   status enum_donation_step_status NOT NULL,
   set_date TIMESTAMP,
 
   created_at TIMESTAMP NOT NULL,
+  created_by VARCHAR(36) NOT NULL,
   updated_at TIMESTAMP,
+  updated_by VARCHAR(36),
   completed_at TIMESTAMP,
 
-  CONSTRAINT fk_step_donation FOREIGN KEY (id_donation) REFERENCES donation(id_donation)
+  CONSTRAINT fk_step_donation FOREIGN KEY (id_donation) REFERENCES donation(id_donation),
+
+  CONSTRAINT fk_donation_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
+  CONSTRAINT fk_donation_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user)
+);
+
+-- DONATION STEP TIMELINE
+CREATE TABLE donation_step_timeline (
+  id_donation_step_timeline VARCHAR(36) PRIMARY KEY,
+
+  id_donation_step VARCHAR(36) NOT NULL,
+
+  description TEXT NOT NULL,
+  status enum_donation_step_status NOT NULL,
+  set_date TIMESTAMP,
+
+  created_at TIMESTAMP NOT NULL,
+  created_by VARCHAR(36) NOT NULL,
+
+  CONSTRAINT fk_timeline_donation_step FOREIGN KEY (id_donation_step) REFERENCES donation_step(id_donation_step),
+
+  CONSTRAINT fk_donation_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user)
 );
 
 -- JOB
@@ -125,7 +153,7 @@ CREATE TABLE job (
   removed_by VARCHAR(36),
 
   CONSTRAINT fk_job_user FOREIGN KEY (id_user) REFERENCES "user"(id_user),
-  CONSTRAINT fk_job_step FOREIGN KEY (id_step) REFERENCES donation_step(id_step_donation),
+  CONSTRAINT fk_job_step FOREIGN KEY (id_step) REFERENCES donation_step(id_donation_step),
 
   CONSTRAINT fk_job_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_job_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),

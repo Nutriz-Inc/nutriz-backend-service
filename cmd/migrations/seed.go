@@ -123,7 +123,6 @@ INSERT INTO donation_point (
 INSERT INTO donation (
     id_donation,
     is_active,
-    description,
     quantity_donated,
     user_feedback,
     created_at,
@@ -136,7 +135,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKE',
     false,
-    'Sua doação foi encerrada! Agradecemos imensamente por sua generosidade e por fazer a diferença na vida de alguém!',
     1.5,
     'Doação realizada com sucesso',
     NOW(),
@@ -149,7 +147,42 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
     true,
-    'Sua doação foi criada! Entre em contato com nosso suporte no WhatsApp para mais informações e para combinar os detalhes da doação.',
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKG',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKH',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKI',
+    true,
     0,
     NULL,
     NOW(),
@@ -328,35 +361,41 @@ VALUES
 );
 
 INSERT INTO donation_step (
-    id_step_donation,
+    id_donation_step,
     id_donation,
     name,
     description,
     status,
     set_date,
     created_at,
+    created_by,
     updated_at,
+    updated_by,
     completed_at
 ) VALUES
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKE',
-    'Coleta inicial',
+    'Exame de sangue',
     'Coleta agendada com o doador',
     'pending',
     NOW() + INTERVAL '2 days',
     NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
     NULL,
     NULL
 ),
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcBB',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
-    'Triagem',
-    'Triagem do leite doado',
+    'Entregar kit de ordenha',
+    'Entregar kit de ordenha ao doador',
     'review',
     NOW() + INTERVAL '3 days',
     NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
     NULL,
     NULL
 );

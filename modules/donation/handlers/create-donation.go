@@ -63,13 +63,10 @@ func (h *HandlerCreateDonation) Execute(ctx context.Context, data *dto.CreateDon
 	}
 
 	idDonation := utils.IdGenerate(utils.DonationEntity)
-	defaultDescription := "Sua doação foi criada! Entre em contato com nosso suporte no WhatsApp para mais informações e para combinar os detalhes da doação."
-
 	repoData := &repositories.CreateDonationRepositoryReq{
-		IdDonation:  idDonation,
-		IdUser:      user.IdUser,
-		IsActive:    true, // default value for new donation
-		Description: defaultDescription,
+		IdDonation: idDonation,
+		IdUser:     user.IdUser,
+		IsActive:   true, // default value for new donation
 	}
 
 	err = h.donationRepo.CreateDonation(ctx, repoData)

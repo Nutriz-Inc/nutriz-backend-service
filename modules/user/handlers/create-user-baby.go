@@ -6,7 +6,6 @@ import (
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
-	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"
@@ -42,15 +41,13 @@ func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyR
 		return nil, utils.ErrorForbidden("User does not have permission to create baby", "user.forbidden")
 	}
 
-	layout := "2006-01-02"
-
-	birthDateParsed, err := time.Parse(layout, data.BirthDate)
-	if err != nil {
-		return nil, fluxgo.ErrorBadRequest("Invalid birth date format. Use YYYY-MM-DD HH:MM:SS", "user_baby.invalid_format")
+	if utils.IsFutureDate(data.BirthDate) {
+		return nil, fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
 	}
 
-	if birthDateParsed.After(time.Now()) {
-		return nil, fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
+	birthDateTime, err := utils.StringToDate(data.BirthDate)
+	if err != nil {
+		return nil, fluxgo.ErrorBadRequest("Invalid birth date format", "user_baby.invalid_birth_date_format")
 	}
 
 	userBabyId := utils.IdGenerate(utils.UserBabyEntity)
@@ -59,7 +56,7 @@ func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyR
 		IdUserBaby: userBabyId,
 		IdUser:     data.ActionBy,
 		Name:       data.Name,
-		BirthDate:  birthDateParsed,
+		BirthDate:  *birthDateTime,
 	})
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to create baby")

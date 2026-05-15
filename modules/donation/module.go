@@ -87,5 +87,25 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
+	// donation step
+	mod.AddHandler(handlers.HandlerCreateDonationStepStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateDonationStep) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"POST",
+			"/donation/step",
+			fluxgo.RouteIncome{
+				Entity:          dto.CreateDonationStepReq{},
+				FromHeader:      true,
+				FromBody:        true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/donation"},
+			},
+			handler.HandleHttp,
+		)
+	})
+
 	return mod
 }
