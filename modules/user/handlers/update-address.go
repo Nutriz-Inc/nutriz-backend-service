@@ -70,45 +70,43 @@ func (h *HandlerUpdateAddress) Execute(ctx context.Context, data *dto.UpdateAddr
 
 	validator := data.ValidateUpdateAddressOptionalFields()
 
-	if validator.HasZipCode {
-		if *data.ZipCode != address.Zipcode {
-			addressWithSameZipcode, err := h.addressRepo.GetAddressByZipcodeAndIdUser(ctx, *data.ZipCode, user.IdUser)
-			if err != nil {
-				return nil, fluxgo.ErrorInternalError("Error to get address by zipcode")
-			}
-			if addressWithSameZipcode != nil {
-				return nil, fluxgo.ErrorBadRequest("Address with same zipcode already exists", "address.already_exists")
-			}
+	canUpdateZipCode := validator.HasZipCode && (*data.ZipCode != address.Zipcode)
+	canUpdateNumber := validator.HasNumber && (address.Number == nil || *data.Number != *address.Number)
+	canUpdateComplement := validator.HasComplement && (address.Complement == nil || *data.Complement != *address.Complement)
 
-			addressData, err := utils.GetAddressByZipCode(ctx, *data.ZipCode, h.config)
-			if err != nil {
-				return nil, fluxgo.ErrorInternalError(err.Error())
-			}
-
-			req.Longitude = addressData.Longitude
-			req.Latitude = addressData.Latitude
-			req.Zipcode = data.ZipCode
-			req.City = &addressData.City
-			req.State = &addressData.State
-			req.Neighborhood = &addressData.Neighborhood
-			req.Street = &addressData.Street
-
-			fieldsToUpdate++
+	if canUpdateZipCode {
+		addressWithSameZipcode, err := h.addressRepo.GetAddressByZipcodeAndIdUser(ctx, *data.ZipCode, user.IdUser)
+		if err != nil {
+			return nil, fluxgo.ErrorInternalError("Error to get address by zipcode")
 		}
+		if addressWithSameZipcode != nil {
+			return nil, fluxgo.ErrorBadRequest("Address with same zipcode already exists", "address.already_exists")
+		}
+
+		addressData, err := utils.GetAddressByZipCode(ctx, *data.ZipCode, h.config)
+		if err != nil {
+			return nil, fluxgo.ErrorInternalError(err.Error())
+		}
+
+		req.Longitude = addressData.Longitude
+		req.Latitude = addressData.Latitude
+		req.Zipcode = data.ZipCode
+		req.City = &addressData.City
+		req.State = &addressData.State
+		req.Neighborhood = &addressData.Neighborhood
+		req.Street = &addressData.Street
+
+		fieldsToUpdate++
 	}
 
-	if validator.HasNumber {
-		if address.Number == nil || *data.Number != *address.Number {
-			req.Number = data.Number
-			fieldsToUpdate++
-		}
+	if canUpdateNumber {
+		req.Number = data.Number
+		fieldsToUpdate++
 	}
 
-	if validator.HasComplement {
-		if address.Complement == nil || *data.Complement != *address.Complement {
-			req.Complement = data.Complement
-			fieldsToUpdate++
-		}
+	if canUpdateComplement {
+		req.Complement = data.Complement
+		fieldsToUpdate++
 	}
 
 	if fieldsToUpdate == 0 {

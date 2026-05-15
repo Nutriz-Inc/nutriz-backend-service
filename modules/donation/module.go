@@ -127,5 +127,25 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
+	// donation step timeline
+	mod.AddHandler(handlers.HandlerListDonationStepTimelineStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonationStepTimeline) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"GET",
+			"/donation/step/:id/timeline",
+			fluxgo.RouteIncome{
+				Entity:     dto.ListDonationStepTimelineReq{},
+				FromParam:  true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      redis,
+				CacheTTL:   time.Hour,
+			},
+			handler.HandleHttp,
+		)
+	})
+
 	return mod
 }
