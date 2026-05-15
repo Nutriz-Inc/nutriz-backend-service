@@ -6,6 +6,7 @@ import (
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"
@@ -71,19 +72,23 @@ func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) 
 		)
 	}
 
-	if !utils.IsFutureDate(data.DateSet) {
-		return nil, fluxgo.ErrorBadRequest(
-			"Set date cannot be in the past",
-			"job.invalid_set_date",
-		)
-	}
+	var setDateTime *time.Time
+	if data.DateSet != nil {
+		if !utils.IsFutureDate(*data.DateSet) {
+			return nil, fluxgo.ErrorBadRequest(
+				"Set date cannot be in the past",
+				"job.invalid_set_date",
+			)
+		}
 
-	setDateTime, err := utils.StringToTime(data.DateSet)
-	if err != nil {
-		return nil, fluxgo.ErrorBadRequest(
-			"Invalid set date format",
-			"job.invalid_set_date_format",
-		)
+		t, err := utils.StringToTime(*data.DateSet)
+		if err != nil {
+			return nil, fluxgo.ErrorBadRequest(
+				"Invalid set date format",
+				"job.invalid_set_date_format",
+			)
+		}
+		setDateTime = &t
 	}
 
 	donationStep, err := h.donationStepRepo.GetDonationStepById(ctx, data.IdStep)
@@ -117,7 +122,7 @@ func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) 
 		IdStep:      data.IdStep,
 		Name:        data.Name,
 		Description: data.Description,
-		DateSet:     &setDateTime,
+		DateSet:     setDateTime,
 		CreatedBy:   data.ActionBy,
 	}
 
