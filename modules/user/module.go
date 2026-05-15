@@ -76,7 +76,7 @@ func Module() *fluxgo.FluxModule {
 			f,
 			"/internal",
 			"DELETE",
-			"user/baby/:id",
+			"/user/baby/:id",
 			fluxgo.RouteIncome{
 				Entity:          dto.RemoveUserBabyReq{},
 				FromParam:       true,
@@ -84,6 +84,26 @@ func Module() *fluxgo.FluxModule {
 				Validate:        true,
 				Cache:           redis,
 				CacheInvalidate: []string{"/internal/user"},
+			},
+			handler.HandleHttp,
+		)
+	})
+
+	mod.AddHandler(handlers.HandlerUpdateUserBabyStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerUpdateUserBaby) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"PUT",
+			"/user/baby/:id",
+			fluxgo.RouteIncome{
+				Entity:				dto.UpdateUserBabyReq{},
+				FromBody: 			true,
+				FromParam: 			true,
+				FromHeader:			true,
+				Validate:			true,
+				Cache:				redis,
+				CacheInvalidate:	[]string{"/internal/user"},
 			},
 			handler.HandleHttp,
 		)
