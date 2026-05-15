@@ -88,7 +88,7 @@ func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) 
 				"job.invalid_set_date_format",
 			)
 		}
-		setDateTime = &t
+		setDateTime = t
 	}
 
 	donationStep, err := h.donationStepRepo.GetDonationStepById(ctx, data.IdStep)
