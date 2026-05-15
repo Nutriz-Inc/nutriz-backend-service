@@ -81,14 +81,13 @@ func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) 
 			)
 		}
 
-		t, err := utils.StringToTime(*data.DateSet)
+		setDateTime, err = utils.StringToTime(*data.DateSet)
 		if err != nil {
 			return nil, fluxgo.ErrorBadRequest(
 				"Invalid set date format",
 				"job.invalid_set_date_format",
 			)
 		}
-		setDateTime = t
 	}
 
 	donationStep, err := h.donationStepRepo.GetDonationStepById(ctx, data.IdStep)
