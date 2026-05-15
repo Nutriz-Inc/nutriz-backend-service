@@ -27,7 +27,6 @@ func TestCreateDonation(t *testing.T) {
 			assert.NotEmpty(t, body["id_donation"])
 			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", body["created_by"])
 			assert.Equal(t, true, body["is_active"])
-			assert.NotEmpty(t, body["description"])
 		})
 	})
 

@@ -4,9 +4,11 @@ import (
 	"context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
+	"github.com/jmoiron/sqlx"
 )
 
 type DonationStepRepository struct {
@@ -40,7 +42,6 @@ func (r *DonationStepRepository) GetDonationStepsByIdDonation(
 		false,
 	)
 }
-
 func (r *DonationStepRepository) GetDonationStepById(ctx context.Context, id string) (*entities.DonationStep, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
@@ -49,7 +50,90 @@ func (r *DonationStepRepository) GetDonationStepById(ctx context.Context, id str
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
-		`SELECT * FROM "donation_step" WHERE id_step_donation = $1`,
+		`SELECT * FROM "donation_step" WHERE id_donation_step = $1`,
 		id,
+	)
+}
+
+type CreateDonationStepRepositoryReq struct {
+	IdDonationStep string
+	IdDonation     string
+	IdUser         string
+	Name           entities.EnumDonationSteps
+	Description    string
+	Status         entities.EnumDonationStepStatus
+	SetDate        *time.Time
+}
+
+func (r *DonationStepRepository) createDonationStep(
+	ctx context.Context,
+	exec sqlx.ExtContext,
+	data *CreateDonationStepRepositoryReq,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		INSERT INTO donation_step (
+			id_donation_step,
+			id_donation,
+			name,
+			description,
+			status,
+			set_date,
+			created_at,
+			created_by
+		) VALUES (
+			:id_donation_step,
+			:id_donation,
+			:name,
+			:description,
+			:status,
+			:set_date,
+			now(),
+			:id_user
+		)
+	`
+
+	params := map[string]any{
+		"id_donation_step": data.IdDonationStep,
+		"id_donation":      data.IdDonation,
+		"id_user":          data.IdUser,
+		"name":             data.Name,
+		"description":      data.Description,
+		"status":           data.Status,
+		"set_date":         data.SetDate,
+	}
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *DonationStepRepository) CreateDonationStepTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	data *CreateDonationStepRepositoryReq,
+) error {
+	return r.createDonationStep(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *DonationStepRepository) CreateDonationStep(
+	ctx context.Context,
+	data *CreateDonationStepRepositoryReq,
+) error {
+	return r.createDonationStep(
+		ctx,
+		r.DB.WriteDB(),
+		data,
 	)
 }
