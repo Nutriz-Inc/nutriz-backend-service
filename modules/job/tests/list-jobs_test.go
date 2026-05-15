@@ -61,6 +61,7 @@ func TestListJobs(t *testing.T) {
 					[]string{
 						"usr_2veL1FPpuXxUaZcFaEC57BfplNV",
 						"usr_2veL1FPpuXxUaZcFaEC57BfpcKL",
+						"usr_2veL1FPpuXxUaZcFaEC57BfpcNF",
 					},
 					idUser,
 				)

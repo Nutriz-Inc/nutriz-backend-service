@@ -42,7 +42,6 @@ func (r *DonationStepRepository) GetDonationStepsByIdDonation(
 		false,
 	)
 }
-
 func (r *DonationStepRepository) GetDonationStepById(ctx context.Context, id string) (*entities.DonationStep, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
