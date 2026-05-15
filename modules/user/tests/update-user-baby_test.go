@@ -68,7 +68,6 @@ func TestUpdateUserBaby(t *testing.T) {
 			    BirthDate: utils.StringPtr("2099-01-01"),
 			}
 			status, resp := fluxgo.RunTestRequest(app, "PUT", endpoint, body, headers)
-			t.Logf("resp: %v", resp)
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "Birth date cannot be in the future", resp["message"])
 		})
@@ -79,7 +78,6 @@ func TestUpdateUserBaby(t *testing.T) {
 				BirthDate: utils.StringPtr("2025-01-15"),
 			}
 			status, resp := fluxgo.RunTestRequest(app, "PUT", endpoint, body, headers)
-			t.Logf("resp: %v", resp)
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "At least one field must be different to update", resp["message"])
 		})
