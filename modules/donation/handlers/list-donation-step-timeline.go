@@ -65,7 +65,7 @@ func (h *HandlerListDonationStepTimeline) Execute(ctx c.Context, filters *dto.Li
 		return nil, utils.ErrorForbidden("User does not have permission to list donation step timeline", "user.forbidden")
 	}
 
-	donationStepTimeline, total, err := h.donationStepTimelineRepo.GetDonationStepsTimelineByIdDonationStep(ctx, filters.IdDonationStep)
+	donationStepTimeline, _, err := h.donationStepTimelineRepo.GetDonationStepsTimelineByIdDonationStep(ctx, filters.IdDonationStep)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list donation step timeline")
 	}
@@ -75,10 +75,5 @@ func (h *HandlerListDonationStepTimeline) Execute(ctx c.Context, filters *dto.Li
 
 	return &dto.ListDonationStepTimelineRes{
 		Data: *donationStepTimeline,
-		PaginationRes: utils.PaginationRes{
-			Page:     filters.Page,
-			PageSize: filters.PageSize,
-			Total:    total,
-		},
 	}, nil
 }

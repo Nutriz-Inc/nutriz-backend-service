@@ -106,11 +106,11 @@ func (r *DonationStepTimelineRepository) GetDonationStepsTimelineByIdDonationSte
 	defer span.End()
 
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
-		Select("dst.*").
-		From("donation_step_timeline", "dst").
-		OrderBy(q.OrderBy{Column: "dst.created_at"}).
+		Select("dtl.*").
+		From("donation_step_timeline", "dtl").
+		OrderBy(q.OrderBy{Column: "dtl.created_at"}).
 		PaginationPaged(1, 50).
-		WhereAnd(q.Where{Column: "dst.id_donation_step", Type: "=", Val: idDonationStep})
+		WhereAnd(q.Where{Column: "dtl.id_donation_step", Type: "=", Val: idDonationStep})
 
 	return utils.ListQuery[entities.DonationStepTimeline](
 		ctx,

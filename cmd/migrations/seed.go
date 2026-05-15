@@ -400,6 +400,34 @@ INSERT INTO donation_step (
     NULL
 );
 
+INSERT INTO donation_step_timeline (
+    id_donation_step_timeline,
+    id_donation_step,
+    description,
+    status,
+    set_date,
+    created_at,
+    created_by
+) VALUES
+(
+    'dtl_2veL1FPpuXxUaZcFaEC57BfpcAA',
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
+    'Timeline entry 1 - Exame agendado',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL'
+),
+(
+    'dtl_2veL1FPpuXxUaZcFaEC57BfpcBB',
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
+    'Timeline entry 2 - Exame realizado',
+    'done',
+    NOW() + INTERVAL '3 days',
+    NOW() + INTERVAL '1 day',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL'
+);
+
 INSERT INTO job (
     id_job,
     id_user,
