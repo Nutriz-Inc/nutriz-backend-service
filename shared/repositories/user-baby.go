@@ -4,6 +4,7 @@ import (
 	"context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
@@ -119,5 +120,54 @@ func (r *UserBabyRepository) RemoveUserBaby(ctx context.Context, id, actionBy st
 		query,
 		id,
 		actionBy,
+	)
+}
+
+type UpdateUserBabyRepositoryReq struct {
+	IdUserBaby		string
+	IdUser			string
+	Name			*string
+	BirthDate		*time.Time
+}
+
+func (r *UserBabyRepository) UpdateUserBaby(ctx context.Context, data UpdateUserBabyRepositoryReq) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	sets := []string{}
+	params := map[string]any{
+		"id_user_baby":	data.IdUserBaby,
+		"id_user":		data.IdUser,
+	}
+
+	if data.Name != nil {
+		sets = append(sets, "name = :name")
+		params["name"] = data.Name
+	}
+
+	if data.BirthDate != nil {
+		sets = append(sets, "birth_date = :birth_date")
+		params["birth_date"] = data.BirthDate
+	}
+
+	if len(sets) == 0 {
+		return nil
+	}
+
+	query := `
+        UPDATE user_baby
+        SET ` + strings.Join(sets, ", ") + `,
+            updated_at = now()
+        WHERE id_user_baby = :id_user_baby
+          AND removed_at IS NULL
+          AND id_user = :id_user
+	`
+
+	return utils.Update(
+		ctx,
+        r.DB.ReadOnlyDB(),
+        span,
+        query,
+        params,
 	)
 }

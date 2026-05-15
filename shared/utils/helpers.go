@@ -49,10 +49,11 @@ func StringToTime(value string) (*time.Time, error) {
 }
 
 func IsFutureDate(dateStr string) bool {
-	date, err := time.Parse(time.RFC3339, dateStr)
-	if err != nil {
-		return false
+	for _, layout := range []string{"2006-01-02", "2006-01-02 15:04:05", time.RFC3339} {
+		date, err := time.Parse(layout, dateStr)
+		if err == nil {
+			return date.After(time.Now())
+        }
 	}
-
-	return date.After(time.Now())
+	return false
 }
