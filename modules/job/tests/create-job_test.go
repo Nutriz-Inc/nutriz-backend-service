@@ -57,6 +57,7 @@ func TestCreateJob(t *testing.T) {
 			assert.Equal(t, idNurse, resp["id_user"])
 			assert.Equal(t, idStepForSuccess, resp["id_step"])
 			assert.Equal(t, "Coleta de leite materno", resp["name"])
+			assert.Equal(t, "pending", resp["status"])
 			assert.NotNil(t, resp["created_at"])
 		})
 	})

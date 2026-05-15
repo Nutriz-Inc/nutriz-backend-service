@@ -7,6 +7,7 @@ CREATE TYPE enum_donation_steps as ENUM (
   'Coletar leite',
   'Análise de leite'
 );
+CREATE TYPE enum_job_status AS ENUM ('pending', 'done', 'failed');
 
 -- USER
 CREATE TABLE "user" (
@@ -140,6 +141,7 @@ CREATE TABLE job (
   id_user VARCHAR(36) NOT NULL,
   id_step VARCHAR(36) NOT NULL,
 
+  status enum_job_status NOT NULL,
   name VARCHAR(120) NOT NULL,
   description TEXT NOT NULL,
   date_set TIMESTAMP,

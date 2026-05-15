@@ -115,11 +115,13 @@ func (h *HandlerCreateJob) Execute(ctx context.Context, data *dto.CreateJobReq) 
 	}
 
 	idJob := utils.IdGenerate(utils.JobEntity)
+	initalStatus := entities.EnumJobStatusPending // All new jobs start with pending status, and it's the nurse's responsibility to update it to done or failed when they complete the job
 
 	repoData := &repositories.CreateJobRepositoryReq{
 		IdJob:       idJob,
 		IdUser:      data.IdUser,
 		IdStep:      data.IdStep,
+		Status:      initalStatus,
 		Name:        data.Name,
 		Description: data.Description,
 		DateSet:     setDateTime,
