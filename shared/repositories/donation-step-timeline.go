@@ -3,9 +3,11 @@ package repositories
 import (
 	"context"
 	"nutriz-backend-service/shared/entities"
+	"nutriz-backend-service/shared/utils"
 	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
+	q "github.com/MMortari/go-query-builder"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -93,5 +95,29 @@ func (r *DonationStepTimelineRepository) CreateDonationStepTimeline(
 		ctx,
 		r.DB.WriteDB(),
 		data,
+	)
+}
+
+func (r *DonationStepTimelineRepository) GetDonationStepsTimelineByIdDonationStep(
+	ctx context.Context,
+	idDonationStep string,
+) (*[]entities.DonationStepTimeline, int, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
+		Select("dst.*").
+		From("donation_step_timeline", "dst").
+		OrderBy(q.OrderBy{Column: "dst.created_at"}).
+		PaginationPaged(1, 50).
+		WhereAnd(q.Where{Column: "dst.id_donation_step", Type: "=", Val: idDonationStep})
+
+	return utils.ListQuery[entities.DonationStepTimeline](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		qb,
+		utils.IntPtr(50),
+		false,
 	)
 }
