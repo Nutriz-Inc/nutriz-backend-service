@@ -31,7 +31,7 @@ func TestCreateJob(t *testing.T) {
 		idNurse      = "usr_2veL1FPpuXxUaZcFaEC57BfpcNF"
 		idCommonUser = "usr_2veL1FPpuXxUaZcFaEC57BfpcKE"
 
-		idStepForSuccess = "dst_2veL1FPpuXxUaZcFaEC57BfpcCC"
+		idStepForSuccess = "dst_2veL1FPpuXxUaZcFaEC57BfslJG"
 		idStepInactive   = "dst_2veL1FPpuXxUaZcFaEC57BfpcAA"
 
 		idNonExistentUser = "usr_2veL1FPpuXxUaZcFaEC57BfpcZZ"

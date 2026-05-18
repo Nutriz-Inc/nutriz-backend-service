@@ -152,11 +152,14 @@ func (r *DonationStepRepository) updateDonationStep(ctx context.Context, exec sq
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	sets := []string{}
 	params := map[string]any{
 		"id_donation_step": data.IdDonationStep,
 		"updated_by":       data.IdUser,
 		"description":      data.Description,
+	}
+
+	sets := []string{
+		"description = :description",
 	}
 
 	if data.Status != nil {
@@ -169,10 +172,6 @@ func (r *DonationStepRepository) updateDonationStep(ctx context.Context, exec sq
 	}
 	if data.IsComplete {
 		sets = append(sets, "completed_at = now()")
-	}
-
-	if len(sets) == 0 {
-		return nil
 	}
 
 	query := `

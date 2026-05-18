@@ -35,13 +35,13 @@ func TestUpdateDonationStep(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(
 				app,
 				"PUT",
-				endpoint+"/dst_2veL1FPpuXxUaZcFaEC57BfpcCC",
+				endpoint+"/dst_2veL1FPpuXxUaZcFaEC57BfslJG",
 				body,
 				adminHeaders,
 			)
 
 			assert.Equal(t, http.StatusOK, status)
-			assert.Equal(t, "dst_2veL1FPpuXxUaZcFaEC57BfpcCC", resp["id_donation_step"])
+			assert.Equal(t, "dst_2veL1FPpuXxUaZcFaEC57BfslJG", resp["id_donation_step"])
 			assert.Equal(t, string(statusToUpdate), resp["status"])
 			assert.Equal(t, body.Description, resp["description"])
 		})
