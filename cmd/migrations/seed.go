@@ -193,6 +193,18 @@ INSERT INTO donation (
     NULL
 ),
 (
+    'don_2veL1FPpuXxUaZcFaEC57BfdsWG',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
     'don_2veL1FPpuXxUaZcFaEC57BfpcKG',
     true,
     0,
@@ -472,6 +484,19 @@ INSERT INTO donation_step (
     NOW() - INTERVAL '1 day',
     'usr_2veL1FPpuXxUaZcFaEC57BfpcAD',
     NOW() - INTERVAL '1 day'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfslJG',
+    'don_2veL1FPpuXxUaZcFaEC57BfdsWG',
+    'Entregar kit de ordenha',
+    'Entregar kit de ordenha ao doador',
+    'review',
+    NOW() + INTERVAL '3 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO donation_step_timeline (

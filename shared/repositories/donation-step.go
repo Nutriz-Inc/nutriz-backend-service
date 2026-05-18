@@ -181,7 +181,6 @@ func (r *DonationStepRepository) updateDonationStep(ctx context.Context, exec sq
 		    updated_at = now(),
 			updated_by = :updated_by
 		WHERE id_donation_step = :id_donation_step
-		  AND removed_at IS NULL
 	`
 
 	_, err := sqlx.NamedExecContext(

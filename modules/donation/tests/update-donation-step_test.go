@@ -24,9 +24,12 @@ func TestUpdateDonationStep(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Admin updates status", func(t *testing.T) {
 			statusToUpdate := entities.EnumDonationStepStatusWarn
+			setDate := time.Now().AddDate(0, 0, 7).Format(time.RFC3339)
+
 			body := dto.UpdateDonationStepReq{
 				Description: "Status alterado para acompanhamento",
 				Status:      &statusToUpdate,
+				SetDate:     &setDate,
 			}
 
 			status, resp := fluxgo.RunTestRequest(
@@ -40,6 +43,7 @@ func TestUpdateDonationStep(t *testing.T) {
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, "dst_2veL1FPpuXxUaZcFaEC57BfpcCC", resp["id_donation_step"])
 			assert.Equal(t, string(statusToUpdate), resp["status"])
+			assert.Equal(t, body.Description, resp["description"])
 		})
 	})
 
