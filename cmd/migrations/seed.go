@@ -227,6 +227,18 @@ INSERT INTO donation (
     NULL,
     NULL,
     NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKJ',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO address (
@@ -447,6 +459,19 @@ INSERT INTO donation_step (
     NULL,
     NULL,
     NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcDD',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKJ',
+    'Análise de leite',
+    'Step finalizado para testes de atualização',
+    'done',
+    NOW() - INTERVAL '1 day',
+    NOW() - INTERVAL '2 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcAD',
+    NOW() - INTERVAL '1 day',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcAD',
+    NOW() - INTERVAL '1 day'
 );
 
 INSERT INTO donation_step_timeline (

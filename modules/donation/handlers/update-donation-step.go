@@ -93,7 +93,6 @@ func (h *HandlerUpdateDonationStep) Execute(ctx context.Context, data *dto.Updat
 	validator := data.ValidateUpdateDonationStepOptionalFields()
 
 	var setDateTime *time.Time
-
 	if validator.HasStatus {
 		if *data.Status == entities.EnumDonationStepStatusDone || *data.Status == entities.EnumDonationStepStatusFailed {
 			if validator.HasSetDate {
@@ -107,13 +106,14 @@ func (h *HandlerUpdateDonationStep) Execute(ctx context.Context, data *dto.Updat
 		}
 
 		req.Status = data.Status
+		fieldsToUpdate++
 	}
 
 	if validator.HasSetDate {
 		if !utils.IsFutureDate(*data.SetDate) {
 			return nil, fluxgo.ErrorBadRequest(
 				"Set date cannot be in the past",
-				"job.invalid_set_date",
+				"donation_step.invalid_set_date",
 			)
 		}
 
@@ -121,11 +121,12 @@ func (h *HandlerUpdateDonationStep) Execute(ctx context.Context, data *dto.Updat
 		if err != nil {
 			return nil, fluxgo.ErrorBadRequest(
 				"Invalid set date format",
-				"job.invalid_set_date_format",
+				"donation_step.invalid_set_date_format",
 			)
 		}
 
 		req.SetDate = setDateTime
+		fieldsToUpdate++
 	}
 
 	if fieldsToUpdate == 0 {
