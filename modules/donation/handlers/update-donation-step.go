@@ -2,29 +2,35 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 )
 
 type HandlerUpdateDonationStep struct {
+	db                       *fluxgo.Database
 	donationRepo             *repositories.DonationRepository
 	donationStepRepo         *repositories.DonationStepRepository
-	DonationStepTimelineRepo *repositories.DonationStepTimelineRepository
+	donationStepTimelineRepo *repositories.DonationStepTimelineRepository
 	userRepo                 *repositories.UserRepository
 }
 
 func HandlerUpdateDonationStepStart(
+	db *fluxgo.Database,
 	donationRepo *repositories.DonationRepository,
 	donationStepRepo *repositories.DonationStepRepository,
 	donationStepTimelineRepo *repositories.DonationStepTimelineRepository,
 	userRepo *repositories.UserRepository,
 ) *HandlerUpdateDonationStep {
 	return &HandlerUpdateDonationStep{
+		db,
 		donationRepo,
 		donationStepRepo,
 		donationStepTimelineRepo,
@@ -78,18 +84,83 @@ func (h *HandlerUpdateDonationStep) Execute(ctx context.Context, data *dto.Updat
 
 	fieldsToUpdate := 0
 	req := repositories.UpdateDonationStepRepositoryReq{
-		IdDonation: data.Id,
-		IdUser:     data.ActionBy,
+		IdDonationStep: data.Id,
+		IdUser:         data.ActionBy,
+		Description:    data.Description,
+		IsComplete:     false,
 	}
+
 	validator := data.ValidateUpdateDonationStepOptionalFields()
+
+	var setDateTime *time.Time
+
+	if validator.HasStatus {
+		if *data.Status == entities.EnumDonationStepStatusDone || *data.Status == entities.EnumDonationStepStatusFailed {
+			if validator.HasSetDate {
+				return nil, fluxgo.ErrorBadRequest(
+					"You can't set a set date if the status is done or failed",
+					"donation_step.invalid_status",
+				)
+			}
+
+			req.IsComplete = true
+		}
+
+		req.Status = data.Status
+	}
+
+	if validator.HasSetDate {
+		if !utils.IsFutureDate(*data.SetDate) {
+			return nil, fluxgo.ErrorBadRequest(
+				"Set date cannot be in the past",
+				"job.invalid_set_date",
+			)
+		}
+
+		setDateTime, err = utils.StringToTime(*data.SetDate)
+		if err != nil {
+			return nil, fluxgo.ErrorBadRequest(
+				"Invalid set date format",
+				"job.invalid_set_date_format",
+			)
+		}
+
+		req.SetDate = setDateTime
+	}
 
 	if fieldsToUpdate == 0 {
 		return nil, fluxgo.ErrorBadRequest("At least one field must be sent to update", "no_fields_to_update")
 	}
 
-	err = h.donationStepRepo.UpdateDonationStep(ctx, req)
+	err = h.db.RunTransaction(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+		err := h.donationStepRepo.UpdateDonationStepTx(ctx, tx, &req)
+		if err != nil {
+			return fmt.Errorf("error to update donation step: %w", err)
+		}
+
+		idDonationStepTimeline := utils.IdGenerate(utils.DonationStepTimelineEntity)
+		status := donationStep.Status
+
+		if req.Status != nil && *req.Status != donationStep.Status {
+			status = *req.Status
+		}
+
+		err = h.donationStepTimelineRepo.CreateDonationStepTimelineTx(ctx, tx, &repositories.CreateDonationStepTimelineRepositoryReq{
+			IdDonationStepTimeline: idDonationStepTimeline,
+			IdDonationStep:         data.Id,
+			Description:            data.Description,
+			Status:                 status,
+			SetDate:                setDateTime,
+			IdUser:                 data.ActionBy,
+		})
+		if err != nil {
+			return fmt.Errorf("error to create donation step timeline: %w", err)
+		}
+
+		return nil
+	})
 	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to update donation step")
+		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
 
 	donationStep, err = h.donationStepRepo.GetDonationStepById(ctx, data.Id)

@@ -142,9 +142,13 @@ func (r *DonationStepRepository) CreateDonationStep(
 type UpdateDonationStepRepositoryReq struct {
 	IdDonationStep string
 	IdUser         string
+	Description    string
+	Status         *entities.EnumDonationStepStatus
+	SetDate        *time.Time
+	IsComplete     bool
 }
 
-func (r *DonationStepRepository) UpdateDonationStep(ctx context.Context, data UpdateDonationStepRepositoryReq) error {
+func (r *DonationStepRepository) updateDonationStep(ctx context.Context, exec sqlx.ExtContext, data *UpdateDonationStepRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -152,19 +156,19 @@ func (r *DonationStepRepository) UpdateDonationStep(ctx context.Context, data Up
 	params := map[string]any{
 		"id_donation_step": data.IdDonationStep,
 		"updated_by":       data.IdUser,
+		"description":      data.Description,
 	}
 
-	if data.IsActive != nil {
-		sets = append(sets, "is_active = :is_active")
-		params["is_active"] = data.IsActive
+	if data.Status != nil {
+		sets = append(sets, "status = :status")
+		params["status"] = *data.Status
 	}
-	if data.QuantityDonated != nil {
-		sets = append(sets, "quantity_donated = :quantity_donated")
-		params["quantity_donated"] = data.QuantityDonated
+	if data.SetDate != nil {
+		sets = append(sets, "set_date = :set_date")
+		params["set_date"] = *data.SetDate
 	}
-	if data.UserFeedback != nil {
-		sets = append(sets, "user_feedback = :user_feedback")
-		params["user_feedback"] = data.UserFeedback
+	if data.IsComplete {
+		sets = append(sets, "completed_at = now()")
 	}
 
 	if len(sets) == 0 {
@@ -172,19 +176,43 @@ func (r *DonationStepRepository) UpdateDonationStep(ctx context.Context, data Up
 	}
 
 	query := `
-		UPDATE donation
+		UPDATE donation_step
 		SET ` + strings.Join(sets, ", ") + `,
 		    updated_at = now(),
 			updated_by = :updated_by
-		WHERE id_donation = :id_donation
+		WHERE id_donation_step = :id_donation_step
 		  AND removed_at IS NULL
 	`
 
-	return utils.Update(
+	_, err := sqlx.NamedExecContext(
 		ctx,
-		r.DB.ReadOnlyDB(),
-		span,
+		exec,
 		query,
 		params,
+	)
+
+	return err
+}
+
+func (r *DonationStepRepository) UpdateDonationStepTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	data *UpdateDonationStepRepositoryReq,
+) error {
+	return r.updateDonationStep(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *DonationStepRepository) UpdateDonationStep(
+	ctx context.Context,
+	data *UpdateDonationStepRepositoryReq,
+) error {
+	return r.updateDonationStep(
+		ctx,
+		r.DB.WriteDB(),
+		data,
 	)
 }
