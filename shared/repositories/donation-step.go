@@ -4,6 +4,7 @@ import (
 	"context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
@@ -135,5 +136,55 @@ func (r *DonationStepRepository) CreateDonationStep(
 		ctx,
 		r.DB.WriteDB(),
 		data,
+	)
+}
+
+type UpdateDonationStepRepositoryReq struct {
+	IdDonationStep string
+	IdUser         string
+}
+
+func (r *DonationStepRepository) UpdateDonationStep(ctx context.Context, data UpdateDonationStepRepositoryReq) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	sets := []string{}
+	params := map[string]any{
+		"id_donation_step": data.IdDonationStep,
+		"updated_by":       data.IdUser,
+	}
+
+	if data.IsActive != nil {
+		sets = append(sets, "is_active = :is_active")
+		params["is_active"] = data.IsActive
+	}
+	if data.QuantityDonated != nil {
+		sets = append(sets, "quantity_donated = :quantity_donated")
+		params["quantity_donated"] = data.QuantityDonated
+	}
+	if data.UserFeedback != nil {
+		sets = append(sets, "user_feedback = :user_feedback")
+		params["user_feedback"] = data.UserFeedback
+	}
+
+	if len(sets) == 0 {
+		return nil
+	}
+
+	query := `
+		UPDATE donation
+		SET ` + strings.Join(sets, ", ") + `,
+		    updated_at = now(),
+			updated_by = :updated_by
+		WHERE id_donation = :id_donation
+		  AND removed_at IS NULL
+	`
+
+	return utils.Update(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		params,
 	)
 }

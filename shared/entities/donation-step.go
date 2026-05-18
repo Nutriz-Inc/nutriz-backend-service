@@ -44,3 +44,10 @@ func (d DonationStep) PrimaryKey() string {
 }
 
 const NUMBER_OF_DONATION_STEPS = 4
+
+func (d DonationStep) CanUpdate() bool {
+	if d.Status == EnumDonationStepStatusDone || d.Status == EnumDonationStepStatusFailed {
+		return false
+	}
+	return true
+}
