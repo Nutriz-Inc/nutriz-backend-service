@@ -29,7 +29,7 @@ func TestCreateConsentLog(t *testing.T) {
 
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
 
-			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, http.StatusCreated, status)
 			assert.NotNil(t, resp["id_consent_log"])
 			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", resp["id_user"])
 			assert.Equal(t, body.TermsVersion, resp["terms_version"])

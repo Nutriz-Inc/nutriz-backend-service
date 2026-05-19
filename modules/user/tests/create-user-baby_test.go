@@ -22,8 +22,10 @@ func TestCreateUserBaby(t *testing.T) {
 	name := "Bebe Teste"
 	t.Run("Success", func(t *testing.T) {
 		data := dto.CreateUserBabyReq{
-			Name:      &name,
-			BirthDate: "2024-01-01",
+			UserBabyCreateBase: dto.UserBabyCreateBase{
+				Name:      &name,
+				BirthDate: "2024-01-01",
+			},
 		}
 
 		status, body := fluxgo.RunTestRequest(app, "POST", endpoint, data, headers)
@@ -40,8 +42,10 @@ func TestCreateUserBaby(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		t.Run("Birthdate in the future", func(t *testing.T) {
 			data := dto.CreateUserBabyReq{
-				Name:      &name,
-				BirthDate: "2099-01-01 00:00:00",
+				UserBabyCreateBase: dto.UserBabyCreateBase{
+					Name:      &name,
+					BirthDate: "2099-01-01 00:00:00",
+				},
 			}
 			status, _ := fluxgo.RunTestRequest(app, "POST", endpoint, data, headers)
 			assert.Equal(t, http.StatusBadRequest, status)
@@ -49,8 +53,10 @@ func TestCreateUserBaby(t *testing.T) {
 		t.Run("No permission", func(t *testing.T) {
 			invalidHeader := &utils.TestHeadersAdmin
 			data := dto.CreateUserBabyReq{
-				Name:      &name,
-				BirthDate: "2024-01-01",
+				UserBabyCreateBase: dto.UserBabyCreateBase{
+					Name:      &name,
+					BirthDate: "2024-01-01",
+				},
 			}
 
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, data, invalidHeader)

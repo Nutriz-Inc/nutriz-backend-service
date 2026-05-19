@@ -43,7 +43,7 @@ func (h *HandlerCreateDonationStep) HandleHttp(c *fiber.Ctx, income interface{})
 	if err != nil {
 		return nil, err
 	}
-	return &fluxgo.GlobalResponse{Content: resp, Status: 200}, nil
+	return &fluxgo.GlobalResponse{Content: resp, Status: 201}, nil
 }
 
 func (h *HandlerCreateDonationStep) Execute(ctx context.Context, data *dto.CreateDonationStepReq) (*dto.CreateDonationStepRes, *fluxgo.GlobalError) {
