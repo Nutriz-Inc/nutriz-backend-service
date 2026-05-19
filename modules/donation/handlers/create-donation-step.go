@@ -75,6 +75,10 @@ func (h *HandlerCreateDonationStep) Execute(ctx context.Context, data *dto.Creat
 	}
 
 	if donationSteps != nil && len(*donationSteps) > 0 {
+		if len(*donationSteps) == entities.NUMBER_OF_DONATION_STEPS {
+			return nil, fluxgo.ErrorBadRequest("Donation already has the maximum number of steps", "donation_step.max_steps")
+		}
+
 		for _, step := range *donationSteps {
 			if step.Status != entities.EnumDonationStepStatusDone {
 				return nil, fluxgo.ErrorBadRequest(
