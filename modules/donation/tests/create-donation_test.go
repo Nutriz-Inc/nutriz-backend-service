@@ -23,7 +23,7 @@ func TestCreateDonation(t *testing.T) {
 		t.Run("Normal", func(t *testing.T) {
 			status, body := fluxgo.RunTestRequest(app, "POST", endpoint, nil, headers)
 
-			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, http.StatusCreated, status)
 			assert.NotEmpty(t, body["id_donation"])
 			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", body["created_by"])
 			assert.Equal(t, true, body["is_active"])

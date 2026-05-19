@@ -57,7 +57,7 @@ func (h *HandlerGetUser) Execute(ctx c.Context, filters *dto.GetUserReq) (*dto.G
 	}
 
 	if filters.ShowBaby {
-		babies, _, err = h.babyRepo.GetUserBabyesByUserId(ctx, filters.Id)
+		babies, _, err = h.babyRepo.GetUserBabiesByUserId(ctx, filters.Id)
 		if err != nil {
 			return nil, fluxgo.ErrorInternalError("Error to get babies")
 		}

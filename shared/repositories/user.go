@@ -5,9 +5,11 @@ import (
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
+	"github.com/jmoiron/sqlx"
 )
 
 type UserRepository struct {
@@ -41,6 +43,19 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*ent
 		span,
 		`SELECT * FROM "user" WHERE email = $1 AND removed_at IS NULL`,
 		email,
+	)
+}
+
+func (r *UserRepository) GetUserByCpf(ctx context.Context, cpf string) (*entities.User, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.Get[entities.User](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "user" WHERE cpf = $1 AND removed_at IS NULL`,
+		cpf,
 	)
 }
 
@@ -89,5 +104,100 @@ func (r *UserRepository) ListUsersByFilters(
 		qb,
 		utils.IntPtr(filter.PageSize),
 		true,
+	)
+}
+
+type CreateUserRepositoryReq struct {
+	IdUser             string
+	InternalIdentifier *string
+	Type               entities.EnumUserType
+	Name               string
+	Cpf                string
+	BirthDate          time.Time
+	PhoneNumber        string
+	Email              string
+	Password           string
+	ActionBy           string
+}
+
+func (r *UserRepository) createUser(
+	ctx context.Context,
+	exec sqlx.ExtContext,
+	data *CreateUserRepositoryReq,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		INSERT INTO "user" (
+			id_user,
+			internal_identifier,
+			type,
+			name,
+			cpf,
+			birth_date,
+			phone_number,
+			email,
+			password,
+			created_by,
+			created_at
+		) VALUES (
+	        :id_user,
+		 	:internal_identifier,
+		 	:type,
+			:name,
+			:cpf,
+			:birth_date,
+			:phone_number,
+			:email,
+			:password,
+			:action_by,
+			now()
+		)
+	`
+
+	params := map[string]any{
+		"id_user":             data.IdUser,
+		"internal_identifier": data.InternalIdentifier,
+		"type":                data.Type,
+		"name":                data.Name,
+		"cpf":                 data.Cpf,
+		"birth_date":          data.BirthDate,
+		"phone_number":        data.PhoneNumber,
+		"email":               data.Email,
+		"password":            data.Password,
+		"action_by":           data.ActionBy,
+	}
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *UserRepository) CreateUserTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	data *CreateUserRepositoryReq,
+) error {
+	return r.createUser(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *UserRepository) CreateUser(
+	ctx context.Context,
+	data *CreateUserRepositoryReq,
+) error {
+	return r.createUser(
+		ctx,
+		r.DB.WriteDB(),
+		data,
 	)
 }

@@ -36,7 +36,7 @@ func (h *HandlerCreateAddress) HandleHttp(c *fiber.Ctx, income interface{}) (*fl
 	if err != nil {
 		return nil, err
 	}
-	return &fluxgo.GlobalResponse{Content: resp, Status: 200}, nil
+	return &fluxgo.GlobalResponse{Content: resp, Status: 201}, nil
 }
 
 func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddressReq) (*dto.CreateAddressRes, *fluxgo.GlobalError) {

@@ -2,6 +2,7 @@ package handlers
 
 import (
 	c "context"
+	"fmt"
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
@@ -39,6 +40,14 @@ func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyR
 	}
 	if user.Type != entities.EnumUserTypeCommon {
 		return nil, utils.ErrorForbidden("User does not have permission to create baby", "user.forbidden")
+	}
+
+	_, babyquantity, err := h.userBabyRepo.GetUserBabiesByUserId(ctx, user.IdUser)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get user babies by user id")
+	}
+	if babyquantity >= entities.MAX_BABY_QUANTITY_PER_USER {
+		return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("User can have up to %d babies", entities.MAX_BABY_QUANTITY_PER_USER), "user_baby.max_quantity_reached")
 	}
 
 	if utils.IsFutureDate(data.BirthDate) {

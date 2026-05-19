@@ -36,7 +36,7 @@ func TestCreateDonationStep(t *testing.T) {
 
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
-			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, http.StatusCreated, status)
 			assert.NotEmpty(t, resp["id_donation_step"])
 			assert.Equal(t, body.IdDonation, resp["id_donation"])
 			assert.Equal(t, string(body.Name), resp["name"])
@@ -51,7 +51,7 @@ func TestCreateDonationStep(t *testing.T) {
 
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
-			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, http.StatusCreated, status)
 			assert.NotEmpty(t, resp["id_donation_step"])
 			assert.Equal(t, body.IdDonation, resp["id_donation"])
 			assert.Equal(t, string(body.Name), resp["name"])

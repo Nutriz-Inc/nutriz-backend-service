@@ -23,9 +23,11 @@ func TestCreateAddress(t *testing.T) {
 
 	makeBody := func(zipcode string) dto.CreateAddressReq {
 		return dto.CreateAddressReq{
-			ZipCode:    zipcode,
-			Number:     utils.StringPtr("123"),
-			Complement: utils.StringPtr("Apto 2"),
+			AddressCreateBase: dto.AddressCreateBase{
+				ZipCode:    zipcode,
+				Number:     utils.StringPtr("123"),
+				Complement: utils.StringPtr("Apto 2"),
+			},
 		}
 	}
 
@@ -35,7 +37,7 @@ func TestCreateAddress(t *testing.T) {
 
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
 
-			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, http.StatusCreated, status)
 			assert.NotNil(t, resp["id_address"])
 			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", resp["id_user"])
 			assert.Equal(t, body.ZipCode, resp["zipcode"])
@@ -72,7 +74,7 @@ func TestCreateAddress(t *testing.T) {
 			for _, zipcode := range setupZipcodes {
 				body := makeBody(zipcode)
 				status, _ := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
-				assert.Equal(t, http.StatusOK, status)
+				assert.Equal(t, http.StatusCreated, status)
 			}
 
 			body := makeBody("01005000")
