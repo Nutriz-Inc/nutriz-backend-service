@@ -74,7 +74,7 @@ func TestCreateAddress(t *testing.T) {
 			for _, zipcode := range setupZipcodes {
 				body := makeBody(zipcode)
 				status, _ := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
-				assert.Equal(t, http.StatusOK, status)
+				assert.Equal(t, http.StatusCreated, status)
 			}
 
 			body := makeBody("01005000")

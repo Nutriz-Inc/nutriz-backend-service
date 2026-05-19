@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/user/dtos"
@@ -20,6 +21,14 @@ type HandlerCreateUser struct {
 	userRepo     *repositories.UserRepository
 	addressRepo  *repositories.AddressRepository
 	userBabyRepo *repositories.UserBabyRepository
+}
+
+type createUserTxError struct {
+	err *fluxgo.GlobalError
+}
+
+func (e *createUserTxError) Error() string {
+	return e.err.Message
 }
 
 func HandlerCreateUserStart(
@@ -70,15 +79,16 @@ func (h *HandlerCreateUser) Execute(ctx context.Context, data *dto.CreateUserReq
 		return nil, fluxgo.ErrorBadRequest("User with same email already exists", "user.duplicate_email")
 	}
 
-	idUser := utils.IdGenerate(utils.UserBabyEntity)
+	idUser := utils.IdGenerate(utils.UserEntity)
 
 	req := repositories.CreateUserRepositoryReq{
-		IdUser:   idUser,
-		Name:     data.Name,
-		Cpf:      data.Cpf,
-		Type:     data.Type,
-		Email:    data.Email,
-		Password: hashPassword,
+		IdUser:      idUser,
+		Name:        data.Name,
+		Cpf:         data.Cpf,
+		Type:        data.Type,
+		Email:       data.Email,
+		Password:    hashPassword,
+		PhoneNumber: data.PhoneNumber,
 	}
 
 	validator := data.ValidateCreateUserOptionalFields()
@@ -86,8 +96,7 @@ func (h *HandlerCreateUser) Execute(ctx context.Context, data *dto.CreateUserReq
 	switch data.Type {
 	case entities.EnumUserTypeCommon:
 		return h.handleCommon(ctx, data, &req, validator, idUser)
-	case entities.EnumUserTypeNurse:
-	case entities.EnumUserTypeAdmin:
+	case entities.EnumUserTypeAdmin, entities.EnumUserTypeNurse:
 		return h.handleWorker(ctx, data, &req, validator, idUser)
 	}
 
@@ -109,7 +118,6 @@ func (h *HandlerCreateUser) handleCommon(ctx context.Context, data *dto.CreateUs
 	}
 
 	req.BirthDate = *birthDateTime
-	req.PhoneNumber = *data.PhoneNumber
 	req.ActionBy = idUser
 
 	err = h.db.RunTransaction(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
@@ -123,7 +131,7 @@ func (h *HandlerCreateUser) handleCommon(ctx context.Context, data *dto.CreateUs
 			AddressCreateBase: *data.Address,
 		}, tx)
 		if errHandler != nil {
-			return fmt.Errorf("error to create address: %w", err)
+			return &createUserTxError{err: errHandler}
 		}
 
 		if data.UserBaby != nil {
@@ -132,13 +140,17 @@ func (h *HandlerCreateUser) handleCommon(ctx context.Context, data *dto.CreateUs
 				UserBabyCreateBase: *data.UserBaby,
 			}, tx)
 			if errHandler != nil {
-				return fmt.Errorf("error to create user baby: %w", err)
+				return &createUserTxError{err: errHandler}
 			}
 		}
 
 		return nil
 	})
 	if err != nil {
+		var txErr *createUserTxError
+		if errors.As(err, &txErr) {
+			return nil, txErr.err
+		}
 		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
 
@@ -215,14 +227,6 @@ func (h *HandlerCreateUser) createAddress(ctx context.Context, data *dto.CreateA
 		return fluxgo.ErrorInternalError("Error to create address")
 	}
 
-	address, err := h.addressRepo.GetAddressById(ctx, idAddress)
-	if err != nil {
-		return fluxgo.ErrorInternalError("Error to get address")
-	}
-	if address == nil {
-		return fluxgo.ErrorNotFound("Address not found")
-	}
-
 	return nil
 }
 
@@ -246,14 +250,6 @@ func (h *HandlerCreateUser) createUserBaby(ctx context.Context, data *dto.Create
 	})
 	if err != nil {
 		return fluxgo.ErrorInternalError("Error to create baby")
-	}
-
-	userBaby, err := h.userBabyRepo.GetUserBabyById(ctx, userBabyId)
-	if err != nil {
-		return fluxgo.ErrorInternalError("Error to get user baby")
-	}
-	if userBaby == nil {
-		return fluxgo.ErrorNotFound("User baby not found")
 	}
 
 	return nil

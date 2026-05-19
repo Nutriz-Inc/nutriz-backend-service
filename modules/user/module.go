@@ -68,8 +68,6 @@ func Module() *fluxgo.FluxModule {
 			handler.HandleHttp,
 		)
 	})
-
-	mod.AddHandler(handlers.HandlerCreateUserStart)
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateUser) error {
 		return mod.HttpRoute(
 			f,

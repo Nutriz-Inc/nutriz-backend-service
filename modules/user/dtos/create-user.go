@@ -5,17 +5,17 @@ import (
 )
 
 type CreateUserReq struct {
-	Type     entities.EnumUserType `json:"type" validate:"required,oneof=common adm nurse"`
-	Name     string                `json:"name" validate:"required,max=120"`
-	Cpf      string                `json:"cpf" validate:"required,document"`
-	Email    string                `json:"email" validate:"required,email"`
-	Password string                `json:"password" validate:"required,min=8"`
+	Type        entities.EnumUserType `json:"type" validate:"required,oneof=common adm nurse"`
+	Name        string                `json:"name" validate:"required,max=120"`
+	Cpf         string                `json:"cpf" validate:"required,document"`
+	Email       string                `json:"email" validate:"required,email"`
+	Password    string                `json:"password" validate:"required,min=8"`
+	PhoneNumber string                `json:"phone_number" validate:"required,e164"`
 
 	//common
-	BirthDate   *string             `json:"birth_date" validate:"omitempty,datetime=2006-01-02"`
-	PhoneNumber *string             `json:"phone_number" validate:"omitempty,e164"`
-	Address     *AddressCreateBase  `json:"address" validate:"omitempty,dive"`
-	UserBaby    *UserBabyCreateBase `json:"user_baby" validate:"omitempty,dive"`
+	BirthDate *string             `json:"birth_date" validate:"omitempty,datetime=2006-01-02"`
+	Address   *AddressCreateBase  `json:"address" validate:"omitempty"`
+	UserBaby  *UserBabyCreateBase `json:"user_baby" validate:"omitempty"`
 
 	//nurse/admn
 	ActionBy   *string `reqHeader:"action-by" validate:"omitempty,id"`
@@ -29,8 +29,8 @@ type CreateUserOptionalFields struct {
 
 func (c CreateUserReq) ValidateCreateUserOptionalFields() CreateUserOptionalFields {
 	return CreateUserOptionalFields{
-		CanCreateCommon: c.Type == entities.EnumUserTypeCommon && c.BirthDate != nil && c.PhoneNumber != nil && c.Address != nil && c.ActionBy == nil,
-		CanCreateWorker: c.Type == entities.EnumUserTypeAdmin && c.Identifier != nil && c.ActionBy != nil,
+		CanCreateCommon: c.Type == entities.EnumUserTypeCommon && c.BirthDate != nil && c.Address != nil && c.ActionBy == nil,
+		CanCreateWorker: (c.Type == entities.EnumUserTypeAdmin || c.Type == entities.EnumUserTypeNurse) && c.Identifier != nil && c.ActionBy != nil,
 	}
 }
 
