@@ -4,6 +4,7 @@ import (
 	"context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
@@ -132,6 +133,82 @@ func (r *DonationStepRepository) CreateDonationStep(
 	data *CreateDonationStepRepositoryReq,
 ) error {
 	return r.createDonationStep(
+		ctx,
+		r.DB.WriteDB(),
+		data,
+	)
+}
+
+type UpdateDonationStepRepositoryReq struct {
+	IdDonationStep string
+	IdUser         string
+	Description    string
+	Status         *entities.EnumDonationStepStatus
+	SetDate        *time.Time
+	IsComplete     bool
+}
+
+func (r *DonationStepRepository) updateDonationStep(ctx context.Context, exec sqlx.ExtContext, data *UpdateDonationStepRepositoryReq) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	params := map[string]any{
+		"id_donation_step": data.IdDonationStep,
+		"updated_by":       data.IdUser,
+		"description":      data.Description,
+	}
+
+	sets := []string{
+		"description = :description",
+	}
+
+	if data.Status != nil {
+		sets = append(sets, "status = :status")
+		params["status"] = *data.Status
+	}
+	if data.SetDate != nil {
+		sets = append(sets, "set_date = :set_date")
+		params["set_date"] = *data.SetDate
+	}
+	if data.IsComplete {
+		sets = append(sets, "completed_at = now()")
+	}
+
+	query := `
+		UPDATE donation_step
+		SET ` + strings.Join(sets, ", ") + `,
+		    updated_at = now(),
+			updated_by = :updated_by
+		WHERE id_donation_step = :id_donation_step
+	`
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *DonationStepRepository) UpdateDonationStepTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	data *UpdateDonationStepRepositoryReq,
+) error {
+	return r.updateDonationStep(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *DonationStepRepository) UpdateDonationStep(
+	ctx context.Context,
+	data *UpdateDonationStepRepositoryReq,
+) error {
+	return r.updateDonationStep(
 		ctx,
 		r.DB.WriteDB(),
 		data,
