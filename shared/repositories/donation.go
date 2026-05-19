@@ -9,6 +9,7 @@ import (
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
+	"github.com/jmoiron/sqlx"
 )
 
 type DonationRepository struct {
@@ -164,5 +165,55 @@ func (r *DonationRepository) UpdateDonation(ctx context.Context, data UpdateDona
 		span,
 		query,
 		params,
+	)
+}
+
+func (r *DonationRepository) disableUserDonations(ctx context.Context, exec sqlx.ExtContext, idUser, actionBy string) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE "donation"
+		set is_active = false, updated_at = now(), updated_by = :action_by
+		WHERE created_by = :id_user AND is_active = true AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_user":   idUser,
+		"action_by": actionBy,
+	}
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *DonationRepository) DisableUserDonationsTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	id, actionBy string,
+) error {
+	return r.disableUserDonations(
+		ctx,
+		tx,
+		id,
+		actionBy,
+	)
+}
+
+func (r *DonationRepository) DisableUserDonations(
+	ctx context.Context,
+	id, actionBy string,
+) error {
+	return r.disableUserDonations(
+		ctx,
+		r.DB.WriteDB(),
+		id,
+		actionBy,
 	)
 }

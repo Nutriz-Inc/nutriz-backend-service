@@ -201,3 +201,54 @@ func (r *UserRepository) CreateUser(
 		data,
 	)
 }
+
+func (r *UserRepository) removeUser(ctx context.Context, exec sqlx.ExtContext, id, actionBy string) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE "user"
+		SET removed_at = now(),
+		    removed_by = :action_by
+		WHERE id_user = :id_user AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_user":   id,
+		"action_by": actionBy,
+	}
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *UserRepository) RemoveUserTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	id, actionBy string,
+) error {
+	return r.removeUser(
+		ctx,
+		tx,
+		id,
+		actionBy,
+	)
+}
+
+func (r *UserRepository) RemoveUser(
+	ctx context.Context,
+	id, actionBy string,
+) error {
+	return r.removeUser(
+		ctx,
+		r.DB.WriteDB(),
+		id,
+		actionBy,
+	)
+}
