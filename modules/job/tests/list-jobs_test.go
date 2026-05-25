@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/http"
 	"testing"
+	"time"
 
+	dto "nutriz-backend-service/modules/job/dtos"
 	"nutriz-backend-service/shared/module"
 	"nutriz-backend-service/shared/utils"
 
@@ -17,7 +19,23 @@ func TestListJobs(t *testing.T) {
 	defer fx.RequireStart().RequireStop()
 
 	endpoint := "/internal/job?page=1&page_size=25"
-	headers := &utils.TestHeadersNurse
+	adminHeaders := &utils.TestHeadersAdmin
+	headers := &fluxgo.Headers{
+		"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGxOViIsImV4cCI6MTc4MDM0NjAwMSwiaWF0IjoxNzc5NzQxMjAxfQ.hvwqIsGGXmPBUH_ok9pMw-Cs5VjkWh91b6HJADxpWjw",
+		"action-by":     "usr_2veL1FPpuXxUaZcFaEC57BfplNV",
+	}
+
+	dateSetInTwoDays := time.Now().UTC().AddDate(0, 0, 2).Format(time.RFC3339)
+	fluxgo.RunTestRequest(
+		app,
+		"PUT",
+		"/internal/job/job_3EEMMlZS3VexkBHkGHPjq0Qt86V",
+		dto.UpdateJobReq{
+			IdUser:  utils.StringPtr("usr_2veL1FPpuXxUaZcFaEC57BfplNV"),
+			DateSet: utils.StringPtr(dateSetInTwoDays),
+		},
+		adminHeaders,
+	)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("No filters", func(t *testing.T) {
@@ -42,7 +60,6 @@ func TestListJobs(t *testing.T) {
 		})
 
 		t.Run("No filters (admin)", func(t *testing.T) {
-			adminHeaders := &utils.TestHeadersAdmin
 			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, adminHeaders)
 
 			assert.Equal(t, int(http.StatusOK), status)
@@ -73,7 +90,7 @@ func TestListJobs(t *testing.T) {
 		})
 
 		t.Run("date_set filter", func(t *testing.T) {
-			dateSet := utils.GetTodayFormattedDate(2)
+			dateSet := time.Now().UTC().AddDate(0, 0, 2).Format("2006-01-02")
 			route := fmt.Sprintf("%s&date_set=%s", endpoint, dateSet)
 
 			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
@@ -87,6 +104,7 @@ func TestListJobs(t *testing.T) {
 			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfplNV", item["id_user"])
 		})
 	})
+
 	t.Run("Error", func(t *testing.T) {
 		t.Run("No permission", func(t *testing.T) {
 			commonHeaders := &utils.TestHeaders
