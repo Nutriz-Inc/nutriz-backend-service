@@ -541,7 +541,7 @@ INSERT INTO donation_step (
 ),
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcEE',
-    'don_2veL1FPpuXxUaZcFaEC57BfpcKG',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKJ',
     'Coletar leite',
     'Realizar coleta na residência da doadora',
     'pending',
@@ -554,7 +554,7 @@ INSERT INTO donation_step (
 ),
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcFF',
-    'don_2veL1FPpuXxUaZcFaEC57BfpcKH',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKJ',
     'Entregar kit de ordenha',
     'Entregar kit de coleta ao doador',
     'pending',
