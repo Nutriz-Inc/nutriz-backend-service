@@ -20,10 +20,7 @@ func TestListJobs(t *testing.T) {
 
 	endpoint := "/internal/job?page=1&page_size=25"
 	adminHeaders := &utils.TestHeadersAdmin
-	headers := &fluxgo.Headers{
-		"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGxOViIsImV4cCI6MTc4MDM0NjAwMSwiaWF0IjoxNzc5NzQxMjAxfQ.hvwqIsGGXmPBUH_ok9pMw-Cs5VjkWh91b6HJADxpWjw",
-		"action-by":     "usr_2veL1FPpuXxUaZcFaEC57BfplNV",
-	}
+	headers := &utils.TestHeadersNurse
 
 	dateSetInTwoDays := time.Now().UTC().AddDate(0, 0, 2).Format(time.RFC3339)
 	fluxgo.RunTestRequest(

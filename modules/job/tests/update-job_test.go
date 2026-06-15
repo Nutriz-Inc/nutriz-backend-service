@@ -22,10 +22,6 @@ func TestUpdateJob(t *testing.T) {
 	nurseHeaders := &utils.TestHeadersNurse
 	commonHeaders := &utils.TestHeaders
 
-	// job_3EEMMlZS3VexkBHkGHPjq0Qt86V → pending, usado para testes de admin e erros
-	// job_3EEP6m8y0peA0J6lrNABYPhhJzG → pending, reservado para testes de nurse que alteram status
-	// job_2veL1FPpuXxUaZcFaEC57Bfpc01 → done, usado para testar job não-pending
-
 	// Setup: reseta o estado do job antes dos testes, pois TestListJobs pode ter alterado seus campos
 	fluxgo.RunTestRequest(
 		app,
@@ -38,6 +34,23 @@ func TestUpdateJob(t *testing.T) {
 		},
 		adminHeaders,
 	)
+
+	// Setup: cria um job pendente para o teste de nurse. Jobs done não podem ser resetados
+	// pela API, então um job fresco é criado a cada execução para garantir idempotência.
+	_, nurseJobResp := fluxgo.RunTestRequest(
+		app,
+		"POST",
+		endpoint,
+		map[string]interface{}{
+			"id_user":     "usr_2veL1FPpuXxUaZcFaEC57BfplNV",
+			"id_step":     "dst_2veL1FPpuXxUaZcFaEC57BfpcCC",
+			"name":        "Coleta para teste de nurse",
+			"description": "Job criado para teste de atualização de status pela nurse",
+			"date_set":    time.Now().UTC().AddDate(0, 0, 5).Format(time.RFC3339),
+		},
+		adminHeaders,
+	)
+	nurseJobId, _ := nurseJobResp["id_job"].(string)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Admin updates description", func(t *testing.T) {
@@ -105,7 +118,7 @@ func TestUpdateJob(t *testing.T) {
 			httpStatus, resp := fluxgo.RunTestRequest(
 				app,
 				"PUT",
-				endpoint+"/job_3EEP6m8y0peA0J6lrNABYPhhJzG",
+				endpoint+"/"+nurseJobId,
 				body,
 				nurseHeaders,
 			)
