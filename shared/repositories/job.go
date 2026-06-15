@@ -145,3 +145,54 @@ func (r *JobRepository) CreateJob(
 		params,
 	)
 }
+
+type UpdateJobRepositoryReq struct {
+	IdJob        string
+	IdUser       *string
+	Status       *entities.EnumJobStatus
+	Description  *string
+	DateSet      *time.Time
+	UserFeedback *string
+	UpdatedBy    string
+}
+
+func (r *JobRepository) UpdateJob(
+	ctx context.Context,
+	data *UpdateJobRepositoryReq,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE job
+		SET
+			id_user       = COALESCE(:id_user, id_user),
+			status        = COALESCE(:status, status),
+			description   = COALESCE(:description, description),
+			date_set      = COALESCE(:date_set, date_set),
+			user_feedback = COALESCE(:user_feedback, user_feedback),
+			updated_at    = now(),
+			updated_by    = :updated_by
+		WHERE
+			id_job     = :id_job
+			AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_job":        data.IdJob,
+		"id_user":       data.IdUser,
+		"status":        data.Status,
+		"description":   data.Description,
+		"date_set":      data.DateSet,
+		"user_feedback": data.UserFeedback,
+		"updated_by":    data.UpdatedBy,
+	}
+
+	return utils.Update(
+		ctx,
+		r.DB.WriteDB(),
+		span,
+		query,
+		params,
+	)
+}
