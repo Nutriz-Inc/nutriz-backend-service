@@ -43,7 +43,7 @@ func TestUpdateJob(t *testing.T) {
 		endpoint,
 		map[string]interface{}{
 			"id_user":     "usr_2veL1FPpuXxUaZcFaEC57BfplNV",
-			"id_step":     "dst_2veL1FPpuXxUaZcFaEC57BfpcCC",
+			"id_step":     "dst_2veL1FPpuXxUaZcFaEC57BfslJG",
 			"name":        "Coleta para teste de nurse",
 			"description": "Job criado para teste de atualização de status pela nurse",
 			"date_set":    time.Now().UTC().AddDate(0, 0, 5).Format(time.RFC3339),
