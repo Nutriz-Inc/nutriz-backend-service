@@ -88,5 +88,24 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
+	mod.AddHandler(handlers.HandlerRemoveJobStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerRemoveJob) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"DELETE",
+			"/job/:id",
+			fluxgo.RouteIncome{
+				Entity:          dto.RemoveJobReq{},
+				FromParam:       true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/job"},
+			},
+			handler.HandleHttp,
+		)
+	})
+
 	return mod
 }
