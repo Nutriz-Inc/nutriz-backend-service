@@ -36,4 +36,4 @@ jobs:
 
       - name: E2E Test
         run: |
-          ENV=test go test ./...
+          ENV=test go test ./... -p 1
