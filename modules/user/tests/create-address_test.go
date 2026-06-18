@@ -39,7 +39,7 @@ func TestCreateAddress(t *testing.T) {
 
 			assert.Equal(t, http.StatusCreated, status)
 			assert.NotNil(t, resp["id_address"])
-			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", resp["id_user"])
+			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKF", resp["id_user"])
 			assert.Equal(t, body.ZipCode, resp["zipcode"])
 			assert.NotNil(t, resp["street"])
 			assert.NotNil(t, resp["city"])
