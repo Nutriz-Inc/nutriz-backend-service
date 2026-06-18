@@ -4,7 +4,6 @@ import (
 	"context"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/user/dtos"
-	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -49,28 +48,16 @@ func (h *HandlerUpdateUser) Execute(ctx context.Context, data *dto.UpdateUserReq
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
+	if data.ActionBy != data.Id {
+		return nil, utils.ErrorForbidden("You don't have permission to update this user", "user.forbidden")
+	}
+
 	validator := data.ValidateUpdateUserOptionalFields()
 
 	fieldsToUpdate := 0
 	repoData := &repositories.UpdateUserRepositoryReq{
 		IdUser:   data.Id,
 		ActionBy: data.ActionBy,
-	}
-
-	if validator.HasInternalIdentifier && (user.InternalIdentifier == nil || *data.InternalIdentifier != *user.InternalIdentifier) {
-		if user.Type == entities.EnumUserTypeCommon {
-			return nil, fluxgo.ErrorBadRequest("Common users cannot have internal identifier", "user.invalid_field")
-		}
-		repoData.InternalIdentifier = data.InternalIdentifier
-		fieldsToUpdate++
-	}
-
-	if validator.HasType && *data.Type != user.Type {
-		if actor.Type != entities.EnumUserTypeAdmin {
-			return nil, utils.ErrorForbidden("Only admins can change user type", "user.forbidden_type")
-		}
-		repoData.Type = data.Type
-		fieldsToUpdate++
 	}
 
 	if validator.HasName && *data.Name != user.Name {
