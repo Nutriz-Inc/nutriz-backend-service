@@ -14,8 +14,8 @@ import (
 
 func TestUpdateUser(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
-	defer fx.RequireStart().RequireStop()	
-	
+	defer fx.RequireStart().RequireStop()
+
 	endpoint := "/internal/user/usr_2veL1FPpuXxUaZcFaEC57BfpcKE"
 
 	t.Run("Success", func(t *testing.T) {
@@ -24,7 +24,7 @@ func TestUpdateUser(t *testing.T) {
 				Name: utils.StringPtr("Maria Silva Atualizada"),
 			}
 			headers := &utils.TestHeaders
-			status, body := fluxgo.RunTestRequest(app, "PATCH", endpoint, data, headers)
+			status, body := fluxgo.RunTestRequest(app, "PUT", endpoint, data, headers)
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, "Maria Silva Atualizada", body["name"])
 		})
@@ -34,7 +34,7 @@ func TestUpdateUser(t *testing.T) {
 				Email: utils.StringPtr("maria.nova@email.com"),
 			}
 			headers := &utils.TestHeaders
-			status, body := fluxgo.RunTestRequest(app, "PATCH", endpoint, data, headers)
+			status, body := fluxgo.RunTestRequest(app, "PUT", endpoint, data, headers)
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, "maria.nova@email.com", body["email"])
@@ -46,7 +46,7 @@ func TestUpdateUser(t *testing.T) {
 				Type: (*entities.EnumUserType)(utils.StringPtr("adm")),
 			}
 			headers := &utils.TestHeadersAdmin
-			status, body := fluxgo.RunTestRequest(app, "PATCH", nurseEndpoint, data, headers)
+			status, body := fluxgo.RunTestRequest(app, "PUT", nurseEndpoint, data, headers)
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, "adm", body["type"])
@@ -59,7 +59,7 @@ func TestUpdateUser(t *testing.T) {
 				Name: utils.StringPtr("Ninguem"),
 			}
 			headers := &utils.TestHeaders
-			status, body := fluxgo.RunTestRequest(app, "PATCH", "/internal/user/usr_2veL1FPpuXxUaZcAbEC57BfpcMM", data, headers)
+			status, body := fluxgo.RunTestRequest(app, "PUT", "/internal/user/usr_2veL1FPpuXxUaZcAbEC57BfpcMM", data, headers)
 
 			assert.Equal(t, http.StatusNotFound, status)
 			assert.Equal(t, "User not found", body["message"])
@@ -70,7 +70,7 @@ func TestUpdateUser(t *testing.T) {
 				InternalIdentifier: utils.StringPtr("ID-001"),
 			}
 			headers := &utils.TestHeaders
-			status, body := fluxgo.RunTestRequest(app, "PATCH", endpoint, data, headers)
+			status, body := fluxgo.RunTestRequest(app, "PUT", endpoint, data, headers)
 
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "Common users cannot have internal identifier", body["message"])
@@ -82,7 +82,7 @@ func TestUpdateUser(t *testing.T) {
 				Type: (*entities.EnumUserType)(utils.StringPtr("nurse")),
 			}
 			headers := &utils.TestHeaders
-			status, body := fluxgo.RunTestRequest(app, "PATCH", endpoint, data, headers)
+			status, body := fluxgo.RunTestRequest(app, "PUT", endpoint, data, headers)
 
 			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "Only admins can change user type", body["message"])
@@ -94,7 +94,7 @@ func TestUpdateUser(t *testing.T) {
 				Email: utils.StringPtr("marta@email.com"),
 			}
 			headers := &utils.TestHeaders
-			status, body := fluxgo.RunTestRequest(app, "PATCH", endpoint, data, headers)
+			status, body := fluxgo.RunTestRequest(app, "PUT", endpoint, data, headers)
 
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "Email already in use", body["message"])
@@ -106,7 +106,7 @@ func TestUpdateUser(t *testing.T) {
 				Name: utils.StringPtr("Hacker"),
 			}
 			headers := &utils.TestHeadersAdmin
-			status, body := fluxgo.RunTestRequest(app, "PATCH", endpoint, data, headers)
+			status, body := fluxgo.RunTestRequest(app, "PUT", endpoint, data, headers)
 
 			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "You don't have permission to update this user", body["message"])

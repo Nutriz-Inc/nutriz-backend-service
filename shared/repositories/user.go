@@ -5,6 +5,7 @@ import (
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
@@ -199,6 +200,7 @@ func (r *UserRepository) CreateUser(
 		ctx,
 		r.DB.WriteDB(),
 		data,
+		
 	)
 }
 
@@ -264,40 +266,62 @@ type UpdateUserRepositoryReq struct {
 	Password				*string
 }
 
-func (r *UserRepository) UpdateUser(ctx context.Context, data *UpdateUserRepositoryReq) error {
+func (r *UserRepository) updateUser(ctx context.Context, exec sqlx.ExtContext, data *UpdateUserRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
+	sets := []string{}
+	params := map[string]any{
+		"id_user":    data.IdUser,
+		"updated_by": data.ActionBy,
+	}
+
+	if data.InternalIdentifier != nil {
+		sets = append(sets, "internal_identifier = :internal_identifier")
+		params["internal_identifier"] = *data.InternalIdentifier
+	}
+	if data.Type != nil {
+		sets = append(sets, "type = :type")
+		params["type"] = *data.Type
+	}
+	if data.Name != nil {
+		sets = append(sets, "name = :name")
+		params["name"] = *data.Name
+	}
+	if data.PhoneNumber != nil {
+		sets = append(sets, "phone_number = :phone_number")
+		params["phone_number"] = *data.PhoneNumber
+	}
+	if data.Email != nil {
+		sets = append(sets, "email = :email")
+		params["email"] = *data.Email
+	}
+	if data.Password != nil {
+		sets = append(sets, "password = :password")
+		params["password"] = *data.Password
+	}
+
 	query := `
 		UPDATE "user"
-		SET
-			internal_identifier = COALESCE(:internal_identifier, internal_identifier),
-			type                = COALESCE(:type, type),
-			name                = COALESCE(:name, name),
-			phone_number        = COALESCE(:phone_number, phone_number),
-			email               = COALESCE(:email, email),
-			password            = COALESCE(:password, password),
-			updated_at          = now(),
-			updated_by          = :action_by
+		SET ` + strings.Join(sets, ", ") + `,
+		    updated_at = now(),
+		    updated_by = :updated_by
 		WHERE id_user = :id_user AND removed_at IS NULL
 	`
 
-	params := map[string]any{
-		"id_user":             data.IdUser,
-		"action_by":           data.ActionBy,
-		"internal_identifier": data.InternalIdentifier,
-		"type":                data.Type,
-		"name":                data.Name,
-		"phone_number":        data.PhoneNumber,
-		"email":               data.Email,
-		"password":            data.Password,
-	}
-
-	_, err := sqlx.NamedExecContext(ctx, r.DB.WriteDB(), query, params)
+	_, err := sqlx.NamedExecContext(ctx, exec, query, params)
 	if err != nil {
 		span.SetError(err)
 		return err
 	}
 
 	return nil
+}
+
+func (r *UserRepository) UpdateUserTx(ctx context.Context, tx *sqlx.Tx, data *UpdateUserRepositoryReq) error {
+	return r.updateUser(ctx, tx, data)
+}
+
+func (r *UserRepository) UpdateUser(ctx context.Context, data *UpdateUserRepositoryReq) error {
+	return r.updateUser(ctx, r.DB.WriteDB(), data)
 }

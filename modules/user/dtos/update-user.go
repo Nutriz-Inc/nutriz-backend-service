@@ -6,16 +6,36 @@ import (
 )
 
 type UpdateUserReq struct {
-	ActionBy			string					`reqHeader:"action-by" validate:"omitempty,id"`
-	InternalIdentifier	*string					`json:"internal_identifier" validate:"omitempty,max=50"`
-	Type				*entities.EnumUserType	`json:"type" validate:"omitempty,oneof=adm nurse"`
-	Name				*string					`json:"name" validate:"omitempty,max=120"`
-	PhoneNumber			*string					`json:"phone_number" validate:"omitempty,e164"`
-	Email				*string					`json:"email" validate:"omitempty,email"`
-	Password			*string					`json:"password" validate:"omitempty,min=8"`
+	ActionBy           string                 `reqHeader:"action-by" validate:"omitempty,id"`
+	InternalIdentifier *string                `json:"internal_identifier" validate:"omitempty,max=50"`
+	Type               *entities.EnumUserType `json:"type" validate:"omitempty,oneof=adm nurse"`
+	Name               *string                `json:"name" validate:"omitempty,max=120"`
+	PhoneNumber        *string                `json:"phone_number" validate:"omitempty,e164"`
+	Email              *string                `json:"email" validate:"omitempty,email"`
+	Password           *string                `json:"password" validate:"omitempty,min=8"`
 	utils.GetReq
 }
 
 type UpdateUserRes struct {
 	entities.User
+}
+
+type UpdateUserOptionalFields struct {
+	HasInternalIdentifier bool
+	HasType               bool
+	HasName               bool
+	HasPhoneNumber        bool
+	HasEmail              bool
+	HasPassword           bool
+}
+
+func (c UpdateUserReq) ValidateUpdateUserOptionalFields() UpdateUserOptionalFields {
+	return UpdateUserOptionalFields{
+		HasInternalIdentifier: c.InternalIdentifier != nil && *c.InternalIdentifier != "",
+		HasType:               c.Type != nil,
+		HasName:               c.Name != nil && *c.Name != "",
+		HasPhoneNumber:        c.PhoneNumber != nil && *c.PhoneNumber != "",
+		HasEmail:              c.Email != nil && *c.Email != "",
+		HasPassword:           c.Password != nil && *c.Password != "",
+	}
 }

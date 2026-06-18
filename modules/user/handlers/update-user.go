@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	c "context"
+	"context"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
@@ -18,7 +18,10 @@ type HandlerUpdateUser struct {
 }
 
 func HandlerUpdateUserStart(config *config.Env, userRepo *repositories.UserRepository) *HandlerUpdateUser {
-	return &HandlerUpdateUser{config, userRepo}
+	return &HandlerUpdateUser{
+		config:   config,
+		userRepo: userRepo,
+	}
 }
 
 func (h *HandlerUpdateUser) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.GlobalResponse, *fluxgo.GlobalError) {
@@ -29,7 +32,15 @@ func (h *HandlerUpdateUser) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxg
 	return &fluxgo.GlobalResponse{Content: resp, Status: 200}, nil
 }
 
-func (h *HandlerUpdateUser) Execute(ctx c.Context, data *dto.UpdateUserReq) (*dto.UpdateUserRes, *fluxgo.GlobalError) {
+func (h *HandlerUpdateUser) Execute(ctx context.Context, data *dto.UpdateUserReq) (*dto.UpdateUserRes, *fluxgo.GlobalError) {
+	actor, err := h.userRepo.GetUserById(ctx, data.ActionBy)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get action by user")
+	}
+	if actor == nil {
+		return nil, fluxgo.ErrorNotFound("Action by user not found")
+	}
+
 	user, err := h.userRepo.GetUserById(ctx, data.Id)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user")
@@ -38,27 +49,41 @@ func (h *HandlerUpdateUser) Execute(ctx c.Context, data *dto.UpdateUserReq) (*dt
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	actionBy, err := h.userRepo.GetUserById(ctx, data.ActionBy)
-	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to get action by user")
-	}
-	if actionBy == nil {
-		return nil, fluxgo.ErrorNotFound("Action by user not found")
+	validator := data.ValidateUpdateUserOptionalFields()
+
+	fieldsToUpdate := 0
+	repoData := &repositories.UpdateUserRepositoryReq{
+		IdUser:   data.Id,
+		ActionBy: data.ActionBy,
 	}
 
-	if actionBy.IdUser != user.IdUser {
-		return nil, utils.ErrorForbidden("You don't have permission to update this user", "user.forbidden")
+	if validator.HasInternalIdentifier && (user.InternalIdentifier == nil || *data.InternalIdentifier != *user.InternalIdentifier) {
+		if user.Type == entities.EnumUserTypeCommon {
+			return nil, fluxgo.ErrorBadRequest("Common users cannot have internal identifier", "user.invalid_field")
+		}
+		repoData.InternalIdentifier = data.InternalIdentifier
+		fieldsToUpdate++
 	}
 
-	if data.Type != nil && actionBy.Type != entities.EnumUserTypeAdmin {
-		return nil, utils.ErrorForbidden("Only admins can change user type", "user.forbidden_type")
+	if validator.HasType && *data.Type != user.Type {
+		if actor.Type != entities.EnumUserTypeAdmin {
+			return nil, utils.ErrorForbidden("Only admins can change user type", "user.forbidden_type")
+		}
+		repoData.Type = data.Type
+		fieldsToUpdate++
 	}
 
-	if data.InternalIdentifier != nil && user.Type == entities.EnumUserTypeCommon {
-		return nil, fluxgo.ErrorBadRequest("Common users cannot have internal identifier", "user.invalid_field")
+	if validator.HasName && *data.Name != user.Name {
+		repoData.Name = data.Name
+		fieldsToUpdate++
 	}
 
-	if data.Email != nil {
+	if validator.HasPhoneNumber && *data.PhoneNumber != user.PhoneNumber {
+		repoData.PhoneNumber = data.PhoneNumber
+		fieldsToUpdate++
+	}
+
+	if validator.HasEmail && *data.Email != user.Email {
 		userWithSameEmail, err := h.userRepo.GetUserByEmail(ctx, *data.Email)
 		if err != nil {
 			return nil, fluxgo.ErrorInternalError("Error to get user by email")
@@ -66,28 +91,28 @@ func (h *HandlerUpdateUser) Execute(ctx c.Context, data *dto.UpdateUserReq) (*dt
 		if userWithSameEmail != nil && userWithSameEmail.IdUser != user.IdUser {
 			return nil, fluxgo.ErrorBadRequest("Email already in use", "user.duplicate_email")
 		}
+		repoData.Email = data.Email
+		fieldsToUpdate++
 	}
 
-	var hashPassword *string
-	if data.Password != nil {
+	if validator.HasPassword {
 		secret := utils.Secret{}
 		hash, err := secret.Encrypt(h.config, *data.Password)
 		if err != nil {
 			return nil, fluxgo.ErrorInternalError("Error to encrypt password")
 		}
-		hashPassword = &hash
+		repoData.Password = &hash
+		fieldsToUpdate++
 	}
 
-	err = h.userRepo.UpdateUser(ctx, &repositories.UpdateUserRepositoryReq{
-		IdUser:             data.Id,
-		ActionBy:           data.ActionBy,
-		InternalIdentifier: data.InternalIdentifier,
-		Type:               data.Type,
-		Name:               data.Name,
-		PhoneNumber:        data.PhoneNumber,
-		Email:              data.Email,
-		Password:           hashPassword,
-	})
+	if fieldsToUpdate == 0 {
+		return nil, fluxgo.ErrorBadRequest(
+			"At least one field must be different to update",
+			"user.no_fields_to_update",
+		)
+	}
+
+	err = h.userRepo.UpdateUser(ctx, repoData)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to update user")
 	}
@@ -96,6 +121,9 @@ func (h *HandlerUpdateUser) Execute(ctx c.Context, data *dto.UpdateUserReq) (*dt
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get updated user")
 	}
+	if updatedUser == nil {
+		return nil, fluxgo.ErrorNotFound("Updated user not found")
+	}
 
 	return &dto.UpdateUserRes{User: *updatedUser}, nil
-}	
+}

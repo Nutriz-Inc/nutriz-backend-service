@@ -110,19 +110,19 @@ func Module() *fluxgo.FluxModule {
 		return mod.HttpRoute(
 			f,
 			"/internal",
-			"PATCH",
+			"PUT",
 			"/user/:id",
 			fluxgo.RouteIncome{
-				Entity:				dto.UpdateUserReq{},
-				FromBody:			true,
-				FromParam:			true,
-				FromHeader:			true,
-				Validate:			true,
-				Cache:				redis,
-				CacheInvalidate:	[]string{"/internal/user"},
+				Entity:          dto.UpdateUserReq{},
+				FromBody:        true,
+				FromParam:       true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/user"},
 			},
 			handler.HandleHttp,
-		)	
+		)
 	})
 
 	// baby
