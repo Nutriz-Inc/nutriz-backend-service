@@ -45,7 +45,7 @@ func TestGetUser(t *testing.T) {
 			assert.True(t, ok)
 
 			assert.NotNil(t, addresses)
-			assert.GreaterOrEqual(t, len(addresses), 2)
+			assert.Equal(t, len(addresses), 1)
 		})
 		t.Run("With baby", func(t *testing.T) {
 			route := fmt.Sprintf("%s/%s?show_baby=true", endpoint, id)

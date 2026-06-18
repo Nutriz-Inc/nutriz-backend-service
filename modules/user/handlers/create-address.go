@@ -59,13 +59,13 @@ func (h *HandlerCreateAddress) Execute(ctx context.Context, data *dto.CreateAddr
 		return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("User can have up to %d addresses", entities.MAX_ADDRESS_QUANTITY_PER_USER), "address.max_quantity_reached")
 	}
 
-	addressWithSameZipcode, err := h.addressRepo.GetAddressByZipcodeAndIdUser(ctx, data.ZipCode, user.IdUser)
-	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to get address by zipcode")
-	}
-	if addressWithSameZipcode != nil {
-		return nil, fluxgo.ErrorBadRequest("Address with same zipcode already exists", "address.already_exists")
-	}
+	// addressWithSameZipcode, err := h.addressRepo.GetAddressByZipcodeAndIdUser(ctx, data.ZipCode, user.IdUser)
+	// if err != nil {
+	// 	return nil, fluxgo.ErrorInternalError("Error to get address by zipcode")
+	// }
+	// if addressWithSameZipcode != nil {
+	// 	return nil, fluxgo.ErrorBadRequest("Address with same zipcode already exists", "address.already_exists")
+	// }
 
 	addressData, err := utils.GetAddressByZipCode(ctx, data.ZipCode, h.config)
 	if err != nil {
