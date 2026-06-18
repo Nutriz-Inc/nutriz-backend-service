@@ -5,6 +5,7 @@ import (
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
@@ -199,6 +200,7 @@ func (r *UserRepository) CreateUser(
 		ctx,
 		r.DB.WriteDB(),
 		data,
+		
 	)
 }
 
@@ -251,4 +253,75 @@ func (r *UserRepository) RemoveUser(
 		id,
 		actionBy,
 	)
+}
+
+type UpdateUserRepositoryReq struct {
+	IdUser					string
+	ActionBy				string
+	InternalIdentifier		*string
+	Type					*entities.EnumUserType
+	Name					*string
+	PhoneNumber				*string
+	Email					*string
+	Password				*string
+}
+
+func (r *UserRepository) updateUser(ctx context.Context, exec sqlx.ExtContext, data *UpdateUserRepositoryReq) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	sets := []string{}
+	params := map[string]any{
+		"id_user":    data.IdUser,
+		"updated_by": data.ActionBy,
+	}
+
+	if data.InternalIdentifier != nil {
+		sets = append(sets, "internal_identifier = :internal_identifier")
+		params["internal_identifier"] = *data.InternalIdentifier
+	}
+	if data.Type != nil {
+		sets = append(sets, "type = :type")
+		params["type"] = *data.Type
+	}
+	if data.Name != nil {
+		sets = append(sets, "name = :name")
+		params["name"] = *data.Name
+	}
+	if data.PhoneNumber != nil {
+		sets = append(sets, "phone_number = :phone_number")
+		params["phone_number"] = *data.PhoneNumber
+	}
+	if data.Email != nil {
+		sets = append(sets, "email = :email")
+		params["email"] = *data.Email
+	}
+	if data.Password != nil {
+		sets = append(sets, "password = :password")
+		params["password"] = *data.Password
+	}
+
+	query := `
+		UPDATE "user"
+		SET ` + strings.Join(sets, ", ") + `,
+		    updated_at = now(),
+		    updated_by = :updated_by
+		WHERE id_user = :id_user AND removed_at IS NULL
+	`
+
+	_, err := sqlx.NamedExecContext(ctx, exec, query, params)
+	if err != nil {
+		span.SetError(err)
+		return err
+	}
+
+	return nil
+}
+
+func (r *UserRepository) UpdateUserTx(ctx context.Context, tx *sqlx.Tx, data *UpdateUserRepositoryReq) error {
+	return r.updateUser(ctx, tx, data)
+}
+
+func (r *UserRepository) UpdateUser(ctx context.Context, data *UpdateUserRepositoryReq) error {
+	return r.updateUser(ctx, r.DB.WriteDB(), data)
 }
