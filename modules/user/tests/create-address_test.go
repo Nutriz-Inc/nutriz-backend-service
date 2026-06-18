@@ -19,7 +19,7 @@ func TestCreateAddress(t *testing.T) {
 	defer fx.RequireStart().RequireStop()
 
 	endpoint := "/internal/user/address"
-	headers := &utils.TestHeaders
+	headers := &utils.TestHeadersCommon
 
 	makeBody := func(zipcode string) dto.CreateAddressReq {
 		return dto.CreateAddressReq{
