@@ -30,7 +30,6 @@ func (h *HandlerUpdateUser) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxg
 }
 
 func (h *HandlerUpdateUser) Execute(ctx c.Context, data *dto.UpdateUserReq) (*dto.UpdateUserRes, *fluxgo.GlobalError) {
-	//busca o user alvo
 	user, err := h.userRepo.GetUserById(ctx, data.Id)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user")
@@ -39,7 +38,6 @@ func (h *HandlerUpdateUser) Execute(ctx c.Context, data *dto.UpdateUserReq) (*dt
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	// busca que m tá fazendo a ação
 	actionBy, err := h.userRepo.GetUserById(ctx, data.ActionBy)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get action by user")
@@ -48,22 +46,18 @@ func (h *HandlerUpdateUser) Execute(ctx c.Context, data *dto.UpdateUserReq) (*dt
 		return nil, fluxgo.ErrorNotFound("Action by user not found")
 	}
 
-	// só o proprio user editar
 	if actionBy.IdUser != user.IdUser {
 		return nil, utils.ErrorForbidden("You don't have permission to update this user", "user.forbidden")
 	}
 
-	// type so pode ser trocado por adm
 	if data.Type != nil && actionBy.Type != entities.EnumUserTypeAdmin {
 		return nil, utils.ErrorForbidden("Only admins can change user type", "user.forbidden_type")
 	}
 
-	// common não recebe internal_identifier
 	if data.InternalIdentifier != nil && user.Type == entities.EnumUserTypeCommon {
 		return nil, fluxgo.ErrorBadRequest("Common users cannot have internal identifier", "user.invalid_field")
 	}
 
-	// valida email único
 	if data.Email != nil {
 		userWithSameEmail, err := h.userRepo.GetUserByEmail(ctx, *data.Email)
 		if err != nil {
@@ -74,7 +68,6 @@ func (h *HandlerUpdateUser) Execute(ctx c.Context, data *dto.UpdateUserReq) (*dt
 		}
 	}
 
-	// hash da nova senha
 	var hashPassword *string
 	if data.Password != nil {
 		secret := utils.Secret{}
