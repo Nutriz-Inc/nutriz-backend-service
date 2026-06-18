@@ -154,7 +154,7 @@ func (r *JobRepository) RemoveJob(ctx context.Context, id, actionBy string) erro
 
 	query := `
 		UPDATE job
-		SET removed_at = now()
+		SET removed_at = now(),
 		    removed_by = $2			
 		WHERE id_job = $1 AND removed_at IS NULL
 	`
