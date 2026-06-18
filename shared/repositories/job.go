@@ -5,10 +5,12 @@ import (
 	dto "nutriz-backend-service/modules/job/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
+	"github.com/jmoiron/sqlx"
 )
 
 type JobRepository struct {
@@ -143,5 +145,108 @@ func (r *JobRepository) CreateJob(
 		span,
 		query,
 		params,
+	)
+}
+
+func (r *JobRepository) RemoveJob(ctx context.Context, id, actionBy string) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE job
+		SET removed_at = now(),
+		    removed_by = $2			
+		WHERE id_job = $1 AND removed_at IS NULL
+	`
+
+	return utils.Delete(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		id,
+		actionBy,
+	)
+}
+
+type UpdateJobRepositoryReq struct {
+	IdJob        string
+	IdUser       *string
+	Status       *entities.EnumJobStatus
+	Description  *string
+	DateSet      *time.Time
+	UserFeedback *string
+	UpdatedBy    string
+}
+
+func (r *JobRepository) updateJob(ctx context.Context, exec sqlx.ExtContext, data *UpdateJobRepositoryReq) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	sets := []string{}
+	params := map[string]any{
+		"id_job":     data.IdJob,
+		"updated_by": data.UpdatedBy,
+	}
+
+	if data.Status != nil {
+		sets = append(sets, "status = :status")
+		params["status"] = *data.Status
+	}
+	if data.DateSet != nil {
+		sets = append(sets, "date_set = :date_set")
+		params["date_set"] = *data.DateSet
+	}
+	if data.UserFeedback != nil {
+		sets = append(sets, "user_feedback = :user_feedback")
+		params["user_feedback"] = *data.UserFeedback
+	}
+	if data.Description != nil {
+		sets = append(sets, "description = :description")
+		params["description"] = *data.Description
+	}
+	if data.IdUser != nil {
+		sets = append(sets, "id_user = :id_user")
+		params["id_user"] = *data.IdUser
+	}
+
+	query := `
+		UPDATE job
+		SET ` + strings.Join(sets, ", ") + `,
+		    updated_at = now(),
+			updated_by = :updated_by
+		WHERE id_job = :id_job AND removed_at IS NULL
+	`
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *JobRepository) UpdateJobTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	data *UpdateJobRepositoryReq,
+) error {
+	return r.updateJob(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *JobRepository) UpdateJob(
+	ctx context.Context,
+	data *UpdateJobRepositoryReq,
+) error {
+	return r.updateJob(
+		ctx,
+		r.DB.WriteDB(),
+		data,
 	)
 }

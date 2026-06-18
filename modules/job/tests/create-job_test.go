@@ -16,22 +16,14 @@ func TestCreateJob(t *testing.T) {
 	defer fx.RequireStart().RequireStop()
 
 	endpoint := "/internal/job"
-
-	admHeaders := &fluxgo.Headers{
-		"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGNBRCIsImV4cCI6MTc3OTM5NzgzNCwiaWF0IjoxNzc4NzkzMDM0fQ.USyo6psNKQ2YNx0BIHUu8QmsW1KMFN5rmbzL6MhSR7I",
-		"action-by":     "usr_2veL1FPpuXxUaZcFaEC57BfpcAD",
-	}
-
-	commonHeaders := &fluxgo.Headers{
-		"Authorization": utils.TestHeaders["Authorization"],
-		"action-by":     "usr_2veL1FPpuXxUaZcFaEC57BfpcKE",
-	}
+	adminHeaders := &utils.TestHeadersAdmin
+	commonHeaders := &utils.TestHeaders
 
 	const (
-		idNurse      = "usr_2veL1FPpuXxUaZcFaEC57BfpcNF"
-		idCommonUser = "usr_2veL1FPpuXxUaZcFaEC57BfpcKE"
+		idNurse      = "usr_2veL1FPpuXxUaZcFaEC57BfplNV"
+		idCommonUser = "usr_2veL1FPpuXxUaZcFaEC57BfpcKG"
 
-		idStepForSuccess = "dst_2veL1FPpuXxUaZcFaEC57BfpcCC"
+		idStepForSuccess = "dst_2veL1FPpuXxUaZcFaEC57BfslJG"
 		idStepInactive   = "dst_2veL1FPpuXxUaZcFaEC57BfpcAA"
 
 		idNonExistentUser = "usr_2veL1FPpuXxUaZcFaEC57BfpcZZ"
@@ -50,7 +42,7 @@ func TestCreateJob(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Create job successfully", func(t *testing.T) {
-			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, baseBody(), admHeaders)
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, baseBody(), adminHeaders)
 
 			assert.Equal(t, http.StatusCreated, status)
 			assert.NotNil(t, resp["id_job"])
@@ -75,7 +67,7 @@ func TestCreateJob(t *testing.T) {
 			body := baseBody()
 			body["id_user"] = idCommonUser
 
-			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, admHeaders)
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "Jobs can only be assigned to nurses", resp["message"])
@@ -86,7 +78,7 @@ func TestCreateJob(t *testing.T) {
 			body := baseBody()
 			body["id_user"] = idNonExistentUser
 
-			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, admHeaders)
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusNotFound, status)
 			assert.Equal(t, "Assignee user not found", resp["message"])
@@ -96,7 +88,7 @@ func TestCreateJob(t *testing.T) {
 			body := baseBody()
 			body["date_set"] = time.Now().AddDate(0, 0, -1).Format(time.RFC3339)
 
-			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, admHeaders)
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "Set date cannot be in the past", resp["message"])
@@ -107,7 +99,7 @@ func TestCreateJob(t *testing.T) {
 			body := baseBody()
 			body["id_step"] = idNonExistentStep
 
-			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, admHeaders)
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusNotFound, status)
 			assert.Equal(t, "Donation step not found", resp["message"])
@@ -117,7 +109,7 @@ func TestCreateJob(t *testing.T) {
 			body := baseBody()
 			body["id_step"] = idStepInactive
 
-			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, admHeaders)
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "Donation is not active", resp["message"])

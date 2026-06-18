@@ -68,5 +68,44 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
+	mod.AddHandler(handlers.HandlerUpdateJobStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerUpdateJob) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"PUT",
+			"/job/:id",
+			fluxgo.RouteIncome{
+				Entity:          dto.UpdateJobReq{},
+				FromParam:       true,
+				FromBody:        true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/job"},
+			},
+			handler.HandleHttp,
+		)
+	})
+
+	mod.AddHandler(handlers.HandlerRemoveJobStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerRemoveJob) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"DELETE",
+			"/job/:id",
+			fluxgo.RouteIncome{
+				Entity:          dto.RemoveJobReq{},
+				FromParam:       true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/job"},
+			},
+			handler.HandleHttp,
+		)
+	})
+
 	return mod
 }

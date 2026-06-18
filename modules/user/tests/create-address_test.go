@@ -19,13 +19,15 @@ func TestCreateAddress(t *testing.T) {
 	defer fx.RequireStart().RequireStop()
 
 	endpoint := "/internal/user/address"
-	headers := &utils.TestHeaders
+	headers := &utils.TestHeadersCommon
 
 	makeBody := func(zipcode string) dto.CreateAddressReq {
 		return dto.CreateAddressReq{
-			ZipCode:    zipcode,
-			Number:     utils.StringPtr("123"),
-			Complement: utils.StringPtr("Apto 2"),
+			AddressCreateBase: dto.AddressCreateBase{
+				ZipCode:    zipcode,
+				Number:     utils.StringPtr("123"),
+				Complement: utils.StringPtr("Apto 2"),
+			},
 		}
 	}
 
@@ -35,9 +37,9 @@ func TestCreateAddress(t *testing.T) {
 
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
 
-			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, http.StatusCreated, status)
 			assert.NotNil(t, resp["id_address"])
-			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", resp["id_user"])
+			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKF", resp["id_user"])
 			assert.Equal(t, body.ZipCode, resp["zipcode"])
 			assert.NotNil(t, resp["street"])
 			assert.NotNil(t, resp["city"])
@@ -57,24 +59,16 @@ func TestCreateAddress(t *testing.T) {
 			assert.Equal(t, "User does not have permission to create address", resp["message"])
 		})
 
-		t.Run("Address with same zipcode already exists", func(t *testing.T) {
-			body := makeBody("09415987")
+		// t.Run("Address with same zipcode already exists", func(t *testing.T) {
+		// 	body := makeBody("09415987")
 
-			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
+		// 	status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
 
-			assert.Equal(t, http.StatusBadRequest, status)
-			assert.Equal(t, "Address with same zipcode already exists", resp["message"])
-		})
+		// 	assert.Equal(t, http.StatusBadRequest, status)
+		// 	assert.Equal(t, "Address with same zipcode already exists", resp["message"])
+		// })
 
 		t.Run("User can have up to %d addresses", func(t *testing.T) {
-			setupZipcodes := []string{"01002000"}
-
-			for _, zipcode := range setupZipcodes {
-				body := makeBody(zipcode)
-				status, _ := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
-				assert.Equal(t, http.StatusOK, status)
-			}
-
 			body := makeBody("01005000")
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
 

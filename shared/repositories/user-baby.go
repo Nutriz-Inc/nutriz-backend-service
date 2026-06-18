@@ -9,6 +9,7 @@ import (
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
+	"github.com/jmoiron/sqlx"
 )
 
 type UserBabyRepository struct {
@@ -19,7 +20,7 @@ func UserBabyRepositoryStart(db *fluxgo.Database) *UserBabyRepository {
 	return &UserBabyRepository{*fluxgo.NewRepository[entities.UserBaby](db)}
 }
 
-func (r *UserBabyRepository) GetUserBabyesByUserId(
+func (r *UserBabyRepository) GetUserBabiesByUserId(
 	ctx context.Context,
 	userId string,
 ) (*[]entities.UserBaby, int, error) {
@@ -40,7 +41,7 @@ func (r *UserBabyRepository) GetUserBabyesByUserId(
 		span,
 		qb,
 		utils.IntPtr(entities.MAX_BABY_QUANTITY_PER_USER),
-		false,
+		true,
 	)
 }
 
@@ -67,7 +68,7 @@ type CreateUserBabyRepositoryReq struct {
 	BirthDate  time.Time
 }
 
-func (r *UserBabyRepository) CreateUserBaby(ctx context.Context, data *CreateUserBabyRepositoryReq) error {
+func (r *UserBabyRepository) createUserBaby(ctx context.Context, exec sqlx.ExtContext, data *CreateUserBabyRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -94,12 +95,36 @@ func (r *UserBabyRepository) CreateUserBaby(ctx context.Context, data *CreateUse
 		"birth_date":   data.BirthDate,
 	}
 
-	return utils.Insert(
+	_, err := sqlx.NamedExecContext(
 		ctx,
-		r.DB.ReadOnlyDB(),
-		span,
+		exec,
 		query,
 		params,
+	)
+
+	return err
+}
+
+func (r *UserBabyRepository) CreateUserBabyTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	data *CreateUserBabyRepositoryReq,
+) error {
+	return r.createUserBaby(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *UserBabyRepository) CreateUserBaby(
+	ctx context.Context,
+	data *CreateUserBabyRepositoryReq,
+) error {
+	return r.createUserBaby(
+		ctx,
+		r.DB.WriteDB(),
+		data,
 	)
 }
 
@@ -124,10 +149,10 @@ func (r *UserBabyRepository) RemoveUserBaby(ctx context.Context, id, actionBy st
 }
 
 type UpdateUserBabyRepositoryReq struct {
-	IdUserBaby		string
-	IdUser			string
-	Name			*string
-	BirthDate		*time.Time
+	IdUserBaby string
+	IdUser     string
+	Name       *string
+	BirthDate  *time.Time
 }
 
 func (r *UserBabyRepository) UpdateUserBaby(ctx context.Context, data UpdateUserBabyRepositoryReq) error {
@@ -136,8 +161,8 @@ func (r *UserBabyRepository) UpdateUserBaby(ctx context.Context, data UpdateUser
 
 	sets := []string{}
 	params := map[string]any{
-		"id_user_baby":	data.IdUserBaby,
-		"id_user":		data.IdUser,
+		"id_user_baby": data.IdUserBaby,
+		"id_user":      data.IdUser,
 	}
 
 	if data.Name != nil {
@@ -165,9 +190,9 @@ func (r *UserBabyRepository) UpdateUserBaby(ctx context.Context, data UpdateUser
 
 	return utils.Update(
 		ctx,
-        r.DB.ReadOnlyDB(),
-        span,
-        query,
-        params,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		params,
 	)
 }

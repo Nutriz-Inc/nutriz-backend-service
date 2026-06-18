@@ -8,6 +8,7 @@ import (
 
 	fluxgo "github.com/MMortari/FluxGo"
 	q "github.com/MMortari/go-query-builder"
+	"github.com/jmoiron/sqlx"
 )
 
 type AddressRepository struct {
@@ -84,8 +85,9 @@ type CreateAddressRepositoryReq struct {
 	Longitude    *float64
 }
 
-func (r *AddressRepository) CreateAddress(
+func (r *AddressRepository) createAddress(
 	ctx context.Context,
+	exec sqlx.ExtContext,
 	data *CreateAddressRepositoryReq,
 ) error {
 	ctx, span := r.StartSpan(ctx)
@@ -135,12 +137,36 @@ func (r *AddressRepository) CreateAddress(
 		"longitude":    data.Longitude,
 	}
 
-	return utils.Insert(
+	_, err := sqlx.NamedExecContext(
 		ctx,
-		r.DB.ReadOnlyDB(),
-		span,
+		exec,
 		query,
 		params,
+	)
+
+	return err
+}
+
+func (r *AddressRepository) CreateAddressTx(
+	ctx context.Context,
+	tx *sqlx.Tx,
+	data *CreateAddressRepositoryReq,
+) error {
+	return r.createAddress(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *AddressRepository) CreateAddress(
+	ctx context.Context,
+	data *CreateAddressRepositoryReq,
+) error {
+	return r.createAddress(
+		ctx,
+		r.DB.WriteDB(),
+		data,
 	)
 }
 

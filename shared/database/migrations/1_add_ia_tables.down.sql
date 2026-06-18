@@ -1,0 +1,8 @@
+-- DROP TABLES
+DROP TABLE IF EXISTS llm_audit;
+DROP TABLE IF EXISTS kb_chunk;
+DROP TABLE IF EXISTS message;
+DROP TABLE IF EXISTS conversation;
+
+-- DROP ENUMS
+DROP TYPE IF EXISTS enum_message_role;

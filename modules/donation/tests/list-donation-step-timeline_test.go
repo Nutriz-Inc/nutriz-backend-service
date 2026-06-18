@@ -25,7 +25,6 @@ func TestListDonationStepTimeline(t *testing.T) {
 			route := fmt.Sprintf("%s/%s/timeline", endpoint, id)
 
 			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
-			fmt.Println("body:", body)
 
 			assert.Equal(t, http.StatusOK, status)
 
