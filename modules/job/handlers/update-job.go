@@ -71,86 +71,14 @@ func (h *HandlerUpdateJob) Execute(ctx context.Context, data *dto.UpdateJobReq) 
 		UpdatedBy: data.ActionBy,
 	}
 
-	validator := data.ValidateUpdateJobOptionalFields()
-
-	if actor.Type == entities.EnumUserTypeAdmin {
-		if data.Status != nil || data.UserFeedback != nil {
-			return nil, utils.ErrorForbidden(
-				"Admins can only update id_user, description and date_set",
-				"job.invalid_fields_for_admin",
-			)
+	switch actor.Type {
+	case entities.EnumUserTypeAdmin:
+		if err := h.handleAdmUpdate(ctx, data, job, repoData, &fieldsToUpdate); err != nil {
+			return nil, err
 		}
-
-		if validator.HasIdUser && *data.IdUser != job.IdUser {
-			assignee, err := h.userRepo.GetUserById(ctx, *data.IdUser)
-			if err != nil {
-				return nil, fluxgo.ErrorInternalError("Error to get assignee user")
-			}
-			if assignee == nil {
-				return nil, fluxgo.ErrorNotFound("Assignee user not found")
-			}
-			if assignee.Type != entities.EnumUserTypeNurse {
-				return nil, utils.ErrorForbidden(
-					"Jobs can only be assigned to nurses",
-					"job.invalid_assignee",
-				)
-			}
-			repoData.IdUser = data.IdUser
-			fieldsToUpdate++
-		}
-
-		if validator.HasDescription && *data.Description != job.Description {
-			repoData.Description = data.Description
-			fieldsToUpdate++
-		}
-
-		if validator.HasDateSet {
-			if !utils.IsFutureDate(*data.DateSet) {
-				return nil, fluxgo.ErrorBadRequest(
-					"Set date cannot be in the past",
-					"job.invalid_set_date",
-				)
-			}
-			setDateTime, err := utils.StringToTime(*data.DateSet)
-			if err != nil {
-				return nil, fluxgo.ErrorBadRequest(
-					"Invalid set date format",
-					"job.invalid_set_date_format",
-				)
-			}
-			repoData.DateSet = setDateTime
-			fieldsToUpdate++
-		}
-
-	} else {
-
-		if data.IdUser != nil || data.Description != nil || data.DateSet != nil {
-			return nil, utils.ErrorForbidden(
-				"Nurses can only update status and user_feedback",
-				"job.invalid_fields_for_nurse",
-			)
-		}
-
-		if validator.HasStatus {
-			if *data.Status == job.Status {
-				return nil, fluxgo.ErrorBadRequest(
-					"Status is already set to the provided value",
-					"job.status_unchanged",
-				)
-			}
-			if !validator.HasUserFeedback {
-				return nil, fluxgo.ErrorBadRequest(
-					"User feedback is required when updating status",
-					"job.feedback_required",
-				)
-			}
-			repoData.Status = data.Status
-			fieldsToUpdate++
-		}
-
-		if validator.HasUserFeedback && (job.UserFeedback == nil || *data.UserFeedback != *job.UserFeedback) {
-			repoData.UserFeedback = data.UserFeedback
-			fieldsToUpdate++
+	case entities.EnumUserTypeNurse:
+		if err := h.handleNurseUpdate(ctx, data, job, repoData, &fieldsToUpdate); err != nil {
+			return nil, err
 		}
 	}
 
@@ -177,4 +105,87 @@ func (h *HandlerUpdateJob) Execute(ctx context.Context, data *dto.UpdateJobReq) 
 	return &dto.UpdateJobRes{
 		Job: *updatedJob,
 	}, nil
+}
+
+func (h *HandlerUpdateJob) handleAdmUpdate(ctx context.Context, data *dto.UpdateJobReq, job *entities.Job, repoData *repositories.UpdateJobRepositoryReq, fieldsToUpdate *int) *fluxgo.GlobalError {
+	validator := data.ValidateUpdateJobOptionalFields()
+
+	if validator.HasStatus || validator.HasUserFeedback {
+		return utils.ErrorForbidden(
+			"Admins can only update id_user, description and date_set",
+			"job.invalid_fields_for_admin",
+		)
+	}
+
+	if validator.HasIdUser && *data.IdUser != job.IdUser {
+		assignee, err := h.userRepo.GetUserById(ctx, *data.IdUser)
+		if err != nil {
+			return fluxgo.ErrorInternalError("Error to get assignee user")
+		}
+		if assignee == nil {
+			return fluxgo.ErrorNotFound("Assignee user not found")
+		}
+		if assignee.Type != entities.EnumUserTypeNurse {
+			return utils.ErrorForbidden(
+				"Jobs can only be assigned to nurses",
+				"job.invalid_assignee",
+			)
+		}
+		repoData.IdUser = data.IdUser
+		(*fieldsToUpdate)++
+	}
+
+	if validator.HasDescription && *data.Description != job.Description {
+		repoData.Description = data.Description
+		(*fieldsToUpdate)++
+	}
+
+	if validator.HasDateSet && (job.DateSet == nil || *data.DateSet != job.DateSet.Format("2006-01-02T15:04:05Z07:00")) {
+		if !utils.IsFutureDate(*data.DateSet) {
+			return fluxgo.ErrorBadRequest(
+				"Set date cannot be in the past",
+				"job.invalid_set_date",
+			)
+		}
+		setDateTime, err := utils.StringToTime(*data.DateSet)
+		if err != nil {
+			return fluxgo.ErrorBadRequest(
+				"Invalid set date format",
+				"job.invalid_set_date_format",
+			)
+		}
+		repoData.DateSet = setDateTime
+		(*fieldsToUpdate)++
+	}
+
+	return nil
+}
+
+func (h *HandlerUpdateJob) handleNurseUpdate(ctx context.Context, data *dto.UpdateJobReq, job *entities.Job, repoData *repositories.UpdateJobRepositoryReq, fieldsToUpdate *int) *fluxgo.GlobalError {
+	validator := data.ValidateUpdateJobOptionalFields()
+
+	if validator.HasIdUser || validator.HasDescription || validator.HasDateSet {
+		return utils.ErrorForbidden(
+			"Nurses can only update status and user_feedback",
+			"job.invalid_fields_for_nurse",
+		)
+	}
+
+	if validator.HasStatus && *data.Status != job.Status {
+		if !validator.HasUserFeedback {
+			return fluxgo.ErrorBadRequest(
+				"User feedback is required when updating status",
+				"job.feedback_required",
+			)
+		}
+		repoData.Status = data.Status
+		(*fieldsToUpdate)++
+	}
+
+	if validator.HasUserFeedback && (job.UserFeedback == nil || *data.UserFeedback != *job.UserFeedback) {
+		repoData.UserFeedback = data.UserFeedback
+		(*fieldsToUpdate)++
+	}
+
+	return nil
 }
