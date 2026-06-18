@@ -148,28 +148,24 @@ func (r *JobRepository) CreateJob(
 	)
 }
 
-func (r *JobRepository) RemoveJob(ctx context.Context, id, removedBy string) error {
+func (r *JobRepository) RemoveJob(ctx context.Context, id, actionBy string) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
 	query := `
 		UPDATE job
-		SET removed_at = now(),
-		    removed_by = :removed_by
-		WHERE id_job = :id_job AND removed_at IS NULL
+		SET removed_at = now()
+		    removed_by = $2			
+		WHERE id_job = $1 AND removed_at IS NULL
 	`
 
-	params := map[string]any{
-		"id_job":     id,
-		"removed_by": removedBy,
-	}
-
-	return utils.Update(
+	return utils.Delete(
 		ctx,
-		r.DB.WriteDB(),
+		r.DB.ReadOnlyDB(),
 		span,
 		query,
-		params,
+		id,
+		actionBy,
 	)
 }
 
