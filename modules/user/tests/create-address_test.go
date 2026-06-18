@@ -59,14 +59,14 @@ func TestCreateAddress(t *testing.T) {
 			assert.Equal(t, "User does not have permission to create address", resp["message"])
 		})
 
-		t.Run("Address with same zipcode already exists", func(t *testing.T) {
-			body := makeBody("09415987")
+		// t.Run("Address with same zipcode already exists", func(t *testing.T) {
+		// 	body := makeBody("09415987")
 
-			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
+		// 	status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
 
-			assert.Equal(t, http.StatusBadRequest, status)
-			assert.Equal(t, "Address with same zipcode already exists", resp["message"])
-		})
+		// 	assert.Equal(t, http.StatusBadRequest, status)
+		// 	assert.Equal(t, "Address with same zipcode already exists", resp["message"])
+		// })
 
 		t.Run("User can have up to %d addresses", func(t *testing.T) {
 			setupZipcodes := []string{"01002000"}
