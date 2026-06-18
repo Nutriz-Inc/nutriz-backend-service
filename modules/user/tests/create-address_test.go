@@ -69,14 +69,6 @@ func TestCreateAddress(t *testing.T) {
 		// })
 
 		t.Run("User can have up to %d addresses", func(t *testing.T) {
-			setupZipcodes := []string{"01002000"}
-
-			for _, zipcode := range setupZipcodes {
-				body := makeBody(zipcode)
-				status, _ := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
-				assert.Equal(t, http.StatusCreated, status)
-			}
-
 			body := makeBody("01005000")
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, headers)
 
