@@ -252,3 +252,52 @@ func (r *UserRepository) RemoveUser(
 		actionBy,
 	)
 }
+
+type UpdateUserRepositoryReq struct {
+	IdUser					string
+	ActionBy				string
+	InternalIdentifier		*string
+	Type					*entities.EnumUserType
+	Name					*string
+	PhoneNumber				*string
+	Email					*string
+	Password				*string
+}
+
+func (r *UserRepository) UpdateUser(ctx context.Context, data *UpdateUserRepositoryReq) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE "user"
+		SET
+			internal_identifier = COALESCE(:internal_identifier, internal_identifier),
+			type                = COALESCE(:type, type),
+			name                = COALESCE(:name, name),
+			phone_number        = COALESCE(:phone_number, phone_number),
+			email               = COALESCE(:email, email),
+			password            = COALESCE(:password, password),
+			updated_at          = now(),
+			updated_by          = :action_by
+		WHERE id_user = :id_user AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_user":             data.IdUser,
+		"action_by":           data.ActionBy,
+		"internal_identifier": data.InternalIdentifier,
+		"type":                data.Type,
+		"name":                data.Name,
+		"phone_number":        data.PhoneNumber,
+		"email":               data.Email,
+		"password":            data.Password,
+	}
+
+	_, err := sqlx.NamedExecContext(ctx, r.DB.WriteDB(), query, params)
+	if err != nil {
+		span.SetError(err)
+		return err
+	}
+
+	return nil
+}

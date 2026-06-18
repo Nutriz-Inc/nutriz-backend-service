@@ -105,6 +105,26 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
+	mod.AddHandler(handlers.HandlerUpdateUserStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerUpdateUser) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"PATCH",
+			"/user/:id",
+			fluxgo.RouteIncome{
+				Entity:				dto.UpdateUserReq{},
+				FromBody:			true,
+				FromParam:			true,
+				FromHeader:			true,
+				Validate:			true,
+				Cache:				redis,
+				CacheInvalidate:	[]string{"/internal/user"},
+			},
+			handler.HandleHttp,
+		)	
+	})
+
 	// baby
 	mod.AddHandler(handlers.HandlerCreateUserBabyStart)
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateUserBaby) error {
