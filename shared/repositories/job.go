@@ -148,6 +148,27 @@ func (r *JobRepository) CreateJob(
 	)
 }
 
+func (r *JobRepository) RemoveJob(ctx context.Context, id, actionBy string) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE job
+		SET removed_at = now(),
+		    removed_by = $2			
+		WHERE id_job = $1 AND removed_at IS NULL
+	`
+
+	return utils.Delete(
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		id,
+		actionBy,
+	)
+}
+
 type UpdateJobRepositoryReq struct {
 	IdJob        string
 	IdUser       *string
