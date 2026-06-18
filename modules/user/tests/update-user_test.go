@@ -25,7 +25,6 @@ func TestUpdateUser(t *testing.T) {
 			}
 			headers := &utils.TestHeaders
 			status, body := fluxgo.RunTestRequest(app, "PATCH", endpoint, data, headers)
-			t.Logf("body: %v", body)
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, "Maria Silva Atualizada", body["name"])
 		})
