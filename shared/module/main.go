@@ -30,7 +30,9 @@ func Module() *fluxgo.FluxGo {
 	flux.AddDependency(func() *config.Env { return &env })
 	flux.AddDatabase(fluxgo.DatabaseOptions{Instances: []fluxgo.DatabaseConn{{Dsn: env.Database.Dsn}}})
 	flux.AddRedis(fluxgo.RedisOptions{Options: redis.Options{Addr: env.Redis.Addr}})
-	flux.AddKafka(env.Kafka.GetConfig())
+	if env.Kafka.Brokers != "" {
+		flux.AddKafka(env.Kafka.GetConfig())
+	}
 	flux.AddCron()
 	flux.AddHttp(http.GetHttp(flux.GetApm(), prom, &env))
 	flux.AddTools()

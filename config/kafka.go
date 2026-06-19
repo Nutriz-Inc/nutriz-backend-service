@@ -8,8 +8,8 @@ import (
 )
 
 type Kafka struct {
-	ServiceName string `env:"SERVICE_NAME" validate:"required"`
-	Brokers     string `env:"KAFKA_BROKERS" validate:"required"`
+	ServiceName string `env:"SERVICE_NAME"`
+	Brokers     string `env:"KAFKA_BROKERS"`
 }
 
 func (k Kafka) GetConfig() fluxgo.KafkaOptions {
