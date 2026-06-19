@@ -8,7 +8,9 @@ type Env struct {
 		Dsn string `env:"DATABASE_DSN" validate:"required"`
 	}
 	Redis struct {
-		Addr string `env:"REDIS_ADDR" validate:"required"`
+		Addr     string `env:"REDIS_ADDR" validate:"required"`
+		Username string `env:"REDIS_USERNAME"`
+		Password string `env:"REDIS_PASSWORD"`
 	}
 	Logger struct {
 		Type     string `env:"LOGGER_TYPE" validate:"required"`
