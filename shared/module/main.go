@@ -1,6 +1,7 @@
 package module
 
 import (
+	"crypto/tls"
 	"nutriz-backend-service/config"
 	"nutriz-backend-service/modules/auth"
 	"nutriz-backend-service/modules/donation"
@@ -31,7 +32,10 @@ func Module() *fluxgo.FluxGo {
 	flux.AddDatabase(fluxgo.DatabaseOptions{Instances: []fluxgo.DatabaseConn{{Dsn: env.Database.Dsn}}})
 	flux.AddRedis(fluxgo.RedisOptions{
 		Options: redis.Options{
-			Addr: env.Redis.Addr,
+			Addr:      env.Redis.Addr,
+			Username:  env.Redis.Username,
+			Password:  env.Redis.Password,
+			TLSConfig: &tls.Config{},
 		},
 	})
 	if env.Kafka.Brokers != "" {
