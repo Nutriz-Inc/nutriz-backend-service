@@ -14,10 +14,10 @@ type LocationService struct {
 	cfg        *config.Env
 }
 
-func NewLocationService() *LocationService {
+func NewLocationService(cfg *config.Env) *LocationService {
 	return &LocationService{
 		httpClient: resty.New().SetTimeout(10 * time.Second),
-		cfg:        &config.Env{},
+		cfg:        cfg,
 	}
 }
 
