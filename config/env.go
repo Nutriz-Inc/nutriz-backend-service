@@ -29,4 +29,9 @@ type Env struct {
 		IV  string `env:"SECRET_IV" validate:"required"`
 		Key string `env:"SECRET_KEY" validate:"required"`
 	}
+	Service struct {
+		Name    string `env:"SERVICE_NAME" validate:"required"`
+		Version string `env:"SERVICE_VERSION" validate:"required"`
+		Email   string `env:"EMAIL" validate:"required"`
+	}
 }
