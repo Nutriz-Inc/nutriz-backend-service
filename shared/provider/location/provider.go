@@ -3,6 +3,7 @@ package location
 import (
 	c "context"
 	"fmt"
+	"log"
 	"nutriz-backend-service/config"
 	"time"
 
@@ -65,6 +66,8 @@ func (n *LocationService) GetCoordinatesByAddress(ctx c.Context, address string)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("[nominatim] user-agent=%q query=%q status=%d body=%s", userAgent, address, res.StatusCode(), res.Body())
 
 	if res.IsError() || len(resp) == 0 {
 		return nil, fmt.Errorf("no coordinates found")
