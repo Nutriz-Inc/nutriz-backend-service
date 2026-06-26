@@ -30,15 +30,14 @@ func Module() *fluxgo.FluxGo {
 
 	flux.AddDependency(func() *config.Env { return &env })
 	flux.AddDatabase(fluxgo.DatabaseOptions{Instances: []fluxgo.DatabaseConn{{Dsn: env.Database.Dsn}}})
-	redisOpts := redis.Options{
-		Addr:     env.Redis.Addr,
-		Username: env.Redis.Username,
-		Password: env.Redis.Password,
-	}
-	if env.Redis.TLS {
-		redisOpts.TLSConfig = &tls.Config{}
-	}
-	flux.AddRedis(fluxgo.RedisOptions{Options: redisOpts})
+	flux.AddRedis(fluxgo.RedisOptions{
+		Options: redis.Options{
+			Addr:      env.Redis.Addr,
+			Username:  env.Redis.Username,
+			Password:  env.Redis.Password,
+			TLSConfig: &tls.Config{},
+		},
+	})
 	if env.Kafka.Brokers != "" {
 		flux.AddKafka(env.Kafka.GetConfig())
 	}
