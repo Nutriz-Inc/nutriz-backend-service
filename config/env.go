@@ -11,6 +11,7 @@ type Env struct {
 		Addr     string `env:"REDIS_ADDR" validate:"required"`
 		Username string `env:"REDIS_USERNAME"`
 		Password string `env:"REDIS_PASSWORD"`
+		TLS      bool   `env:"REDIS_TLS"`
 	}
 	Logger struct {
 		Type     string `env:"LOGGER_TYPE" validate:"required"`
