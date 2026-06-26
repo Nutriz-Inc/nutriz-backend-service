@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"context"
+	c "context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 
@@ -25,7 +25,7 @@ type CreateConsentRepositoryReq struct {
 }
 
 func (r *ConsentLogRepository) CreateConsentLog(
-	ctx context.Context,
+	ctx c.Context,
 	data *CreateConsentRepositoryReq,
 ) error {
 	ctx, span := r.StartSpan(ctx)
@@ -66,7 +66,7 @@ func (r *ConsentLogRepository) CreateConsentLog(
 	)
 }
 
-func (r *ConsentLogRepository) GetConsentLogById(ctx context.Context, id string) (*entities.ConsentLog, error) {
+func (r *ConsentLogRepository) GetConsentLogById(ctx c.Context, id string) (*entities.ConsentLog, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 

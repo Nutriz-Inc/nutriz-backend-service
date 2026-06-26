@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	c "context"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/donation/dtos"
@@ -59,7 +58,7 @@ func (h *HandlerListDonationPoints) Execute(ctx c.Context, filters *dto.ListDona
 	}, nil
 }
 
-func (h *HandlerListDonationPoints) getCoordinatesByZipcode(ctx context.Context, zipCode string) (*entities.Coordinates, *fluxgo.GlobalError) {
+func (h *HandlerListDonationPoints) getCoordinatesByZipcode(ctx c.Context, zipCode string) (*entities.Coordinates, *fluxgo.GlobalError) {
 	addressData, err := utils.GetAddressByZipCode(ctx, zipCode, h.config)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError(err.Error())

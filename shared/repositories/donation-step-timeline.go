@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"context"
+	c "context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 	"time"
@@ -29,7 +29,7 @@ type CreateDonationStepTimelineRepositoryReq struct {
 }
 
 func (r *DonationStepTimelineRepository) createDonationStepTimeline(
-	ctx context.Context,
+	ctx c.Context,
 	exec sqlx.ExtContext,
 	data *CreateDonationStepTimelineRepositoryReq,
 ) error {
@@ -76,7 +76,7 @@ func (r *DonationStepTimelineRepository) createDonationStepTimeline(
 }
 
 func (r *DonationStepTimelineRepository) CreateDonationStepTimelineTx(
-	ctx context.Context,
+	ctx c.Context,
 	tx *sqlx.Tx,
 	data *CreateDonationStepTimelineRepositoryReq,
 ) error {
@@ -88,7 +88,7 @@ func (r *DonationStepTimelineRepository) CreateDonationStepTimelineTx(
 }
 
 func (r *DonationStepTimelineRepository) CreateDonationStepTimeline(
-	ctx context.Context,
+	ctx c.Context,
 	data *CreateDonationStepTimelineRepositoryReq,
 ) error {
 	return r.createDonationStepTimeline(
@@ -99,7 +99,7 @@ func (r *DonationStepTimelineRepository) CreateDonationStepTimeline(
 }
 
 func (r *DonationStepTimelineRepository) GetDonationStepsTimelineByIdDonationStep(
-	ctx context.Context,
+	ctx c.Context,
 	idDonationStep string,
 ) (*[]entities.DonationStepTimeline, int, error) {
 	ctx, span := r.StartSpan(ctx)

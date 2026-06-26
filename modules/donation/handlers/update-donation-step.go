@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"context"
+	c "context"
 	"fmt"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
@@ -46,7 +46,7 @@ func (h *HandlerUpdateDonationStep) HandleHttp(c *fiber.Ctx, income interface{})
 	return &fluxgo.GlobalResponse{Content: resp, Status: 200}, nil
 }
 
-func (h *HandlerUpdateDonationStep) Execute(ctx context.Context, data *dto.UpdateDonationStepReq) (*dto.UpdateDonationStepRes, *fluxgo.GlobalError) {
+func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonationStepReq) (*dto.UpdateDonationStepRes, *fluxgo.GlobalError) {
 	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user")
@@ -133,7 +133,7 @@ func (h *HandlerUpdateDonationStep) Execute(ctx context.Context, data *dto.Updat
 		return nil, fluxgo.ErrorBadRequest("At least one field must be sent to update", "no_fields_to_update")
 	}
 
-	err = h.db.RunTransaction(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
 		err := h.donationStepRepo.UpdateDonationStepTx(ctx, tx, &req)
 		if err != nil {
 			return fmt.Errorf("error to update donation step: %w", err)

@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"context"
+	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
@@ -21,7 +21,7 @@ func UserRepositoryStart(db *fluxgo.Database) *UserRepository {
 	return &UserRepository{*fluxgo.NewRepository[entities.User](db)}
 }
 
-func (r *UserRepository) GetUserById(ctx context.Context, id string) (*entities.User, error) {
+func (r *UserRepository) GetUserById(ctx c.Context, id string) (*entities.User, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -34,7 +34,7 @@ func (r *UserRepository) GetUserById(ctx context.Context, id string) (*entities.
 	)
 }
 
-func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*entities.User, error) {
+func (r *UserRepository) GetUserByEmail(ctx c.Context, email string) (*entities.User, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -47,7 +47,7 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*ent
 	)
 }
 
-func (r *UserRepository) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (*entities.User, error) {
+func (r *UserRepository) GetUserByPhoneNumber(ctx c.Context, phoneNumber string) (*entities.User, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -60,7 +60,7 @@ func (r *UserRepository) GetUserByPhoneNumber(ctx context.Context, phoneNumber s
 	)
 }
 
-func (r *UserRepository) GetUserByCpf(ctx context.Context, cpf string) (*entities.User, error) {
+func (r *UserRepository) GetUserByCpf(ctx c.Context, cpf string) (*entities.User, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -74,7 +74,7 @@ func (r *UserRepository) GetUserByCpf(ctx context.Context, cpf string) (*entitie
 }
 
 func (r *UserRepository) ListUsersByFilters(
-	ctx context.Context,
+	ctx c.Context,
 	filter *dto.ListUsersReq,
 ) (*[]entities.User, int, error) {
 	ctx, span := r.StartSpan(ctx)
@@ -135,7 +135,7 @@ type CreateUserRepositoryReq struct {
 }
 
 func (r *UserRepository) createUser(
-	ctx context.Context,
+	ctx c.Context,
 	exec sqlx.ExtContext,
 	data *CreateUserRepositoryReq,
 ) error {
@@ -194,7 +194,7 @@ func (r *UserRepository) createUser(
 }
 
 func (r *UserRepository) CreateUserTx(
-	ctx context.Context,
+	ctx c.Context,
 	tx *sqlx.Tx,
 	data *CreateUserRepositoryReq,
 ) error {
@@ -206,7 +206,7 @@ func (r *UserRepository) CreateUserTx(
 }
 
 func (r *UserRepository) CreateUser(
-	ctx context.Context,
+	ctx c.Context,
 	data *CreateUserRepositoryReq,
 ) error {
 	return r.createUser(
@@ -216,7 +216,7 @@ func (r *UserRepository) CreateUser(
 	)
 }
 
-func (r *UserRepository) removeUser(ctx context.Context, exec sqlx.ExtContext, id, actionBy string) error {
+func (r *UserRepository) removeUser(ctx c.Context, exec sqlx.ExtContext, id, actionBy string) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -243,7 +243,7 @@ func (r *UserRepository) removeUser(ctx context.Context, exec sqlx.ExtContext, i
 }
 
 func (r *UserRepository) RemoveUserTx(
-	ctx context.Context,
+	ctx c.Context,
 	tx *sqlx.Tx,
 	id, actionBy string,
 ) error {
@@ -256,7 +256,7 @@ func (r *UserRepository) RemoveUserTx(
 }
 
 func (r *UserRepository) RemoveUser(
-	ctx context.Context,
+	ctx c.Context,
 	id, actionBy string,
 ) error {
 	return r.removeUser(
@@ -278,7 +278,7 @@ type UpdateUserRepositoryReq struct {
 	Password           *string
 }
 
-func (r *UserRepository) updateUser(ctx context.Context, exec sqlx.ExtContext, data *UpdateUserRepositoryReq) error {
+func (r *UserRepository) updateUser(ctx c.Context, exec sqlx.ExtContext, data *UpdateUserRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -330,10 +330,10 @@ func (r *UserRepository) updateUser(ctx context.Context, exec sqlx.ExtContext, d
 	return nil
 }
 
-func (r *UserRepository) UpdateUserTx(ctx context.Context, tx *sqlx.Tx, data *UpdateUserRepositoryReq) error {
+func (r *UserRepository) UpdateUserTx(ctx c.Context, tx *sqlx.Tx, data *UpdateUserRepositoryReq) error {
 	return r.updateUser(ctx, tx, data)
 }
 
-func (r *UserRepository) UpdateUser(ctx context.Context, data *UpdateUserRepositoryReq) error {
+func (r *UserRepository) UpdateUser(ctx c.Context, data *UpdateUserRepositoryReq) error {
 	return r.updateUser(ctx, r.DB.WriteDB(), data)
 }

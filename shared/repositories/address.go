@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"context"
+	c "context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 	"strings"
@@ -20,7 +20,7 @@ func AddressRepositoryStart(db *fluxgo.Database) *AddressRepository {
 }
 
 func (r *AddressRepository) GetAddressesByUserId(
-	ctx context.Context,
+	ctx c.Context,
 	userId string,
 ) (*[]entities.Address, int, error) {
 	ctx, span := r.StartSpan(ctx)
@@ -44,7 +44,7 @@ func (r *AddressRepository) GetAddressesByUserId(
 	)
 }
 
-func (r *AddressRepository) GetAddressById(ctx context.Context, id string) (*entities.Address, error) {
+func (r *AddressRepository) GetAddressById(ctx c.Context, id string) (*entities.Address, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -57,7 +57,7 @@ func (r *AddressRepository) GetAddressById(ctx context.Context, id string) (*ent
 	)
 }
 
-func (r *AddressRepository) GetAddressByZipcodeAndIdUser(ctx context.Context, zipcode string, userId string) (*entities.Address, error) {
+func (r *AddressRepository) GetAddressByZipcodeAndIdUser(ctx c.Context, zipcode string, userId string) (*entities.Address, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -86,7 +86,7 @@ type CreateAddressRepositoryReq struct {
 }
 
 func (r *AddressRepository) createAddress(
-	ctx context.Context,
+	ctx c.Context,
 	exec sqlx.ExtContext,
 	data *CreateAddressRepositoryReq,
 ) error {
@@ -148,7 +148,7 @@ func (r *AddressRepository) createAddress(
 }
 
 func (r *AddressRepository) CreateAddressTx(
-	ctx context.Context,
+	ctx c.Context,
 	tx *sqlx.Tx,
 	data *CreateAddressRepositoryReq,
 ) error {
@@ -160,7 +160,7 @@ func (r *AddressRepository) CreateAddressTx(
 }
 
 func (r *AddressRepository) CreateAddress(
-	ctx context.Context,
+	ctx c.Context,
 	data *CreateAddressRepositoryReq,
 ) error {
 	return r.createAddress(
@@ -184,7 +184,7 @@ type UpdateAddressRepositoryReq struct {
 	Longitude    *float64
 }
 
-func (r *AddressRepository) UpdateAddress(ctx context.Context, data UpdateAddressRepositoryReq) error {
+func (r *AddressRepository) UpdateAddress(ctx c.Context, data UpdateAddressRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -253,7 +253,7 @@ func (r *AddressRepository) UpdateAddress(ctx context.Context, data UpdateAddres
 	)
 }
 
-func (r *AddressRepository) RemoveAddress(ctx context.Context, id, actionBy string) error {
+func (r *AddressRepository) RemoveAddress(ctx c.Context, id, actionBy string) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 

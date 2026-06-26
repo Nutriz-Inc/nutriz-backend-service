@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"context"
+	c "context"
 	"fmt"
 	"nutriz-backend-service/config"
 	"nutriz-backend-service/shared/provider/location"
@@ -16,7 +16,7 @@ type AddressRes struct {
 	Latitude     *float64
 }
 
-func GetAddressByZipCode(ctx context.Context, zipcode string, config *config.Env) (*AddressRes, error) {
+func GetAddressByZipCode(ctx c.Context, zipcode string, config *config.Env) (*AddressRes, error) {
 	provider, err := location.NewLocationProvider(config)
 	if err != nil {
 		return nil, fmt.Errorf("error to initialize location provider: %v", err)

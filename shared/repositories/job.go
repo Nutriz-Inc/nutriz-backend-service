@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"context"
+	c "context"
 	dto "nutriz-backend-service/modules/job/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
@@ -22,7 +22,7 @@ func JobRepositoryStart(db *fluxgo.Database) *JobRepository {
 }
 
 func (r *JobRepository) ListJobsByFilters(
-	ctx context.Context,
+	ctx c.Context,
 	filter *dto.ListJobsReq,
 ) (*[]entities.Job, int, error) {
 	ctx, span := r.StartSpan(ctx)
@@ -69,7 +69,7 @@ func (r *JobRepository) ListJobsByFilters(
 	)
 }
 
-func (r *JobRepository) GetJobById(ctx context.Context, id string) (*entities.Job, error) {
+func (r *JobRepository) GetJobById(ctx c.Context, id string) (*entities.Job, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -95,7 +95,7 @@ type CreateJobRepositoryReq struct {
 }
 
 func (r *JobRepository) CreateJob(
-	ctx context.Context,
+	ctx c.Context,
 	data *CreateJobRepositoryReq,
 ) error {
 	ctx, span := r.StartSpan(ctx)
@@ -148,7 +148,7 @@ func (r *JobRepository) CreateJob(
 	)
 }
 
-func (r *JobRepository) RemoveJob(ctx context.Context, id, actionBy string) error {
+func (r *JobRepository) RemoveJob(ctx c.Context, id, actionBy string) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -179,7 +179,7 @@ type UpdateJobRepositoryReq struct {
 	UpdatedBy    string
 }
 
-func (r *JobRepository) updateJob(ctx context.Context, exec sqlx.ExtContext, data *UpdateJobRepositoryReq) error {
+func (r *JobRepository) updateJob(ctx c.Context, exec sqlx.ExtContext, data *UpdateJobRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -229,7 +229,7 @@ func (r *JobRepository) updateJob(ctx context.Context, exec sqlx.ExtContext, dat
 }
 
 func (r *JobRepository) UpdateJobTx(
-	ctx context.Context,
+	ctx c.Context,
 	tx *sqlx.Tx,
 	data *UpdateJobRepositoryReq,
 ) error {
@@ -241,7 +241,7 @@ func (r *JobRepository) UpdateJobTx(
 }
 
 func (r *JobRepository) UpdateJob(
-	ctx context.Context,
+	ctx c.Context,
 	data *UpdateJobRepositoryReq,
 ) error {
 	return r.updateJob(

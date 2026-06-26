@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"context"
+	c "context"
 	"errors"
 	"fmt"
 	"nutriz-backend-service/config"
@@ -55,7 +55,7 @@ func (h *HandlerCreateUser) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxg
 	return &fluxgo.GlobalResponse{Content: resp, Status: 201}, nil
 }
 
-func (h *HandlerCreateUser) Execute(ctx context.Context, data *dto.CreateUserReq) (*dto.CreateUserRes, *fluxgo.GlobalError) {
+func (h *HandlerCreateUser) Execute(ctx c.Context, data *dto.CreateUserReq) (*dto.CreateUserRes, *fluxgo.GlobalError) {
 	secret := utils.Secret{}
 
 	hashPassword, err := secret.Encrypt(h.config, data.Password)
@@ -111,7 +111,7 @@ func (h *HandlerCreateUser) Execute(ctx context.Context, data *dto.CreateUserReq
 	return nil, fluxgo.ErrorBadRequest("Invalid user type", "user.invalid_type")
 }
 
-func (h *HandlerCreateUser) handleCommon(ctx context.Context, data *dto.CreateUserReq, req *repositories.CreateUserRepositoryReq, validator dto.CreateUserOptionalFields, idUser string) (*dto.CreateUserRes, *fluxgo.GlobalError) {
+func (h *HandlerCreateUser) handleCommon(ctx c.Context, data *dto.CreateUserReq, req *repositories.CreateUserRepositoryReq, validator dto.CreateUserOptionalFields, idUser string) (*dto.CreateUserRes, *fluxgo.GlobalError) {
 	if !validator.CanCreateCommon {
 		return nil, fluxgo.ErrorBadRequest("Missing required fields for common user", "user.missing_fields")
 	}
@@ -128,7 +128,7 @@ func (h *HandlerCreateUser) handleCommon(ctx context.Context, data *dto.CreateUs
 	req.BirthDate = *birthDateTime
 	req.ActionBy = idUser
 
-	err = h.db.RunTransaction(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
 		err := h.userRepo.CreateUserTx(ctx, tx, req)
 		if err != nil {
 			return fmt.Errorf("error to create user: %w", err)
@@ -173,7 +173,7 @@ func (h *HandlerCreateUser) handleCommon(ctx context.Context, data *dto.CreateUs
 	return &dto.CreateUserRes{User: *user}, nil
 }
 
-func (h *HandlerCreateUser) handleWorker(ctx context.Context, data *dto.CreateUserReq, req *repositories.CreateUserRepositoryReq, validator dto.CreateUserOptionalFields, idUser string) (*dto.CreateUserRes, *fluxgo.GlobalError) {
+func (h *HandlerCreateUser) handleWorker(ctx c.Context, data *dto.CreateUserReq, req *repositories.CreateUserRepositoryReq, validator dto.CreateUserOptionalFields, idUser string) (*dto.CreateUserRes, *fluxgo.GlobalError) {
 	if !validator.CanCreateWorker {
 		return nil, fluxgo.ErrorBadRequest("Missing required fields for worker user", "user.missing_fields")
 	}
@@ -208,7 +208,7 @@ func (h *HandlerCreateUser) handleWorker(ctx context.Context, data *dto.CreateUs
 	return &dto.CreateUserRes{User: *user}, nil
 }
 
-func (h *HandlerCreateUser) createAddress(ctx context.Context, data *dto.CreateAddressReq, tx *sqlx.Tx) *fluxgo.GlobalError {
+func (h *HandlerCreateUser) createAddress(ctx c.Context, data *dto.CreateAddressReq, tx *sqlx.Tx) *fluxgo.GlobalError {
 	addressData, err := utils.GetAddressByZipCode(ctx, data.ZipCode, h.config)
 	if err != nil {
 		return fluxgo.ErrorInternalError(err.Error())
@@ -238,7 +238,7 @@ func (h *HandlerCreateUser) createAddress(ctx context.Context, data *dto.CreateA
 	return nil
 }
 
-func (h *HandlerCreateUser) createUserBaby(ctx context.Context, data *dto.CreateUserBabyReq, tx *sqlx.Tx) *fluxgo.GlobalError {
+func (h *HandlerCreateUser) createUserBaby(ctx c.Context, data *dto.CreateUserBabyReq, tx *sqlx.Tx) *fluxgo.GlobalError {
 	if utils.IsFutureDate(data.BirthDate) {
 		return fluxgo.ErrorBadRequest("Birth date cannot be in the future", "user_baby.invalid_birth_date")
 	}
