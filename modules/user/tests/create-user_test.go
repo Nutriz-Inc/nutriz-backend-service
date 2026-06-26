@@ -157,6 +157,23 @@ func TestCreateUser(t *testing.T) {
 			assert.Equal(t, "user.duplicate_email", body["code"])
 		})
 
+		t.Run("User with same phone number already exists", func(t *testing.T) {
+			data := makeCommonBody(
+				"Duplicado Telefone",
+				"34470578070",
+				"testeeeeeeeee@email.com",
+				"+5511991111111",
+				"1993-11-05",
+				"01004000",
+			)
+
+			status, body := fluxgo.RunTestRequest(app, "POST", publicEndpoint, data, nil)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(t, "User with same phone number already exists", body["message"])
+			assert.Equal(t, "user.duplicate_phone_number", body["code"])
+		})
+
 		t.Run("Missing required fields for common user", func(t *testing.T) {
 			data := makeCommonBody(
 				"Sem Endereco",

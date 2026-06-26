@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"context"
+	c "context"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
@@ -21,7 +21,7 @@ func DonationRepositoryStart(db *fluxgo.Database) *DonationRepository {
 }
 
 func (r *DonationRepository) ListDonationByFilters(
-	ctx context.Context,
+	ctx c.Context,
 	filter *dto.ListDonationReq,
 ) (*[]entities.Donation, int, error) {
 	ctx, span := r.StartSpan(ctx)
@@ -60,7 +60,7 @@ func (r *DonationRepository) ListDonationByFilters(
 	)
 }
 
-func (r *DonationRepository) GetDonationById(ctx context.Context, id string) (*entities.Donation, error) {
+func (r *DonationRepository) GetDonationById(ctx c.Context, id string) (*entities.Donation, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -80,7 +80,7 @@ type CreateDonationRepositoryReq struct {
 }
 
 func (r *DonationRepository) CreateDonation(
-	ctx context.Context,
+	ctx c.Context,
 	data *CreateDonationRepositoryReq,
 ) error {
 	ctx, span := r.StartSpan(ctx)
@@ -123,7 +123,7 @@ type UpdateDonationRepositoryReq struct {
 	UserFeedback    *string
 }
 
-func (r *DonationRepository) UpdateDonation(ctx context.Context, data UpdateDonationRepositoryReq) error {
+func (r *DonationRepository) UpdateDonation(ctx c.Context, data UpdateDonationRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -168,7 +168,7 @@ func (r *DonationRepository) UpdateDonation(ctx context.Context, data UpdateDona
 	)
 }
 
-func (r *DonationRepository) disableUserDonations(ctx context.Context, exec sqlx.ExtContext, idUser, actionBy string) error {
+func (r *DonationRepository) disableUserDonations(ctx c.Context, exec sqlx.ExtContext, idUser, actionBy string) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -194,7 +194,7 @@ func (r *DonationRepository) disableUserDonations(ctx context.Context, exec sqlx
 }
 
 func (r *DonationRepository) DisableUserDonationsTx(
-	ctx context.Context,
+	ctx c.Context,
 	tx *sqlx.Tx,
 	id, actionBy string,
 ) error {
@@ -207,7 +207,7 @@ func (r *DonationRepository) DisableUserDonationsTx(
 }
 
 func (r *DonationRepository) DisableUserDonations(
-	ctx context.Context,
+	ctx c.Context,
 	id, actionBy string,
 ) error {
 	return r.disableUserDonations(

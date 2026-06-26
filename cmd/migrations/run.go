@@ -1,7 +1,7 @@
 package main
 
 import (
-	"context"
+	c "context"
 	"nutriz-backend-service/config"
 	"time"
 
@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
+	ctx, cancel := c.WithTimeout(c.Background(), time.Minute)
 	defer cancel()
 
 	env := fluxgo.ParseEnv[config.Env](fluxgo.EnvOptions{LoadFromFile: fluxgo.Pointer(".env.development"), Validate: true})

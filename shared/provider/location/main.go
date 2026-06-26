@@ -17,5 +17,5 @@ func NewLocationProvider(cfg *config.Env) (LocationProvider, error) {
 		return &LocationMock{}, nil
 	}
 
-	return NewLocationService(), nil
+	return NewLocationService(cfg), nil
 }

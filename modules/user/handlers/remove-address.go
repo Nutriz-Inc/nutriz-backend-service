@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"context"
+	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
@@ -34,7 +34,7 @@ func (h *HandlerRemoveAddress) HandleHttp(c *fiber.Ctx, income interface{}) (*fl
 	return &fluxgo.GlobalResponse{Content: resp, Status: 200}, nil
 }
 
-func (h *HandlerRemoveAddress) Execute(ctx context.Context, data *dto.RemoveAddressReq) (*dto.RemoveAddressRes, *fluxgo.GlobalError) {
+func (h *HandlerRemoveAddress) Execute(ctx c.Context, data *dto.RemoveAddressReq) (*dto.RemoveAddressRes, *fluxgo.GlobalError) {
 	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user")

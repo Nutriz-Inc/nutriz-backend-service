@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"context"
+	c "context"
 	"fmt"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
@@ -35,7 +35,7 @@ func (h *HandlerCreateDonation) HandleHttp(c *fiber.Ctx, income interface{}) (*f
 	return &fluxgo.GlobalResponse{Content: resp, Status: 201}, nil
 }
 
-func (h *HandlerCreateDonation) Execute(ctx context.Context, data *dto.CreateDonationReq) (*dto.CreateDonationRes, *fluxgo.GlobalError) {
+func (h *HandlerCreateDonation) Execute(ctx c.Context, data *dto.CreateDonationReq) (*dto.CreateDonationRes, *fluxgo.GlobalError) {
 	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user")

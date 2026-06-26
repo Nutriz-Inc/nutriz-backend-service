@@ -2,7 +2,9 @@ package handlers
 
 import (
 	c "context"
+	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/donation/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -12,10 +14,11 @@ import (
 
 type HandlerListDonationPoints struct {
 	donationPointRepo *repositories.DonationPointRepository
+	config            *config.Env
 }
 
-func HandlerListDonationPointsStart(donationPointRepo *repositories.DonationPointRepository) *HandlerListDonationPoints {
-	return &HandlerListDonationPoints{donationPointRepo}
+func HandlerListDonationPointsStart(donationPointRepo *repositories.DonationPointRepository, config *config.Env) *HandlerListDonationPoints {
+	return &HandlerListDonationPoints{donationPointRepo, config}
 }
 
 func (h *HandlerListDonationPoints) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.GlobalResponse, *fluxgo.GlobalError) {
@@ -27,6 +30,16 @@ func (h *HandlerListDonationPoints) HandleHttp(c *fiber.Ctx, income interface{})
 }
 
 func (h *HandlerListDonationPoints) Execute(ctx c.Context, filters *dto.ListDonationPointsReq) (*dto.ListDonationPointsRes, *fluxgo.GlobalError) {
+	if filters.ZipCode != nil {
+		coordinates, err := h.getCoordinatesByZipcode(ctx, *filters.ZipCode)
+		if err != nil {
+			return nil, err
+		}
+
+		filters.Latitude = &coordinates.Latitude
+		filters.Longitude = &coordinates.Longitude
+	}
+
 	donationPoints, total, err := h.donationPointRepo.ListDonationPointsByFilters(ctx, filters)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list donation points")
@@ -42,5 +55,21 @@ func (h *HandlerListDonationPoints) Execute(ctx c.Context, filters *dto.ListDona
 			PageSize: filters.PageSize,
 			Total:    total,
 		},
+	}, nil
+}
+
+func (h *HandlerListDonationPoints) getCoordinatesByZipcode(ctx c.Context, zipCode string) (*entities.Coordinates, *fluxgo.GlobalError) {
+	addressData, err := utils.GetAddressByZipCode(ctx, zipCode, h.config)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError(err.Error())
+	}
+
+	if addressData.Latitude == nil || addressData.Longitude == nil {
+		return nil, fluxgo.ErrorInternalError("Coordinates not found for the given zipcode")
+	}
+
+	return &entities.Coordinates{
+		Latitude:  *addressData.Latitude,
+		Longitude: *addressData.Longitude,
 	}, nil
 }

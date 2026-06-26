@@ -11,6 +11,7 @@ type ListDonationPointsReq struct {
 	HasHome     *bool    `query:"has_home" validate:"omitempty"`
 	Longitude   *float64 `query:"longitude" validate:"omitempty,required_with=Latitude"`
 	Latitude    *float64 `query:"latitude" validate:"omitempty,required_with=Longitude"`
+	ZipCode     *string  `query:"zipcode" validate:"omitempty,cep"`
 	utils.PaginationReq
 }
 
