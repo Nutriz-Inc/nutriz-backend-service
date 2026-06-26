@@ -47,6 +47,19 @@ func (r *UserRepository) GetUserByEmail(ctx context.Context, email string) (*ent
 	)
 }
 
+func (r *UserRepository) GetUserByPhoneNumber(ctx context.Context, phoneNumber string) (*entities.User, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.Get[entities.User](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "user" WHERE phone_number = $1 AND removed_at IS NULL`,
+		phoneNumber,
+	)
+}
+
 func (r *UserRepository) GetUserByCpf(ctx context.Context, cpf string) (*entities.User, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
@@ -200,7 +213,6 @@ func (r *UserRepository) CreateUser(
 		ctx,
 		r.DB.WriteDB(),
 		data,
-		
 	)
 }
 
@@ -256,14 +268,14 @@ func (r *UserRepository) RemoveUser(
 }
 
 type UpdateUserRepositoryReq struct {
-	IdUser					string
-	ActionBy				string
-	InternalIdentifier		*string
-	Type					*entities.EnumUserType
-	Name					*string
-	PhoneNumber				*string
-	Email					*string
-	Password				*string
+	IdUser             string
+	ActionBy           string
+	InternalIdentifier *string
+	Type               *entities.EnumUserType
+	Name               *string
+	PhoneNumber        *string
+	Email              *string
+	Password           *string
 }
 
 func (r *UserRepository) updateUser(ctx context.Context, exec sqlx.ExtContext, data *UpdateUserRepositoryReq) error {

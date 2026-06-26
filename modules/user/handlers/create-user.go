@@ -79,6 +79,14 @@ func (h *HandlerCreateUser) Execute(ctx context.Context, data *dto.CreateUserReq
 		return nil, fluxgo.ErrorBadRequest("User with same email already exists", "user.duplicate_email")
 	}
 
+	userWithSamePhoneNumber, err := h.userRepo.GetUserByPhoneNumber(ctx, data.PhoneNumber)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get user by phone number")
+	}
+	if userWithSamePhoneNumber != nil {
+		return nil, fluxgo.ErrorBadRequest("User with same phone number already exists", "user.duplicate_phone_number")
+	}
+
 	idUser := utils.IdGenerate(utils.UserEntity)
 
 	req := repositories.CreateUserRepositoryReq{

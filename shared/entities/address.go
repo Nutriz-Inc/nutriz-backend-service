@@ -21,6 +21,10 @@ type Address struct {
 	UpdatedAt       *time.Time `json:"updated_at" db:"updated_at"`
 	RemovedAt       *time.Time `json:"removed_at" db:"removed_at"`
 }
+type Coordinates struct {
+	Latitude  float64 `json:"latitude"`
+	Longitude float64 `json:"longitude"`
+}
 
 func (a Address) TableName() string {
 	return "address"

@@ -87,5 +87,18 @@ func TestListDonationPoint(t *testing.T) {
 
 			assert.NotNil(t, item["distance_from_you"])
 		})
+		t.Run("zipcode filter", func(t *testing.T) {
+			zipcode := "01001000"
+			route := fmt.Sprintf("%s&zipcode=%s", endpoint, zipcode)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, nil)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			item := fluxgo.ConvertToMap(data[0])
+
+			assert.NotNil(t, item["distance_from_you"])
+		})
 	})
 }
