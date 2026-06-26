@@ -3,8 +3,8 @@ VALUES (
     'Posto de Coleta de Leite Humano Amparo Maternal',
     'Posto de coleta de leite humano localizado no Amparo Maternal, Vila Clementino.',
     false,
-    null,
-    null,
+    '1150898277',
+    'ouvidoria@ham.spdmpais.org.br',
     'Dom-Sáb, Manhã: 07:00 às 11:55 | Tarde: 12:00 às 17:00'
 );
 INSERT INTO address (id_donation_point, zipcode, street, number, city, state, neighborhood, complement, latitude, longitude, created_at)
@@ -17,7 +17,7 @@ VALUES (
     'Banco de leite humano localizado na Maternidade São Luiz Star, Vila Olímpia.',
     false,
     '1121211349',
-    null,
+    'consultoriamaternidade@maternidadesaoluiz.com.br',
     'Dom-Sáb, Manhã: 07:00 às 11:55 | Tarde: 12:00 às 19:00'
 );
 INSERT INTO address (id_donation_point, zipcode, street, number, city, state, neighborhood, complement, latitude, longitude, created_at)
@@ -30,7 +30,7 @@ VALUES (
     'Banco de leite humano localizado no Hospital e Maternidade São Luiz, Unidade Anália Franco, Tatuapé.',
     false,
     '1133861315',
-    null,
+    'faleconosco.sadt@saoluiz.com.br',
     'Dom-Sáb, Manhã: 07:00 às 11:55 | Tarde: 12:00 às 19:00'
 );
 INSERT INTO address (id_donation_point, zipcode, street, number, city, state, neighborhood, complement, latitude, longitude, created_at)
@@ -43,7 +43,7 @@ VALUES (
     'Banco de leite humano localizado no Hospital Ipiranga, 8º andar.',
     true,
     '1120677866',
-    null,
+    'hi.cemed@gmail.com',
     null
 );
 INSERT INTO address (id_donation_point, zipcode, street, number, city, state, neighborhood, complement, latitude, longitude, created_at)
@@ -56,7 +56,7 @@ VALUES (
     'Banco de leite humano localizado no Hospital Central da Santa Casa de São Paulo, Vila Buarque.',
     false,
     '1121767390',
-    null,
+    'ouvidoria@santacasasp.org.br',
     'Seg-Sex, Manhã: 07:00 às 11:55 | Tarde: 12:00 às 19:00'
 );
 INSERT INTO address (id_donation_point, zipcode, street, number, city, state, neighborhood, complement, latitude, longitude, created_at)
