@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"context"
+	c "context"
 	"fmt"
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
@@ -39,7 +39,7 @@ func (h *HandlerRemoveUser) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxg
 	return &fluxgo.GlobalResponse{Content: resp, Status: 200}, nil
 }
 
-func (h *HandlerRemoveUser) Execute(ctx context.Context, data *dto.RemoveUserReq) (*dto.RemoveUserRes, *fluxgo.GlobalError) {
+func (h *HandlerRemoveUser) Execute(ctx c.Context, data *dto.RemoveUserReq) (*dto.RemoveUserRes, *fluxgo.GlobalError) {
 	userAction, err := h.userRepo.GetUserById(ctx, data.ActionBy)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user action")
@@ -62,7 +62,7 @@ func (h *HandlerRemoveUser) Execute(ctx context.Context, data *dto.RemoveUserReq
 		return nil, utils.ErrorForbidden("You don't have permission to access this resource", "user.forbidden")
 	}
 
-	err = h.db.RunTransaction(ctx, func(ctx context.Context, tx *sqlx.Tx) error {
+	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
 		err := h.userRepo.RemoveUserTx(ctx, tx, data.Id, data.ActionBy)
 		if err != nil {
 			return fmt.Errorf("error to remove user: %w", err)

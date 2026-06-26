@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"context"
+	c "context"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
@@ -21,7 +21,7 @@ func DonationPointRepositoryStart(db *fluxgo.Database) *DonationPointRepository 
 }
 
 func (r *DonationPointRepository) ListDonationPointsByFilters(
-	ctx context.Context,
+	ctx c.Context,
 	filter *dto.ListDonationPointsReq,
 ) (*[]dto.DonationPointsRes, int, error) {
 	ctx, span := r.StartSpan(ctx)

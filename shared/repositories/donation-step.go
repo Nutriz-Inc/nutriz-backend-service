@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"context"
+	c "context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 	"strings"
@@ -21,7 +21,7 @@ func DonationStepRepositoryStart(db *fluxgo.Database) *DonationStepRepository {
 }
 
 func (r *DonationStepRepository) GetDonationStepsByIdDonation(
-	ctx context.Context,
+	ctx c.Context,
 	idDonation string,
 ) (*[]entities.DonationStep, int, error) {
 	ctx, span := r.StartSpan(ctx)
@@ -43,7 +43,7 @@ func (r *DonationStepRepository) GetDonationStepsByIdDonation(
 		false,
 	)
 }
-func (r *DonationStepRepository) GetDonationStepById(ctx context.Context, id string) (*entities.DonationStep, error) {
+func (r *DonationStepRepository) GetDonationStepById(ctx c.Context, id string) (*entities.DonationStep, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -67,7 +67,7 @@ type CreateDonationStepRepositoryReq struct {
 }
 
 func (r *DonationStepRepository) createDonationStep(
-	ctx context.Context,
+	ctx c.Context,
 	exec sqlx.ExtContext,
 	data *CreateDonationStepRepositoryReq,
 ) error {
@@ -117,7 +117,7 @@ func (r *DonationStepRepository) createDonationStep(
 }
 
 func (r *DonationStepRepository) CreateDonationStepTx(
-	ctx context.Context,
+	ctx c.Context,
 	tx *sqlx.Tx,
 	data *CreateDonationStepRepositoryReq,
 ) error {
@@ -129,7 +129,7 @@ func (r *DonationStepRepository) CreateDonationStepTx(
 }
 
 func (r *DonationStepRepository) CreateDonationStep(
-	ctx context.Context,
+	ctx c.Context,
 	data *CreateDonationStepRepositoryReq,
 ) error {
 	return r.createDonationStep(
@@ -148,7 +148,7 @@ type UpdateDonationStepRepositoryReq struct {
 	IsComplete     bool
 }
 
-func (r *DonationStepRepository) updateDonationStep(ctx context.Context, exec sqlx.ExtContext, data *UpdateDonationStepRepositoryReq) error {
+func (r *DonationStepRepository) updateDonationStep(ctx c.Context, exec sqlx.ExtContext, data *UpdateDonationStepRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -193,7 +193,7 @@ func (r *DonationStepRepository) updateDonationStep(ctx context.Context, exec sq
 }
 
 func (r *DonationStepRepository) UpdateDonationStepTx(
-	ctx context.Context,
+	ctx c.Context,
 	tx *sqlx.Tx,
 	data *UpdateDonationStepRepositoryReq,
 ) error {
@@ -205,7 +205,7 @@ func (r *DonationStepRepository) UpdateDonationStepTx(
 }
 
 func (r *DonationStepRepository) UpdateDonationStep(
-	ctx context.Context,
+	ctx c.Context,
 	data *UpdateDonationStepRepositoryReq,
 ) error {
 	return r.updateDonationStep(

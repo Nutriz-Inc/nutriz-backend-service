@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"context"
+	c "context"
 	"database/sql"
 
 	q "github.com/MMortari/go-query-builder"
@@ -12,7 +12,7 @@ import (
 )
 
 func ListQuery[T any](
-	ctx context.Context,
+	ctx c.Context,
 	db *sqlx.DB,
 	span trace.Span,
 	qb *q.QueryBuilder,
@@ -59,7 +59,7 @@ func ListQuery[T any](
 }
 
 func Insert(
-	ctx context.Context,
+	ctx c.Context,
 	db *sqlx.DB,
 	span trace.Span,
 	query string,
@@ -76,7 +76,7 @@ func Insert(
 }
 
 func Update(
-	ctx context.Context,
+	ctx c.Context,
 	db *sqlx.DB,
 	span trace.Span,
 	query string,
@@ -93,7 +93,7 @@ func Update(
 }
 
 func Get[T any](
-	ctx context.Context,
+	ctx c.Context,
 	db *sqlx.DB,
 	span trace.Span,
 	query string,
@@ -116,7 +116,7 @@ func Get[T any](
 }
 
 func Delete(
-	ctx context.Context,
+	ctx c.Context,
 	db *sqlx.DB,
 	span trace.Span,
 	query string,

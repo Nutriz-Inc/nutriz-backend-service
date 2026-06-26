@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"context"
+	c "context"
 	dto "nutriz-backend-service/modules/job/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
@@ -34,7 +34,7 @@ func (h *HandlerUpdateJob) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo
 	return &fluxgo.GlobalResponse{Content: resp, Status: 200}, nil
 }
 
-func (h *HandlerUpdateJob) Execute(ctx context.Context, data *dto.UpdateJobReq) (*dto.UpdateJobRes, *fluxgo.GlobalError) {
+func (h *HandlerUpdateJob) Execute(ctx c.Context, data *dto.UpdateJobReq) (*dto.UpdateJobRes, *fluxgo.GlobalError) {
 	actor, err := h.userRepo.GetUserById(ctx, data.ActionBy)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user")
@@ -107,7 +107,7 @@ func (h *HandlerUpdateJob) Execute(ctx context.Context, data *dto.UpdateJobReq) 
 	}, nil
 }
 
-func (h *HandlerUpdateJob) handleAdmUpdate(ctx context.Context, data *dto.UpdateJobReq, job *entities.Job, repoData *repositories.UpdateJobRepositoryReq, fieldsToUpdate *int) *fluxgo.GlobalError {
+func (h *HandlerUpdateJob) handleAdmUpdate(ctx c.Context, data *dto.UpdateJobReq, job *entities.Job, repoData *repositories.UpdateJobRepositoryReq, fieldsToUpdate *int) *fluxgo.GlobalError {
 	validator := data.ValidateUpdateJobOptionalFields()
 
 	if validator.HasStatus || validator.HasUserFeedback {
@@ -161,7 +161,7 @@ func (h *HandlerUpdateJob) handleAdmUpdate(ctx context.Context, data *dto.Update
 	return nil
 }
 
-func (h *HandlerUpdateJob) handleNurseUpdate(ctx context.Context, data *dto.UpdateJobReq, job *entities.Job, repoData *repositories.UpdateJobRepositoryReq, fieldsToUpdate *int) *fluxgo.GlobalError {
+func (h *HandlerUpdateJob) handleNurseUpdate(ctx c.Context, data *dto.UpdateJobReq, job *entities.Job, repoData *repositories.UpdateJobRepositoryReq, fieldsToUpdate *int) *fluxgo.GlobalError {
 	validator := data.ValidateUpdateJobOptionalFields()
 
 	if validator.HasIdUser || validator.HasDescription || validator.HasDateSet {

@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"context"
+	c "context"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 	"strings"
@@ -21,7 +21,7 @@ func UserBabyRepositoryStart(db *fluxgo.Database) *UserBabyRepository {
 }
 
 func (r *UserBabyRepository) GetUserBabiesByUserId(
-	ctx context.Context,
+	ctx c.Context,
 	userId string,
 ) (*[]entities.UserBaby, int, error) {
 	ctx, span := r.StartSpan(ctx)
@@ -46,7 +46,7 @@ func (r *UserBabyRepository) GetUserBabiesByUserId(
 }
 
 func (r *UserBabyRepository) GetUserBabyById(
-	ctx context.Context,
+	ctx c.Context,
 	userBabyId string,
 ) (*entities.UserBaby, error) {
 	ctx, span := r.StartSpan(ctx)
@@ -68,7 +68,7 @@ type CreateUserBabyRepositoryReq struct {
 	BirthDate  time.Time
 }
 
-func (r *UserBabyRepository) createUserBaby(ctx context.Context, exec sqlx.ExtContext, data *CreateUserBabyRepositoryReq) error {
+func (r *UserBabyRepository) createUserBaby(ctx c.Context, exec sqlx.ExtContext, data *CreateUserBabyRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -106,7 +106,7 @@ func (r *UserBabyRepository) createUserBaby(ctx context.Context, exec sqlx.ExtCo
 }
 
 func (r *UserBabyRepository) CreateUserBabyTx(
-	ctx context.Context,
+	ctx c.Context,
 	tx *sqlx.Tx,
 	data *CreateUserBabyRepositoryReq,
 ) error {
@@ -118,7 +118,7 @@ func (r *UserBabyRepository) CreateUserBabyTx(
 }
 
 func (r *UserBabyRepository) CreateUserBaby(
-	ctx context.Context,
+	ctx c.Context,
 	data *CreateUserBabyRepositoryReq,
 ) error {
 	return r.createUserBaby(
@@ -128,7 +128,7 @@ func (r *UserBabyRepository) CreateUserBaby(
 	)
 }
 
-func (r *UserBabyRepository) RemoveUserBaby(ctx context.Context, id, actionBy string) error {
+func (r *UserBabyRepository) RemoveUserBaby(ctx c.Context, id, actionBy string) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -155,7 +155,7 @@ type UpdateUserBabyRepositoryReq struct {
 	BirthDate  *time.Time
 }
 
-func (r *UserBabyRepository) UpdateUserBaby(ctx context.Context, data UpdateUserBabyRepositoryReq) error {
+func (r *UserBabyRepository) UpdateUserBaby(ctx c.Context, data UpdateUserBabyRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 

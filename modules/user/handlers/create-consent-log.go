@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"context"
+	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
@@ -34,7 +34,7 @@ func (h *HandlerCreateConsentLog) HandleHttp(c *fiber.Ctx, income interface{}) (
 	return &fluxgo.GlobalResponse{Content: resp, Status: 201}, nil
 }
 
-func (h *HandlerCreateConsentLog) Execute(ctx context.Context, data *dto.CreateConsentReq) (*dto.CreateConsentRes, *fluxgo.GlobalError) {
+func (h *HandlerCreateConsentLog) Execute(ctx c.Context, data *dto.CreateConsentReq) (*dto.CreateConsentRes, *fluxgo.GlobalError) {
 	user, err := h.userRepo.GetUserById(ctx, data.ActionBy)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get user")
