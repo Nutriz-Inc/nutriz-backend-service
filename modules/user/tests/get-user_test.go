@@ -32,6 +32,10 @@ func TestGetUser(t *testing.T) {
 			assert.Equal(t, id, body["id_user"])
 			assert.Equal(t, internalIdentifier, body["internal_identifier"])
 			assert.Nil(t, body["password"])
+			assert.Nil(t, body["donations_completed"])
+			assert.Nil(t, body["current_donation"])
+			assert.Nil(t, body["addresses"])
+			assert.Nil(t, body["babies"])
 		})
 		t.Run("With address", func(t *testing.T) {
 			route := fmt.Sprintf("%s/%s?show_address=true", endpoint, id)
@@ -60,6 +64,45 @@ func TestGetUser(t *testing.T) {
 
 			assert.NotNil(t, babies)
 			assert.GreaterOrEqual(t, len(babies), 2)
+		})
+		t.Run("With donations completed", func(t *testing.T) {
+			route := fmt.Sprintf("%s/%s?show_donations_completed=true", endpoint, id)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
+
+			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, id, body["id_user"])
+
+			donationsCompleted, ok := body["donations_completed"].(float64)
+			assert.True(t, ok)
+			assert.Equal(t, float64(1), donationsCompleted)
+		})
+		t.Run("With current donation", func(t *testing.T) {
+			route := fmt.Sprintf("%s/%s?show_current_donation=true", endpoint, id)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
+
+			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, id, body["id_user"])
+
+			currentDonation, ok := body["current_donation"].(map[string]interface{})
+			assert.True(t, ok)
+			assert.NotNil(t, currentDonation)
+			assert.Equal(t, "don_2veL1FPpuXxUaZcFaEC57BfpcC3", currentDonation["id_donation"])
+			assert.Equal(t, true, currentDonation["is_active"])
+		})
+		t.Run("Donation filters are ignored for non-common users", func(t *testing.T) {
+			adminId := "usr_2veL1FPpuXxUaZcFaEC57BfpxWS"
+			route := fmt.Sprintf("%s/%s?show_address=true&show_baby=true&show_donations_completed=true&show_current_donation=true", endpoint, adminId)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, &utils.TestHeadersAdmin)
+
+			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, adminId, body["id_user"])
+			assert.Nil(t, body["addresses"])
+			assert.Nil(t, body["babies"])
+			assert.Nil(t, body["donations_completed"])
+			assert.Nil(t, body["current_donation"])
 		})
 	})
 
