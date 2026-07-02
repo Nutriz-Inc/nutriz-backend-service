@@ -329,18 +329,6 @@ INSERT INTO donation (
     NULL,
     NULL,
     NULL
-),
-(
-    'don_2veL1FPpuXxUaZcFaEC57BfpcC3',
-    true,
-    0,
-    NULL,
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
-    NULL,
-    NULL,
-    NULL,
-    NULL
 );
 
 INSERT INTO address (

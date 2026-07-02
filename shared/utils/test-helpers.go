@@ -14,6 +14,10 @@ var TestHeadersCommon = fluxgo.Headers{
 	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGNLRiIsImlhdCI6MTc2ODYwNzY5NX0.PAJJ76xq6F7DL2YQkpLh3FuW3L7utAvEWSdIxs4QGW8",
 }
 
+var TestHeadersCommonKL = fluxgo.Headers{
+	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGNLTCIsImlhdCI6MTc4Mjk1MTkzN30.GDxbbTrtVAF326zFphOZ2-fQUjzl_gL6OWx-VPBQYPM",
+}
+
 var TestHeadersAdmin = fluxgo.Headers{
 	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcHhXUyIsImlhdCI6MTc3ODc2OTA4OX0.HbTjER3zissjbv-gvkC3fod_qvhMA0NflJ_JnvOUrpg",
 }

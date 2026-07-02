@@ -78,18 +78,22 @@ func TestGetUser(t *testing.T) {
 			assert.Equal(t, float64(1), donationsCompleted)
 		})
 		t.Run("With current donation", func(t *testing.T) {
-			route := fmt.Sprintf("%s/%s?show_current_donation=true", endpoint, id)
+			// usr_...KL already owns active donations in the seed data (unlike
+			// usr_...KE, which must stay free of active donations so the
+			// donation module's "max active donations" tests keep working).
+			klId := "usr_2veL1FPpuXxUaZcFaEC57BfpcKL"
+			route := fmt.Sprintf("%s/%s?show_current_donation=true", endpoint, klId)
 
-			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, &utils.TestHeadersCommonKL)
 
 			assert.Equal(t, http.StatusOK, status)
-			assert.Equal(t, id, body["id_user"])
+			assert.Equal(t, klId, body["id_user"])
 
 			currentDonation, ok := body["current_donation"].(map[string]interface{})
 			assert.True(t, ok)
 			assert.NotNil(t, currentDonation)
-			assert.Equal(t, "don_2veL1FPpuXxUaZcFaEC57BfpcC3", currentDonation["id_donation"])
 			assert.Equal(t, true, currentDonation["is_active"])
+			assert.Equal(t, klId, currentDonation["created_by"])
 		})
 		t.Run("Donation filters are ignored for non-common users", func(t *testing.T) {
 			adminId := "usr_2veL1FPpuXxUaZcFaEC57BfpxWS"
