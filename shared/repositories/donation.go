@@ -217,3 +217,40 @@ func (r *DonationRepository) DisableUserDonations(
 		actionBy,
 	)
 }
+
+func (r *DonationRepository) CountCompletedDonations(ctx c.Context, idUser string) (int64, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	result, err := utils.Get[int64](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`
+		SELECT COUNT(*)
+		FROM (
+			SELECT d.id_donation
+			FROM donation d
+			JOIN donation_step ds
+				ON ds.id_donation = d.id_donation
+			WHERE d.is_active = false
+				AND d.removed_at IS NULL
+				AND d.created_by = $1
+			GROUP BY d.id_donation
+			HAVING COUNT(*) = 4
+				AND COUNT(*) FILTER (WHERE ds.status = 'done') = 4
+		) completed
+		`,
+		idUser,
+	)
+
+	if err != nil {
+		return 0, err
+	}
+
+	if result == nil {
+		return 0, nil
+	}
+
+	return *result, nil
+}

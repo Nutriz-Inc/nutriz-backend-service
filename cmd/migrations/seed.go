@@ -305,6 +305,30 @@ INSERT INTO donation (
     NULL,
     NULL,
     NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
+    false,
+    1.2,
+    'Doação completa para testes de contagem',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
+    false,
+    1.2,
+    'Doação completa de outro usuário para testes de escopo',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO address (
@@ -577,6 +601,110 @@ INSERT INTO donation_step (
     NULL,
     NULL,
     NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcG1',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
+    'Exame de sangue',
+    'Exame realizado com sucesso',
+    'done',
+    NOW() - INTERVAL '4 days',
+    NOW() - INTERVAL '5 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NOW() - INTERVAL '4 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NOW() - INTERVAL '4 days'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcG2',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
+    'Entregar kit de ordenha',
+    'Kit entregue ao doador',
+    'done',
+    NOW() - INTERVAL '3 days',
+    NOW() - INTERVAL '4 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NOW() - INTERVAL '3 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NOW() - INTERVAL '3 days'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcG3',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
+    'Coletar leite',
+    'Coleta realizada com sucesso',
+    'done',
+    NOW() - INTERVAL '2 days',
+    NOW() - INTERVAL '3 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NOW() - INTERVAL '2 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NOW() - INTERVAL '2 days'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcG4',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
+    'Análise de leite',
+    'Análise concluída com sucesso',
+    'done',
+    NOW() - INTERVAL '1 day',
+    NOW() - INTERVAL '2 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NOW() - INTERVAL '1 day',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NOW() - INTERVAL '1 day'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcH1',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
+    'Exame de sangue',
+    'Exame realizado com sucesso',
+    'done',
+    NOW() - INTERVAL '4 days',
+    NOW() - INTERVAL '5 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NOW() - INTERVAL '4 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NOW() - INTERVAL '4 days'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcH2',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
+    'Entregar kit de ordenha',
+    'Kit entregue ao doador',
+    'done',
+    NOW() - INTERVAL '3 days',
+    NOW() - INTERVAL '4 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NOW() - INTERVAL '3 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NOW() - INTERVAL '3 days'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcH3',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
+    'Coletar leite',
+    'Coleta realizada com sucesso',
+    'done',
+    NOW() - INTERVAL '2 days',
+    NOW() - INTERVAL '3 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NOW() - INTERVAL '2 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NOW() - INTERVAL '2 days'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcH4',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
+    'Análise de leite',
+    'Análise concluída com sucesso',
+    'done',
+    NOW() - INTERVAL '1 day',
+    NOW() - INTERVAL '2 days',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NOW() - INTERVAL '1 day',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NOW() - INTERVAL '1 day'
 );
 
 INSERT INTO donation_step_timeline (
