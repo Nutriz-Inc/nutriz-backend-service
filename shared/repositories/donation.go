@@ -50,6 +50,20 @@ func (r *DonationRepository) ListDonationByFilters(
 		})
 	}
 
+	if filter.UserDocument != nil {
+		qb.Join(q.Join{
+			Table: "user",
+			As:    "u",
+			On:    "u.id_user = d.created_by AND u.removed_at IS NULL",
+			Type:  q.LeftJoin,
+		})
+		qb.WhereAnd(q.Where{
+			Column: "u.cpf",
+			Type:   "=",
+			Val:    *filter.UserDocument,
+		})
+	}
+
 	return utils.ListQuery[entities.Donation](
 		ctx,
 		r.DB.ReadOnlyDB(),

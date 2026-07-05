@@ -8,9 +8,8 @@ type LoginReq struct {
 }
 
 type LoginRes struct {
-	Token     string                `json:"token"`
-	IdUser    string                `json:"id_user"`
-	Name      string                `json:"name"`
-	Type      entities.EnumUserType `json:"type"`
-	Addresses *[]entities.Address   `json:"addresses,omitempty"`
+	Token  string                `json:"token"`
+	IdUser string                `json:"id_user"`
+	Name   string                `json:"name"`
+	Type   entities.EnumUserType `json:"type"`
 }

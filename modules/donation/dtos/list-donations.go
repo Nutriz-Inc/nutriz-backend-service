@@ -6,8 +6,9 @@ import (
 )
 
 type ListDonationReq struct {
-	IsActive *bool   `query:"is_active" validate:"omitempty"`
-	ActionBy *string `reqHeader:"action-by" validate:"required,id"`
+	IsActive     *bool   `query:"is_active" validate:"omitempty"`
+	UserDocument *string `query:"user_document" validate:"omitempty,document"`
+	ActionBy     *string `reqHeader:"action-by" validate:"required,id"`
 	utils.PaginationReq
 }
 
