@@ -88,5 +88,18 @@ func TestListDonation(t *testing.T) {
 
 			assert.Equal(t, is_active, item["is_active"])
 		})
+		t.Run("user_document filter as a admin", func(t *testing.T) {
+			user_document := "47046117012"
+			route := fmt.Sprintf("%s&user_document=%s", endpoint, user_document)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, &utils.TestHeadersAdmin)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			item := fluxgo.ConvertToMap(data[0])
+
+			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", item["created_by"])
+		})
 	})
 }

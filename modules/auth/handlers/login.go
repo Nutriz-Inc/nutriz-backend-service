@@ -47,11 +47,6 @@ func (h *HandlerLogin) Execute(ctx c.Context, data *dto.LoginReq) (*dto.LoginRes
 		return nil, fluxgo.ErrorBadRequest("Invalid email or password", "auth.invalid_credentials")
 	}
 
-	addresses, _, err := h.addressRepo.GetAddressesByUserId(ctx, user.IdUser)
-	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to get addresses")
-	}
-
 	const SEVEN_DAYS = 7 * 24 * time.Hour
 
 	tokenPayload := utils.JwtClaims{
@@ -67,10 +62,9 @@ func (h *HandlerLogin) Execute(ctx c.Context, data *dto.LoginReq) (*dto.LoginRes
 	}
 
 	return &dto.LoginRes{
-		Token:     token,
-		IdUser:    user.IdUser,
-		Name:      user.Name,
-		Type:      user.Type,
-		Addresses: addresses,
+		Token:  token,
+		IdUser: user.IdUser,
+		Name:   user.Name,
+		Type:   user.Type,
 	}, nil
 }
