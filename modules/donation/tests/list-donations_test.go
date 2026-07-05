@@ -99,7 +99,7 @@ func TestListDonation(t *testing.T) {
 			data := fluxgo.ConvertToList(body["data"])
 			item := fluxgo.ConvertToMap(data[0])
 
-			assert.Equal(t, user_document, item["user_document"])
+			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", item["created_by"])
 		})
 	})
 }
