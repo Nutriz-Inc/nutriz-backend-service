@@ -88,7 +88,7 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 		return nil, fluxgo.ErrorBadRequest("At least one field must be sent to update", "no_fields_to_update")
 	}
 
-	err = h.donationRepo.UpdateDonation(ctx, req)
+	err = h.donationRepo.UpdateDonation(ctx, &req)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to update donation")
 	}
