@@ -139,6 +139,17 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 			return fmt.Errorf("error to update donation step: %w", err)
 		}
 
+		if req.IsComplete {
+			err = h.donationRepo.UpdateDonationTx(ctx, tx, &repositories.UpdateDonationRepositoryReq{
+				IdDonation: donation.IdDonation,
+				IdUser:     data.ActionBy,
+				IsActive:   utils.BoolPtr(false),
+			})
+			if err != nil {
+				return fmt.Errorf("error to update donation step: %w", err)
+			}
+		}
+
 		idDonationStepTimeline := utils.IdGenerate(utils.DonationStepTimelineEntity)
 		status := donationStep.Status
 

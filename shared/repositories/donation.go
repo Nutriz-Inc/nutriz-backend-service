@@ -137,7 +137,7 @@ type UpdateDonationRepositoryReq struct {
 	UserFeedback    *string
 }
 
-func (r *DonationRepository) UpdateDonation(ctx c.Context, data UpdateDonationRepositoryReq) error {
+func (r *DonationRepository) updateDonation(ctx c.Context, exec sqlx.ExtContext, data *UpdateDonationRepositoryReq) error {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
@@ -179,6 +179,29 @@ func (r *DonationRepository) UpdateDonation(ctx c.Context, data UpdateDonationRe
 		span,
 		query,
 		params,
+	)
+}
+
+func (r *DonationRepository) UpdateDonationTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	data *UpdateDonationRepositoryReq,
+) error {
+	return r.updateDonation(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *DonationRepository) UpdateDonation(
+	ctx c.Context,
+	data *UpdateDonationRepositoryReq,
+) error {
+	return r.updateDonation(
+		ctx,
+		r.DB.WriteDB(),
+		data,
 	)
 }
 
