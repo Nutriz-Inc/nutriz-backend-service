@@ -30,7 +30,7 @@ func (r *DonationRepository) ListDonationByFilters(
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
 		Select("d.*").
 		From("donation", "d").
-		OrderBy(q.OrderBy{Column: "d.created_at"}).
+		OrderBy(q.OrderBy{Column: "d.created_at", Type: "DESC"}).
 		PaginationPaged(filter.Page, filter.PageSize).
 		WhereAnd(q.Where{Column: "d.removed_at", Type: "IS NULL"})
 
