@@ -6,6 +6,7 @@ import (
 	"nutriz-backend-service/shared/utils"
 
 	fluxgo "github.com/MMortari/FluxGo"
+	"github.com/jmoiron/sqlx"
 )
 
 type ConsentLogRepository struct {
@@ -24,8 +25,9 @@ type CreateConsentRepositoryReq struct {
 	IdConsentLog string
 }
 
-func (r *ConsentLogRepository) CreateConsentLog(
+func (r *ConsentLogRepository) createConsentLog(
 	ctx c.Context,
+	exec sqlx.ExtContext,
 	data *CreateConsentRepositoryReq,
 ) error {
 	ctx, span := r.StartSpan(ctx)
@@ -57,12 +59,36 @@ func (r *ConsentLogRepository) CreateConsentLog(
 		"user_agent":     data.UserAgent,
 	}
 
-	return utils.Insert(
+	_, err := sqlx.NamedExecContext(
 		ctx,
-		r.DB.ReadOnlyDB(),
-		span,
+		exec,
 		query,
 		params,
+	)
+
+	return err
+}
+
+func (r *ConsentLogRepository) CreateConsentLogTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	data *CreateConsentRepositoryReq,
+) error {
+	return r.createConsentLog(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *ConsentLogRepository) CreateConsentLog(
+	ctx c.Context,
+	data *CreateConsentRepositoryReq,
+) error {
+	return r.createConsentLog(
+		ctx,
+		r.DB.WriteDB(),
+		data,
 	)
 }
 
