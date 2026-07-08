@@ -16,11 +16,12 @@ import (
 )
 
 type HandlerCreateUser struct {
-	db           *fluxgo.Database
-	config       *config.Env
-	userRepo     *repositories.UserRepository
-	addressRepo  *repositories.AddressRepository
-	userBabyRepo *repositories.UserBabyRepository
+	db             *fluxgo.Database
+	config         *config.Env
+	userRepo       *repositories.UserRepository
+	addressRepo    *repositories.AddressRepository
+	userBabyRepo   *repositories.UserBabyRepository
+	consentLogRepo *repositories.ConsentLogRepository
 }
 
 type createUserTxError struct {
@@ -37,6 +38,7 @@ func HandlerCreateUserStart(
 	userRepo *repositories.UserRepository,
 	addressRepo *repositories.AddressRepository,
 	userBabyRepo *repositories.UserBabyRepository,
+	consentLogRepo *repositories.ConsentLogRepository,
 ) *HandlerCreateUser {
 	return &HandlerCreateUser{
 		db,
@@ -44,6 +46,7 @@ func HandlerCreateUserStart(
 		userRepo,
 		addressRepo,
 		userBabyRepo,
+		consentLogRepo,
 	}
 }
 
@@ -142,6 +145,14 @@ func (h *HandlerCreateUser) handleCommon(ctx c.Context, data *dto.CreateUserReq,
 			return &createUserTxError{err: errHandler}
 		}
 
+		errHandler = h.createConsentLog(ctx, &dto.CreateConsentReq{
+			ActionBy:          idUser,
+			CreateConsentBase: *data.ConsentLog,
+		}, tx)
+		if errHandler != nil {
+			return &createUserTxError{err: errHandler}
+		}
+
 		if data.UserBaby != nil {
 			errHandler := h.createUserBaby(ctx, &dto.CreateUserBabyReq{
 				ActionBy:           idUser,
@@ -206,6 +217,25 @@ func (h *HandlerCreateUser) handleWorker(ctx c.Context, data *dto.CreateUserReq,
 	}
 
 	return &dto.CreateUserRes{User: *user}, nil
+}
+
+func (h *HandlerCreateUser) createConsentLog(ctx c.Context, data *dto.CreateConsentReq, tx *sqlx.Tx) *fluxgo.GlobalError {
+	idConsentLog := utils.IdGenerate(utils.ConsentLogEntity)
+
+	repoData := &repositories.CreateConsentRepositoryReq{
+		TermsVersion: data.TermsVersion,
+		Ip:           data.IpAddress,
+		UserAgent:    data.UserAgent,
+		IdUser:       data.ActionBy,
+		IdConsentLog: idConsentLog,
+	}
+
+	err := h.consentLogRepo.CreateConsentLogTx(ctx, tx, repoData)
+	if err != nil {
+		return fluxgo.ErrorInternalError("Error to create consent")
+	}
+
+	return nil
 }
 
 func (h *HandlerCreateUser) createAddress(ctx c.Context, data *dto.CreateAddressReq, tx *sqlx.Tx) *fluxgo.GlobalError {
