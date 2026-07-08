@@ -173,13 +173,14 @@ func (r *DonationRepository) updateDonation(ctx c.Context, exec sqlx.ExtContext,
 		  AND removed_at IS NULL
 	`
 
-	return utils.Update(
+	_, err := sqlx.NamedExecContext(
 		ctx,
-		r.DB.ReadOnlyDB(),
-		span,
+		exec,
 		query,
 		params,
 	)
+
+	return err
 }
 
 func (r *DonationRepository) UpdateDonationTx(

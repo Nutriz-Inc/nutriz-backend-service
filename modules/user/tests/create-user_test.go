@@ -38,6 +38,7 @@ func TestCreateUser(t *testing.T) {
 			BirthDate:   utils.StringPtr(birthDate),
 			PhoneNumber: phone,
 			Address:     makeAddress(zipcode),
+			ConsentLog:  &ConsentLog,
 		}
 	}
 
