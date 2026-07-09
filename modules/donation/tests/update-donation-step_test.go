@@ -45,6 +45,45 @@ func TestUpdateDonationStep(t *testing.T) {
 			assert.Equal(t, string(statusToUpdate), resp["status"])
 			assert.Equal(t, body.Description, resp["description"])
 		})
+
+		t.Run("Admin updates with existing address id belonging to the user", func(t *testing.T) {
+			idAddress := "adr_01JTX0H1V8N5Q3W7E2R4T6Y8ADM"
+			body := dto.UpdateDonationStepReq{
+				Description: "Atualizacao com endereco existente",
+				IdAddress:   &idAddress,
+			}
+
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"PUT",
+				endpoint+"/dst_2veL1FPpuXxUaZcFaEC57BfpcII",
+				body,
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, idAddress, resp["id_address"])
+		})
+
+		t.Run("Admin updates with new address by zip code", func(t *testing.T) {
+			body := dto.UpdateDonationStepReq{
+				Description: "Atualizacao com endereco criado via CEP",
+				Address: &dto.AddressCreateBase{
+					ZipCode: "05010000",
+				},
+			}
+
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"PUT",
+				endpoint+"/dst_2veL1FPpuXxUaZcFaEC57BfpcJJ",
+				body,
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusOK, status)
+			assert.NotEmpty(t, resp["id_address"])
+		})
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -160,6 +199,44 @@ func TestUpdateDonationStep(t *testing.T) {
 
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "At least one field must be sent to update", resp["message"])
+		})
+
+		t.Run("Address does not belong to the user", func(t *testing.T) {
+			idAddress := "adr_01JTG8K8N4P2R6T9V1X3Y5Z7MIP"
+			body := dto.UpdateDonationStepReq{
+				Description: "Tentativa com endereco de outro usuario",
+				IdAddress:   &idAddress,
+			}
+
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"PUT",
+				endpoint+"/dst_2veL1FPpuXxUaZcFaEC57BfpcBB",
+				body,
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "Address does not belong to the user", resp["message"])
+		})
+
+		t.Run("Address not found", func(t *testing.T) {
+			idAddress := "adr_2veL1FPpuXxUaZcFaEC57BfpcZZ"
+			body := dto.UpdateDonationStepReq{
+				Description: "Tentativa com endereco inexistente",
+				IdAddress:   &idAddress,
+			}
+
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"PUT",
+				endpoint+"/dst_2veL1FPpuXxUaZcFaEC57BfpcBB",
+				body,
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusNotFound, status)
+			assert.Equal(t, "Address not found", resp["message"])
 		})
 	})
 }

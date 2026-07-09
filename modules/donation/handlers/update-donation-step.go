@@ -3,6 +3,7 @@ package handlers
 import (
 	c "context"
 	"fmt"
+	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
@@ -16,25 +17,31 @@ import (
 
 type HandlerUpdateDonationStep struct {
 	db                       *fluxgo.Database
+	config                   *config.Env
 	donationRepo             *repositories.DonationRepository
 	donationStepRepo         *repositories.DonationStepRepository
 	donationStepTimelineRepo *repositories.DonationStepTimelineRepository
 	userRepo                 *repositories.UserRepository
+	addressRepo              *repositories.AddressRepository
 }
 
 func HandlerUpdateDonationStepStart(
 	db *fluxgo.Database,
+	config *config.Env,
 	donationRepo *repositories.DonationRepository,
 	donationStepRepo *repositories.DonationStepRepository,
 	donationStepTimelineRepo *repositories.DonationStepTimelineRepository,
 	userRepo *repositories.UserRepository,
+	addressRepo *repositories.AddressRepository,
 ) *HandlerUpdateDonationStep {
 	return &HandlerUpdateDonationStep{
 		db,
+		config,
 		donationRepo,
 		donationStepRepo,
 		donationStepTimelineRepo,
 		userRepo,
+		addressRepo,
 	}
 }
 
@@ -134,6 +141,22 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 	}
 
 	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
+		var idAddress *string
+		var handleErr *fluxgo.GlobalError
+
+		if validator.HasAddress {
+			idAddress, handleErr = h.handleAddress(ctx, tx, &dto.CreateDonationStepReq{
+				ActionBy:  data.ActionBy,
+				IdAddress: data.IdAddress,
+				Address:   data.Address,
+			})
+			if handleErr != nil {
+				return fmt.Errorf("error on handle address: %s", handleErr.Message)
+			}
+
+			req.IdAddress = idAddress
+		}
+
 		err := h.donationStepRepo.UpdateDonationStepTx(ctx, tx, &req)
 		if err != nil {
 			return fmt.Errorf("error to update donation step: %w", err)
@@ -160,6 +183,7 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 		err = h.donationStepTimelineRepo.CreateDonationStepTimelineTx(ctx, tx, &repositories.CreateDonationStepTimelineRepositoryReq{
 			IdDonationStepTimeline: idDonationStepTimeline,
 			IdDonationStep:         data.Id,
+			IdAddress:              idAddress,
 			Description:            data.Description,
 			Status:                 status,
 			SetDate:                setDateTime,
@@ -186,4 +210,72 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 	return &dto.UpdateDonationStepRes{
 		DonationStep: *donationStep,
 	}, nil
+}
+
+func (h *HandlerUpdateDonationStep) handleAddress(ctx c.Context, tx *sqlx.Tx, data *dto.CreateDonationStepReq) (*string, *fluxgo.GlobalError) {
+	var idAddress *string
+
+	if data.IdAddress != nil {
+		address, err := h.addressRepo.GetAddressById(ctx, *data.IdAddress)
+		if err != nil {
+			return nil, fluxgo.ErrorInternalError("Error to get address")
+		}
+		if address == nil {
+			return nil, fluxgo.ErrorNotFound("Address not found")
+		}
+
+		if address.IdUser != nil && *address.IdUser != data.ActionBy {
+			return nil, utils.ErrorForbidden("Address does not belong to the user", "address.forbidden")
+		}
+
+		idAddress = data.IdAddress
+	} else {
+		address, err := h.addressRepo.GetAddressByZipcodeAndIdUser(ctx, data.Address.ZipCode, data.ActionBy)
+		if err != nil {
+			return nil, fluxgo.ErrorInternalError("Error to get address")
+		}
+
+		if address == nil {
+			var handleErr *fluxgo.GlobalError
+
+			idAddress, handleErr = h.createAddress(ctx, data.Address, data.ActionBy, tx)
+			if handleErr != nil {
+				return nil, handleErr
+			}
+		} else {
+			idAddress = &address.IdAddress
+		}
+	}
+
+	return idAddress, nil
+}
+
+func (h *HandlerUpdateDonationStep) createAddress(ctx c.Context, data *dto.AddressCreateBase, actionBy string, tx *sqlx.Tx) (*string, *fluxgo.GlobalError) {
+	addressData, err := utils.GetAddressByZipCode(ctx, data.ZipCode, h.config)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError(err.Error())
+	}
+
+	idAddress := utils.IdGenerate(utils.AddressEntity)
+
+	repoData := &repositories.CreateAddressRepositoryReq{
+		IdAddress:    idAddress,
+		IdUser:       actionBy,
+		Zipcode:      data.ZipCode,
+		Street:       addressData.Street,
+		Number:       data.Number,
+		City:         addressData.City,
+		State:        addressData.State,
+		Neighborhood: addressData.Neighborhood,
+		Complement:   data.Complement,
+		Latitude:     addressData.Latitude,
+		Longitude:    addressData.Longitude,
+	}
+
+	err = h.addressRepo.CreateAddressTx(ctx, tx, repoData)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to create address")
+	}
+
+	return &idAddress, nil
 }

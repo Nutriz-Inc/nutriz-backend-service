@@ -5,6 +5,7 @@ import "time"
 type DonationStep struct {
 	IdDonationStep string                 `json:"id_donation_step" db:"id_donation_step"`
 	IdDonation     string                 `json:"id_donation" db:"id_donation"`
+	IdAddress      *string                `json:"id_address" db:"id_address"`
 	Name           EnumDonationSteps      `json:"name" db:"name"`
 	Description    string                 `json:"description" db:"description"`
 	Status         EnumDonationStepStatus `json:"status" db:"status"`

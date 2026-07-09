@@ -22,6 +22,7 @@ func DonationStepTimelineRepositoryStart(db *fluxgo.Database) *DonationStepTimel
 type CreateDonationStepTimelineRepositoryReq struct {
 	IdDonationStepTimeline string
 	IdDonationStep         string
+	IdAddress              *string
 	Description            string
 	Status                 entities.EnumDonationStepStatus
 	SetDate                *time.Time
@@ -40,6 +41,7 @@ func (r *DonationStepTimelineRepository) createDonationStepTimeline(
 		INSERT INTO donation_step_timeline (
 			id_donation_step_timeline,
 			id_donation_step,
+			id_address,
 			description,
 			status,
 			set_date,
@@ -48,6 +50,7 @@ func (r *DonationStepTimelineRepository) createDonationStepTimeline(
 		) VALUES (
 		 	:id_donation_step_timeline,
 			:id_donation_step,
+			:id_address,
 			:description,
 			:status,
 			:set_date,
@@ -59,6 +62,7 @@ func (r *DonationStepTimelineRepository) createDonationStepTimeline(
 	params := map[string]any{
 		"id_donation_step_timeline": data.IdDonationStepTimeline,
 		"id_donation_step":          data.IdDonationStep,
+		"id_address":                data.IdAddress,
 		"description":               data.Description,
 		"status":                    data.Status,
 		"set_date":                  data.SetDate,
