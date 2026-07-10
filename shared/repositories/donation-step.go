@@ -64,6 +64,7 @@ type CreateDonationStepRepositoryReq struct {
 	Description    string
 	Status         entities.EnumDonationStepStatus
 	SetDate        *time.Time
+	IdAddress      *string
 }
 
 func (r *DonationStepRepository) createDonationStep(
@@ -78,6 +79,7 @@ func (r *DonationStepRepository) createDonationStep(
 		INSERT INTO donation_step (
 			id_donation_step,
 			id_donation,
+			id_address,
 			name,
 			description,
 			status,
@@ -87,6 +89,7 @@ func (r *DonationStepRepository) createDonationStep(
 		) VALUES (
 			:id_donation_step,
 			:id_donation,
+			:id_address,
 			:name,
 			:description,
 			:status,
@@ -100,6 +103,7 @@ func (r *DonationStepRepository) createDonationStep(
 		"id_donation_step": data.IdDonationStep,
 		"id_donation":      data.IdDonation,
 		"id_user":          data.IdUser,
+		"id_address":       data.IdAddress,
 		"name":             data.Name,
 		"description":      data.Description,
 		"status":           data.Status,
@@ -142,6 +146,7 @@ func (r *DonationStepRepository) CreateDonationStep(
 type UpdateDonationStepRepositoryReq struct {
 	IdDonationStep string
 	IdUser         string
+	IdAddress      *string
 	Description    string
 	Status         *entities.EnumDonationStepStatus
 	SetDate        *time.Time
@@ -172,6 +177,10 @@ func (r *DonationStepRepository) updateDonationStep(ctx c.Context, exec sqlx.Ext
 	}
 	if data.IsComplete {
 		sets = append(sets, "completed_at = now()")
+	}
+	if data.IdAddress != nil {
+		sets = append(sets, "id_address = :id_address")
+		params["id_address"] = *data.IdAddress
 	}
 
 	query := `

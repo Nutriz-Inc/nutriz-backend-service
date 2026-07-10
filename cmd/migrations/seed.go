@@ -329,6 +329,66 @@ INSERT INTO donation (
     NULL,
     NULL,
     NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKM',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKN',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKO',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKP',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKQ',
+    true,
+    0,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO address (
@@ -446,6 +506,23 @@ INSERT INTO address (
     'Casa 1209',
     -13.559511,
     -36.737330,
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'adr_01JTX0H1V8N5Q3W7E2R4T6Y8ADM',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    '04538132',
+    'Avenida Brigadeiro Faria Lima',
+    '2000',
+    'São Paulo',
+    'SP',
+    'Itaim Bibi',
+    'Sala 10',
+    -23.587421,
+    -46.681521,
     NOW(),
     NULL,
     NULL
@@ -705,6 +782,32 @@ INSERT INTO donation_step (
     NOW() - INTERVAL '1 day',
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
     NOW() - INTERVAL '1 day'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcII',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKO',
+    'Exame de sangue',
+    'Step reservado para testes de atualização de endereço',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcJJ',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKO',
+    'Entregar kit de ordenha',
+    'Step reservado para testes de criação de endereço via CEP',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO donation_step_timeline (

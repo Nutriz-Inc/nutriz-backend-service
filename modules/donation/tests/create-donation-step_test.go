@@ -59,6 +59,30 @@ func TestCreateDonationStep(t *testing.T) {
 			assert.Equal(t, string(entities.EnumDonationStepStatusPending), resp["status"])
 			assert.NotNil(t, resp["set_date"])
 		})
+
+		t.Run("With existing address id belonging to the user", func(t *testing.T) {
+			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcKM", nil)
+			idAddress := "adr_01JTX0H1V8N5Q3W7E2R4T6Y8ADM"
+			body.IdAddress = &idAddress
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusCreated, status)
+			assert.Equal(t, idAddress, resp["id_address"])
+		})
+
+		t.Run("With new address by zip code", func(t *testing.T) {
+			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcKN", nil)
+			body.Address = &dto.AddressCreateBase{
+				ZipCode: "05010000",
+			}
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusCreated, status)
+			assert.NotEmpty(t, resp["id_address"])
+			assert.NotEqual(t, "adr_01JTX0H1V8N5Q3W7E2R4T6Y8ADM", resp["id_address"])
+		})
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -106,6 +130,28 @@ func TestCreateDonationStep(t *testing.T) {
 
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "Set date must be in the future", resp["message"])
+		})
+
+		t.Run("Address does not belong to the user", func(t *testing.T) {
+			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcKP", nil)
+			idAddress := "adr_01JTG8K8N4P2R6T9V1X3Y5Z7MIP"
+			body.IdAddress = &idAddress
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusForbidden, status)
+			assert.Equal(t, "Address does not belong to the user", resp["message"])
+		})
+
+		t.Run("Address not found", func(t *testing.T) {
+			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcKQ", nil)
+			idAddress := "adr_2veL1FPpuXxUaZcFaEC57BfpcZZ"
+			body.IdAddress = &idAddress
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusNotFound, status)
+			assert.Equal(t, "Address not found", resp["message"])
 		})
 	})
 }

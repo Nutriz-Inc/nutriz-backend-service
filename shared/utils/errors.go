@@ -33,3 +33,11 @@ func ErrorForbidden(message, code string) *fluxgo.GlobalError {
 		Success: false,
 	}
 }
+
+type TxError struct {
+	Err *fluxgo.GlobalError
+}
+
+func (e *TxError) Error() string {
+	return e.Err.Message
+}
