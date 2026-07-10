@@ -2,6 +2,7 @@ package handlers
 
 import (
 	c "context"
+	"errors"
 	"fmt"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/donation/dtos"
@@ -136,6 +137,10 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 		fieldsToUpdate++
 	}
 
+	if validator.HasAddress {
+		fieldsToUpdate++
+	}
+
 	if fieldsToUpdate == 0 {
 		return nil, fluxgo.ErrorBadRequest("At least one field must be sent to update", "no_fields_to_update")
 	}
@@ -151,7 +156,7 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 				Address:   data.Address,
 			})
 			if handleErr != nil {
-				return fmt.Errorf("error on handle address: %s", handleErr.Message)
+				return &utils.TxError{Err: handleErr}
 			}
 
 			req.IdAddress = idAddress
@@ -196,6 +201,10 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 		return nil
 	})
 	if err != nil {
+		var txErr *utils.TxError
+		if errors.As(err, &txErr) {
+			return nil, txErr.Err
+		}
 		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
 

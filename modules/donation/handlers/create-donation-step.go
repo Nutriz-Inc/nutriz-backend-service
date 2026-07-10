@@ -2,6 +2,7 @@ package handlers
 
 import (
 	c "context"
+	"errors"
 	"fmt"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/donation/dtos"
@@ -118,7 +119,7 @@ func (h *HandlerCreateDonationStep) Execute(ctx c.Context, data *dto.CreateDonat
 		if data.HasAddress() {
 			idAddress, handleErr = h.handleAddress(ctx, tx, data)
 			if handleErr != nil {
-				return fmt.Errorf("error on handle address: %s", handleErr.Message)
+				return &utils.TxError{Err: handleErr}
 			}
 		}
 
@@ -153,6 +154,10 @@ func (h *HandlerCreateDonationStep) Execute(ctx c.Context, data *dto.CreateDonat
 		return nil
 	})
 	if err != nil {
+		var txErr *utils.TxError
+		if errors.As(err, &txErr) {
+			return nil, txErr.Err
+		}
 		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
 
