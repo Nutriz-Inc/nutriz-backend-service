@@ -147,9 +147,9 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 
 	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
 		var idAddress *string
-		var handleErr *fluxgo.GlobalError
 
 		if validator.HasAddress {
+			var handleErr *fluxgo.GlobalError
 			idAddress, handleErr = h.handleAddress(ctx, tx, &dto.CreateDonationStepReq{
 				ActionBy:  data.ActionBy,
 				IdAddress: data.IdAddress,
@@ -239,12 +239,12 @@ func (h *HandlerUpdateDonationStep) handleAddress(ctx c.Context, tx *sqlx.Tx, da
 
 		idAddress = data.IdAddress
 	} else {
-		address, err := h.addressRepo.GetAddressByZipcodeAndIdUser(ctx, data.Address.ZipCode, data.ActionBy)
+		address, err := h.addressRepo.GetAddressByZipcode(ctx, data.Address.ZipCode)
 		if err != nil {
 			return nil, fluxgo.ErrorInternalError("Error to get address")
 		}
 
-		if address == nil {
+		if address == nil || (address.IdUser != nil && *address.IdUser != data.ActionBy) {
 			var handleErr *fluxgo.GlobalError
 
 			idAddress, handleErr = h.createAddress(ctx, data.Address, data.ActionBy, tx)
