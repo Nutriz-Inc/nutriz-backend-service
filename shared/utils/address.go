@@ -17,6 +17,14 @@ type AddressRes struct {
 }
 
 func GetAddressByZipCode(ctx c.Context, zipcode string, config *config.Env) (*AddressRes, error) {
+	return getAddressByZipCode(ctx, zipcode, config, true)
+}
+
+func GetAddressByZipCodeOptionalCoordinates(ctx c.Context, zipcode string, config *config.Env) (*AddressRes, error) {
+	return getAddressByZipCode(ctx, zipcode, config, false)
+}
+
+func getAddressByZipCode(ctx c.Context, zipcode string, config *config.Env, coordinatesRequired bool) (*AddressRes, error) {
 	provider, err := location.NewLocationProvider(config)
 	if err != nil {
 		return nil, fmt.Errorf("error to initialize location provider: %v", err)
@@ -50,6 +58,10 @@ func GetAddressByZipCode(ctx c.Context, zipcode string, config *config.Env) (*Ad
 
 	coordinates, err := provider.GetCoordinatesByAddress(ctx, query)
 	if err != nil {
+		if !coordinatesRequired {
+			return res, nil
+		}
+
 		return nil, fmt.Errorf("error getting coordinates by address: %v", err)
 	}
 
