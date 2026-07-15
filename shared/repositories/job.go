@@ -24,13 +24,56 @@ func JobRepositoryStart(db *fluxgo.Database) *JobRepository {
 func (r *JobRepository) ListJobsByFilters(
 	ctx c.Context,
 	filter *dto.ListJobsReq,
-) (*[]entities.Job, int, error) {
+) (*[]dto.JobRes, int, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
-		Select("j.*").
+		Select(
+			"j.*",
+			"uc.name AS user_common_name",
+			"un.name AS user_nurse_name",
+			`a.id_address         AS "address.id_address"`,
+			`a.id_user            AS "address.id_user"`,
+			`a.id_donation_point  AS "address.id_donation_point"`,
+			`a.zipcode            AS "address.zipcode"`,
+			`a.street             AS "address.street"`,
+			`a.number             AS "address.number"`,
+			`a.city               AS "address.city"`,
+			`a.state              AS "address.state"`,
+			`a.neighborhood       AS "address.neighborhood"`,
+			`a.complement         AS "address.complement"`,
+			`a.latitude           AS "address.latitude"`,
+			`a.longitude          AS "address.longitude"`,
+			`a.created_at         AS "address.created_at"`,
+			`a.updated_at         AS "address.updated_at"`,
+			`a.removed_at         AS "address.removed_at"`,
+		).
 		From("job", "j").
+		Join(q.Join{
+			Table: "user",
+			As:    "uc",
+			On:    "uc.id_user = j.id_user AND uc.removed_at IS NULL",
+			Type:  q.LeftJoin,
+		}).
+		Join(q.Join{
+			Table: "user",
+			As:    "un",
+			On:    "un.id_user = j.created_by AND un.removed_at IS NULL",
+			Type:  q.LeftJoin,
+		}).
+		Join(q.Join{
+			Table: "donation_step",
+			As:    "ds",
+			On:    "ds.id_donation_step = j.id_step",
+			Type:  q.LeftJoin,
+		}).
+		Join(q.Join{
+			Table: "address",
+			As:    "a",
+			On:    "a.id_address = ds.id_address AND a.removed_at IS NULL",
+			Type:  q.LeftJoin,
+		}).
 		OrderBy(q.OrderBy{Column: "j.date_set"}).
 		PaginationPaged(filter.Page, filter.PageSize).
 		WhereAnd(q.Where{Column: "j.removed_at", Type: "IS NULL"})
@@ -59,7 +102,39 @@ func (r *JobRepository) ListJobsByFilters(
 		})
 	}
 
-	return utils.ListQuery[entities.Job](
+	if filter.IdUserCommon != nil {
+		qb.WhereAnd(q.Where{
+			Column: "j.id_user",
+			Type:   "=",
+			Val:    *filter.IdUserCommon,
+		})
+	}
+
+	if filter.IdUserNurse != nil {
+		qb.WhereAnd(q.Where{
+			Column: "j.created_by",
+			Type:   "=",
+			Val:    *filter.IdUserNurse,
+		})
+	}
+
+	if filter.UserCommonName != nil {
+		qb.WhereAnd(q.Where{
+			Column: "uc.name",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.UserCommonName + "%",
+		})
+	}
+
+	if filter.UserNurseName != nil {
+		qb.WhereAnd(q.Where{
+			Column: "un.name",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.UserNurseName + "%",
+		})
+	}
+
+	return utils.ListQuery[dto.JobRes](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,

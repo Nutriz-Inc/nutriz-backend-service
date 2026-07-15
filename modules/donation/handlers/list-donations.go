@@ -41,6 +41,7 @@ func (h *HandlerListDonations) Execute(ctx c.Context, filters *dto.ListDonationR
 	} else {
 		filters.UserName = nil
 		filters.UserDocument = nil
+		filters.IdUserCommon = nil
 	}
 
 	donations, total, err := h.donationRepo.ListDonationByFilters(ctx, filters)
@@ -51,25 +52,12 @@ func (h *HandlerListDonations) Execute(ctx c.Context, filters *dto.ListDonationR
 		return nil, fluxgo.ErrorNotFound("Donations not found")
 	}
 
-	donationsFormatted := h.mapResponse(donations, user.Type)
-
 	return &dto.ListDonationRes{
-		Data: *donationsFormatted,
+		Data: *donations,
 		PaginationRes: utils.PaginationRes{
 			Page:     filters.Page,
 			PageSize: filters.PageSize,
 			Total:    total,
 		},
 	}, nil
-}
-
-func (h *HandlerListDonations) mapResponse(donations *[]dto.DonationRes, userType entities.EnumUserType) *[]dto.DonationRes {
-	if userType == entities.EnumUserTypeCommon {
-		for i := range *donations {
-			(*donations)[i].UserName = nil
-			(*donations)[i].UserDocument = nil
-		}
-	}
-
-	return donations
 }

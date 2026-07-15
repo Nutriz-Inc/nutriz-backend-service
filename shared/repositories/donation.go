@@ -38,8 +38,6 @@ func (r *DonationRepository) ListDonationByFilters(
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
 		Select(
 			"d.*",
-			"u.name AS user_name",
-			"u.cpf AS user_document",
 			currentStepSubquery+" AS current_step",
 		).
 		From("donation", "d").
@@ -52,6 +50,13 @@ func (r *DonationRepository) ListDonationByFilters(
 		OrderBy(q.OrderBy{Column: "d.created_at", Type: "DESC"}).
 		PaginationPaged(filter.Page, filter.PageSize).
 		WhereAnd(q.Where{Column: "d.removed_at", Type: "IS NULL"})
+
+	if filter.ActionBy == nil {
+		qb.Select(
+			"u.name AS user_name",
+			"u.cpf AS user_document",
+		)
+	}
 
 	if filter.IsActive != nil {
 		qb.WhereAnd(q.Where{
@@ -66,6 +71,14 @@ func (r *DonationRepository) ListDonationByFilters(
 			Column: "d.created_by",
 			Type:   "=",
 			Val:    *filter.ActionBy,
+		})
+	}
+
+	if filter.IdUserCommon != nil {
+		qb.WhereAnd(q.Where{
+			Column: "d.created_by",
+			Type:   "=",
+			Val:    *filter.IdUserCommon,
 		})
 	}
 

@@ -6,13 +6,24 @@ import (
 )
 
 type ListJobsReq struct {
-	ActionBy *string `reqHeader:"action-by" validate:"required,id"`
-	DateSet  *string `query:"date_set" validate:"omitempty,datetime=2006-01-02"`
-	IdStep   *string `query:"id_step" validate:"omitempty,id"`
+	ActionBy       *string `reqHeader:"action-by" validate:"required,id"`
+	DateSet        *string `query:"date_set" validate:"omitempty,datetime=2006-01-02"`
+	IdStep         *string `query:"id_step" validate:"omitempty,id"`
+	IdUserCommon   *string `query:"id_user_common" validate:"omitempty,id"`
+	IdUserNurse    *string `query:"id_user_nurse" validate:"omitempty,id"`
+	UserCommonName *string `query:"user_common_name" validate:"omitempty"`
+	UserNurseName  *string `query:"user_nurse_name" validate:"omitempty"`
 	utils.PaginationReq
 }
 
+type JobRes struct {
+	entities.Job
+	UserCommonName string            `json:"user_common_name" db:"user_common_name"`
+	UserNurseName  string            `json:"user_nurse_name" db:"user_nurse_name"`
+	Address        *entities.Address `json:"address,omitempty" db:"address"`
+}
+
 type ListJobsRes struct {
-	Data []entities.Job `json:"data"`
+	Data []JobRes `json:"data"`
 	utils.PaginationRes
 }
