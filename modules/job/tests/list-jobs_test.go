@@ -100,6 +100,73 @@ func TestListJobs(t *testing.T) {
 			assert.Contains(t, item["date_set"], dateSet)
 			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfplNV", item["id_user"])
 		})
+
+		t.Run("id_user_nurse filter", func(t *testing.T) {
+			idNurse := "usr_2veL1FPpuXxUaZcFaEC57BfplNV"
+			route := fmt.Sprintf("%s&id_user_nurse=%s", endpoint, idNurse)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Equal(t, idNurse, row["id_user"])
+				assert.Equal(t, "Paula Fernandes", row["user_nurse_name"])
+			}
+		})
+
+		t.Run("id_user_common filter", func(t *testing.T) {
+			idDonor := "usr_2veL1FPpuXxUaZcFaEC57BfpcKE"
+			route := fmt.Sprintf("%s&id_user_common=%s", endpoint, idDonor)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Equal(t, "Maria Silva", row["user_common_name"])
+			}
+		})
+
+		t.Run("user_nurse_name filter", func(t *testing.T) {
+			route := fmt.Sprintf("%s&user_nurse_name=Paula", endpoint)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Contains(t, row["user_nurse_name"], "Paula")
+			}
+		})
+
+		t.Run("user_common_name filter", func(t *testing.T) {
+			route := fmt.Sprintf("%s&user_common_name=Maria", endpoint)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Contains(t, row["user_common_name"], "Maria")
+			}
+		})
 	})
 
 	t.Run("Error", func(t *testing.T) {

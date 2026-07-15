@@ -31,8 +31,8 @@ func (r *JobRepository) ListJobsByFilters(
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
 		Select(
 			"j.*",
-			"uc.name AS user_common_name",
 			"un.name AS user_nurse_name",
+			"uc.name AS user_common_name",
 			`a.id_address         AS "address.id_address"`,
 			`a.id_user            AS "address.id_user"`,
 			`a.id_donation_point  AS "address.id_donation_point"`,
@@ -52,20 +52,26 @@ func (r *JobRepository) ListJobsByFilters(
 		From("job", "j").
 		Join(q.Join{
 			Table: "user",
-			As:    "uc",
-			On:    "uc.id_user = j.id_user AND uc.removed_at IS NULL",
-			Type:  q.LeftJoin,
-		}).
-		Join(q.Join{
-			Table: "user",
 			As:    "un",
-			On:    "un.id_user = j.created_by AND un.removed_at IS NULL",
+			On:    "un.id_user = j.id_user AND un.removed_at IS NULL",
 			Type:  q.LeftJoin,
 		}).
 		Join(q.Join{
 			Table: "donation_step",
 			As:    "ds",
 			On:    "ds.id_donation_step = j.id_step",
+			Type:  q.LeftJoin,
+		}).
+		Join(q.Join{
+			Table: "donation",
+			As:    "d",
+			On:    "d.id_donation = ds.id_donation",
+			Type:  q.LeftJoin,
+		}).
+		Join(q.Join{
+			Table: "user",
+			As:    "uc",
+			On:    "uc.id_user = d.created_by AND uc.removed_at IS NULL",
 			Type:  q.LeftJoin,
 		}).
 		Join(q.Join{
@@ -104,7 +110,7 @@ func (r *JobRepository) ListJobsByFilters(
 
 	if filter.IdUserCommon != nil {
 		qb.WhereAnd(q.Where{
-			Column: "j.id_user",
+			Column: "d.created_by",
 			Type:   "=",
 			Val:    *filter.IdUserCommon,
 		})
@@ -112,7 +118,7 @@ func (r *JobRepository) ListJobsByFilters(
 
 	if filter.IdUserNurse != nil {
 		qb.WhereAnd(q.Where{
-			Column: "j.created_by",
+			Column: "j.id_user",
 			Type:   "=",
 			Val:    *filter.IdUserNurse,
 		})

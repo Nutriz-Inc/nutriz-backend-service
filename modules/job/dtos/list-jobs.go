@@ -18,8 +18,8 @@ type ListJobsReq struct {
 
 type JobRes struct {
 	entities.Job
-	UserCommonName string            `json:"user_common_name" db:"user_common_name"`
-	UserNurseName  string            `json:"user_nurse_name" db:"user_nurse_name"`
+	UserCommonName *string           `json:"user_common_name,omitempty" db:"user_common_name"`
+	UserNurseName  *string           `json:"user_nurse_name,omitempty" db:"user_nurse_name"`
 	Address        *entities.Address `json:"address,omitempty" db:"address"`
 }
 
