@@ -38,7 +38,7 @@ func (r *DonationRepository) ListDonationByFilters(
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
 		Select(
 			"d.*",
-			currentStepSubquery+" AS current_step",
+			"COALESCE("+currentStepSubquery+"::text, '') AS current_step",
 		).
 		From("donation", "d").
 		Join(q.Join{
