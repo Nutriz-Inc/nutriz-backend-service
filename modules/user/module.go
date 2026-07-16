@@ -198,7 +198,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/user"},
+				CacheInvalidate: []string{"/internal/user", "internal/address"},
 			},
 			handler.HandleHttp,
 		)
@@ -218,7 +218,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/user"},
+				CacheInvalidate: []string{"/internal/user", "internal/address"},
 			},
 			handler.HandleHttp,
 		)
@@ -237,7 +237,26 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/user"},
+				CacheInvalidate: []string{"/internal/user", "internal/address"},
+			},
+			handler.HandleHttp,
+		)
+	})
+
+	mod.AddHandler(handlers.HandlerGetAddressStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetAddress) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"GET",
+			"/address/:id",
+			fluxgo.RouteIncome{
+				Entity:     dto.GetAddressReq{},
+				FromParam:  true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      redis,
+				CacheTTL:   time.Hour,
 			},
 			handler.HandleHttp,
 		)
