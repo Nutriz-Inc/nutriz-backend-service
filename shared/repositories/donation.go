@@ -23,16 +23,40 @@ func DonationRepositoryStart(db *fluxgo.Database) *DonationRepository {
 func (r *DonationRepository) ListDonationByFilters(
 	ctx c.Context,
 	filter *dto.ListDonationReq,
-) (*[]entities.Donation, int, error) {
+) (*[]dto.DonationRes, int, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
+	currentStepSubquery := `(
+		SELECT ds.name
+		FROM "donation_step" ds
+		WHERE ds.id_donation = d.id_donation
+		ORDER BY ds.created_at DESC
+		LIMIT 1
+	)`
+
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
-		Select("d.*").
+		Select(
+			"d.*",
+			"COALESCE("+currentStepSubquery+"::text, '') AS current_step",
+		).
 		From("donation", "d").
+		Join(q.Join{
+			Table: "user",
+			As:    "u",
+			On:    "u.id_user = d.created_by AND u.removed_at IS NULL",
+			Type:  q.LeftJoin,
+		}).
 		OrderBy(q.OrderBy{Column: "d.created_at", Type: "DESC"}).
 		PaginationPaged(filter.Page, filter.PageSize).
 		WhereAnd(q.Where{Column: "d.removed_at", Type: "IS NULL"})
+
+	if filter.ActionBy == nil {
+		qb.Select(
+			"u.name AS user_name",
+			"u.cpf AS user_document",
+		)
+	}
 
 	if filter.IsActive != nil {
 		qb.WhereAnd(q.Where{
@@ -50,13 +74,15 @@ func (r *DonationRepository) ListDonationByFilters(
 		})
 	}
 
-	if filter.UserDocument != nil {
-		qb.Join(q.Join{
-			Table: "user",
-			As:    "u",
-			On:    "u.id_user = d.created_by AND u.removed_at IS NULL",
-			Type:  q.LeftJoin,
+	if filter.IdUserCommon != nil {
+		qb.WhereAnd(q.Where{
+			Column: "d.created_by",
+			Type:   "=",
+			Val:    *filter.IdUserCommon,
 		})
+	}
+
+	if filter.UserDocument != nil {
 		qb.WhereAnd(q.Where{
 			Column: "u.cpf",
 			Type:   "=",
@@ -64,7 +90,23 @@ func (r *DonationRepository) ListDonationByFilters(
 		})
 	}
 
-	return utils.ListQuery[entities.Donation](
+	if filter.UserName != nil {
+		qb.WhereAnd(q.Where{
+			Column: "u.name",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.UserName + "%",
+		})
+	}
+
+	if filter.CurrentStep != nil {
+		qb.WhereAnd(q.Where{
+			Column: currentStepSubquery,
+			Type:   "=",
+			Val:    *filter.CurrentStep,
+		})
+	}
+
+	return utils.ListQuery[dto.DonationRes](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,

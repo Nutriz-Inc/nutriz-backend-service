@@ -24,13 +24,42 @@ func JobRepositoryStart(db *fluxgo.Database) *JobRepository {
 func (r *JobRepository) ListJobsByFilters(
 	ctx c.Context,
 	filter *dto.ListJobsReq,
-) (*[]entities.Job, int, error) {
+) (*[]dto.JobRes, int, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
-		Select("j.*").
+		Select(
+			"j.*",
+			"un.name AS user_nurse_name",
+			"uc.name AS user_common_name",
+			"ds.id_address AS id_address_ref",
+		).
 		From("job", "j").
+		Join(q.Join{
+			Table: "user",
+			As:    "un",
+			On:    "un.id_user = j.id_user AND un.removed_at IS NULL",
+			Type:  q.LeftJoin,
+		}).
+		Join(q.Join{
+			Table: "donation_step",
+			As:    "ds",
+			On:    "ds.id_donation_step = j.id_step",
+			Type:  q.LeftJoin,
+		}).
+		Join(q.Join{
+			Table: "donation",
+			As:    "d",
+			On:    "d.id_donation = ds.id_donation",
+			Type:  q.LeftJoin,
+		}).
+		Join(q.Join{
+			Table: "user",
+			As:    "uc",
+			On:    "uc.id_user = d.created_by AND uc.removed_at IS NULL",
+			Type:  q.LeftJoin,
+		}).
 		OrderBy(q.OrderBy{Column: "j.date_set"}).
 		PaginationPaged(filter.Page, filter.PageSize).
 		WhereAnd(q.Where{Column: "j.removed_at", Type: "IS NULL"})
@@ -59,7 +88,39 @@ func (r *JobRepository) ListJobsByFilters(
 		})
 	}
 
-	return utils.ListQuery[entities.Job](
+	if filter.IdUserCommon != nil {
+		qb.WhereAnd(q.Where{
+			Column: "d.created_by",
+			Type:   "=",
+			Val:    *filter.IdUserCommon,
+		})
+	}
+
+	if filter.IdUserNurse != nil {
+		qb.WhereAnd(q.Where{
+			Column: "j.id_user",
+			Type:   "=",
+			Val:    *filter.IdUserNurse,
+		})
+	}
+
+	if filter.UserCommonName != nil {
+		qb.WhereAnd(q.Where{
+			Column: "uc.name",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.UserCommonName + "%",
+		})
+	}
+
+	if filter.UserNurseName != nil {
+		qb.WhereAnd(q.Where{
+			Column: "un.name",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.UserNurseName + "%",
+		})
+	}
+
+	rows, total, err := utils.ListQuery[jobRow](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
@@ -67,6 +128,70 @@ func (r *JobRepository) ListJobsByFilters(
 		utils.IntPtr(filter.PageSize),
 		true,
 	)
+	if err != nil || rows == nil {
+		return nil, total, err
+	}
+
+	jobs, err := r.attachAddresses(ctx, span, *rows)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return jobs, total, nil
+}
+
+type jobRow struct {
+	dto.JobRes
+	IdAddressRef *string `db:"id_address_ref"`
+}
+
+func (r *JobRepository) attachAddresses(ctx c.Context, span fluxgo.Span, rows []jobRow) (*[]dto.JobRes, error) {
+	addressIds := make([]string, 0, len(rows))
+	seenAddressIds := make(map[string]bool, len(rows))
+	for _, row := range rows {
+		if row.IdAddressRef == nil || seenAddressIds[*row.IdAddressRef] {
+			continue
+		}
+		seenAddressIds[*row.IdAddressRef] = true
+		addressIds = append(addressIds, *row.IdAddressRef)
+	}
+
+	addressById := make(map[string]entities.Address, len(addressIds))
+	if len(addressIds) > 0 {
+		addressQb := q.NewQueryBuilder(q.SetOtelSpan(span)).
+			Select("*").
+			From("address").
+			WhereAnd(q.Where{Column: "id_address", Type: "IN", Val: addressIds}).
+			WhereAnd(q.Where{Column: "removed_at", Type: "IS NULL"})
+
+		addresses, _, err := utils.ListQuery[entities.Address](
+			ctx,
+			r.DB.ReadOnlyDB(),
+			span,
+			addressQb,
+			nil,
+			false,
+		)
+		if err != nil {
+			return nil, err
+		}
+		for _, address := range *addresses {
+			addressById[address.IdAddress] = address
+		}
+	}
+
+	jobs := make([]dto.JobRes, len(rows))
+	for i, row := range rows {
+		jobs[i] = row.JobRes
+		if row.IdAddressRef == nil {
+			continue
+		}
+		if address, ok := addressById[*row.IdAddressRef]; ok {
+			jobs[i].Address = &address
+		}
+	}
+
+	return &jobs, nil
 }
 
 func (r *JobRepository) GetJobById(ctx c.Context, id string) (*entities.Job, error) {

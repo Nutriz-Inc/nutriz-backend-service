@@ -101,5 +101,43 @@ func TestListDonation(t *testing.T) {
 
 			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", item["created_by"])
 		})
+
+		t.Run("id_user_common filter as admin", func(t *testing.T) {
+			idUserCommon := "usr_2veL1FPpuXxUaZcFaEC57BfpcKE"
+			route := fmt.Sprintf("%s&id_user_common=%s", endpoint, idUserCommon)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, &utils.TestHeadersAdmin)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Equal(t, idUserCommon, row["created_by"])
+			}
+		})
+
+		t.Run("id_user_common filter is ignored for common users", func(t *testing.T) {
+			otherUserId := "usr_2veL1FPpuXxUaZcFaEC57BfpcKL"
+			route := fmt.Sprintf("%s&id_user_common=%s", endpoint, otherUserId)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Equal(
+					t,
+					"usr_2veL1FPpuXxUaZcFaEC57BfpcKE",
+					row["created_by"],
+				)
+			}
+		})
 	})
 }
