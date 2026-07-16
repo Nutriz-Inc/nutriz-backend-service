@@ -32,7 +32,7 @@ func Module() *fluxgo.FluxModule {
 
 	// donation
 	mod.AddHandler(handlers.HandlerListDonationsStart)
-	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonations) error {
+	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerListDonations) error {
 		return mod.HttpRoute(
 			f,
 			"/internal",
@@ -43,8 +43,6 @@ func Module() *fluxgo.FluxModule {
 				FromQuery:  true,
 				FromHeader: true,
 				Validate:   true,
-				Cache:      redis,
-				CacheTTL:   time.Hour,
 			},
 			handler.HandleHttp,
 		)
