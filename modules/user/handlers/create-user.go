@@ -239,7 +239,7 @@ func (h *HandlerCreateUser) createConsentLog(ctx c.Context, data *dto.CreateCons
 }
 
 func (h *HandlerCreateUser) createAddress(ctx c.Context, data *dto.CreateAddressReq, tx *sqlx.Tx) *fluxgo.GlobalError {
-	addressData, err := utils.GetAddressByZipCode(ctx, data.ZipCode, h.config)
+	addressData, err := utils.GetAddressByZipCodeOptionalCoordinates(ctx, data.ZipCode, h.config)
 	if err != nil {
 		return fluxgo.ErrorInternalError(err.Error())
 	}

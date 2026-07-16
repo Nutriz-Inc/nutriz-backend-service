@@ -67,7 +67,7 @@ func (h *HandlerCreateAddress) Execute(ctx c.Context, data *dto.CreateAddressReq
 	// 	return nil, fluxgo.ErrorBadRequest("Address with same zipcode already exists", "address.already_exists")
 	// }
 
-	addressData, err := utils.GetAddressByZipCode(ctx, data.ZipCode, h.config)
+	addressData, err := utils.GetAddressByZipCodeOptionalCoordinates(ctx, data.ZipCode, h.config)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError(err.Error())
 	}

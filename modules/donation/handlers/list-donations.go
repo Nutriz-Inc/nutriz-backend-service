@@ -38,6 +38,10 @@ func (h *HandlerListDonations) Execute(ctx c.Context, filters *dto.ListDonationR
 	}
 	if user.Type != entities.EnumUserTypeCommon {
 		filters.ActionBy = nil
+	} else {
+		filters.UserName = nil
+		filters.UserDocument = nil
+		filters.IdUserCommon = nil
 	}
 
 	donations, total, err := h.donationRepo.ListDonationByFilters(ctx, filters)
