@@ -33,21 +33,7 @@ func (r *JobRepository) ListJobsByFilters(
 			"j.*",
 			"un.name AS user_nurse_name",
 			"uc.name AS user_common_name",
-			`a.id_address         AS "address.id_address"`,
-			`a.id_user            AS "address.id_user"`,
-			`a.id_donation_point  AS "address.id_donation_point"`,
-			`a.zipcode            AS "address.zipcode"`,
-			`a.street             AS "address.street"`,
-			`a.number             AS "address.number"`,
-			`a.city               AS "address.city"`,
-			`a.state              AS "address.state"`,
-			`a.neighborhood       AS "address.neighborhood"`,
-			`a.complement         AS "address.complement"`,
-			`a.latitude           AS "address.latitude"`,
-			`a.longitude          AS "address.longitude"`,
-			`a.created_at         AS "address.created_at"`,
-			`a.updated_at         AS "address.updated_at"`,
-			`a.removed_at         AS "address.removed_at"`,
+			"ds.id_address AS id_address_ref",
 		).
 		From("job", "j").
 		Join(q.Join{
@@ -72,12 +58,6 @@ func (r *JobRepository) ListJobsByFilters(
 			Table: "user",
 			As:    "uc",
 			On:    "uc.id_user = d.created_by AND uc.removed_at IS NULL",
-			Type:  q.LeftJoin,
-		}).
-		Join(q.Join{
-			Table: "address",
-			As:    "a",
-			On:    "a.id_address = ds.id_address AND a.removed_at IS NULL",
 			Type:  q.LeftJoin,
 		}).
 		OrderBy(q.OrderBy{Column: "j.date_set"}).
@@ -140,7 +120,7 @@ func (r *JobRepository) ListJobsByFilters(
 		})
 	}
 
-	return utils.ListQuery[dto.JobRes](
+	rows, total, err := utils.ListQuery[jobRow](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
@@ -148,6 +128,70 @@ func (r *JobRepository) ListJobsByFilters(
 		utils.IntPtr(filter.PageSize),
 		true,
 	)
+	if err != nil || rows == nil {
+		return nil, total, err
+	}
+
+	jobs, err := r.attachAddresses(ctx, span, *rows)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return jobs, total, nil
+}
+
+type jobRow struct {
+	dto.JobRes
+	IdAddressRef *string `db:"id_address_ref"`
+}
+
+func (r *JobRepository) attachAddresses(ctx c.Context, span fluxgo.Span, rows []jobRow) (*[]dto.JobRes, error) {
+	addressIds := make([]string, 0, len(rows))
+	seenAddressIds := make(map[string]bool, len(rows))
+	for _, row := range rows {
+		if row.IdAddressRef == nil || seenAddressIds[*row.IdAddressRef] {
+			continue
+		}
+		seenAddressIds[*row.IdAddressRef] = true
+		addressIds = append(addressIds, *row.IdAddressRef)
+	}
+
+	addressById := make(map[string]entities.Address, len(addressIds))
+	if len(addressIds) > 0 {
+		addressQb := q.NewQueryBuilder(q.SetOtelSpan(span)).
+			Select("*").
+			From("address").
+			WhereAnd(q.Where{Column: "id_address", Type: "IN", Val: addressIds}).
+			WhereAnd(q.Where{Column: "removed_at", Type: "IS NULL"})
+
+		addresses, _, err := utils.ListQuery[entities.Address](
+			ctx,
+			r.DB.ReadOnlyDB(),
+			span,
+			addressQb,
+			nil,
+			false,
+		)
+		if err != nil {
+			return nil, err
+		}
+		for _, address := range *addresses {
+			addressById[address.IdAddress] = address
+		}
+	}
+
+	jobs := make([]dto.JobRes, len(rows))
+	for i, row := range rows {
+		jobs[i] = row.JobRes
+		if row.IdAddressRef == nil {
+			continue
+		}
+		if address, ok := addressById[*row.IdAddressRef]; ok {
+			jobs[i].Address = &address
+		}
+	}
+
+	return &jobs, nil
 }
 
 func (r *JobRepository) GetJobById(ctx c.Context, id string) (*entities.Job, error) {
