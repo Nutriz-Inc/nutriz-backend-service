@@ -106,7 +106,7 @@ func TestCreateUser(t *testing.T) {
 		t.Run("Create common user with multiple babies", func(t *testing.T) {
 			data := makeCommonBody(
 				"Marcia Lima",
-				"78018989007",
+				"34111259693",
 				"marcia.lima@email.com",
 				"+5511992222233",
 				"1985-05-15",
