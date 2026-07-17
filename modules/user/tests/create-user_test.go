@@ -88,9 +88,41 @@ func TestCreateUser(t *testing.T) {
 				"01002000",
 			)
 			babyName := "Lia"
-			data.UserBaby = &dto.UserBabyCreateBase{
-				Name:      &babyName,
-				BirthDate: "2024-01-01",
+			data.UserBaby = &[]dto.UserBabyCreateBase{
+				{
+					Name:      &babyName,
+					BirthDate: "2024-01-01",
+				},
+			}
+
+			status, body := fluxgo.RunTestRequest(app, "POST", publicEndpoint, data, nil)
+
+			assert.Equal(t, http.StatusCreated, status)
+			assert.NotNil(t, body["id_user"])
+			assert.Equal(t, "common", body["type"])
+			assert.Equal(t, data.Email, body["email"])
+		})
+
+		t.Run("Create common user with multiple babies", func(t *testing.T) {
+			data := makeCommonBody(
+				"Marcia Lima",
+				"78018989007",
+				"marcia.lima@email.com",
+				"+5511992222233",
+				"1985-05-15",
+				"01002100",
+			)
+			firstBabyName := "Noah"
+			secondBabyName := "Alice"
+			data.UserBaby = &[]dto.UserBabyCreateBase{
+				{
+					Name:      &firstBabyName,
+					BirthDate: "2023-01-01",
+				},
+				{
+					Name:      &secondBabyName,
+					BirthDate: "2024-06-15",
+				},
 			}
 
 			status, body := fluxgo.RunTestRequest(app, "POST", publicEndpoint, data, nil)
@@ -259,9 +291,11 @@ func TestCreateUser(t *testing.T) {
 				"01007000",
 			)
 			babyName := "Baby Futuro"
-			data.UserBaby = &dto.UserBabyCreateBase{
-				Name:      &babyName,
-				BirthDate: utils.GetTodayFormattedDate(1),
+			data.UserBaby = &[]dto.UserBabyCreateBase{
+				{
+					Name:      &babyName,
+					BirthDate: utils.GetTodayFormattedDate(1),
+				},
 			}
 
 			status, body := fluxgo.RunTestRequest(app, "POST", publicEndpoint, data, nil)
