@@ -13,10 +13,10 @@ type CreateUserReq struct {
 	PhoneNumber string                `json:"phone_number" validate:"required,e164"`
 
 	//common
-	BirthDate  *string             `json:"birth_date" validate:"omitempty,datetime=2006-01-02"`
-	Address    *AddressCreateBase  `json:"address" validate:"omitempty"`
-	UserBaby   *UserBabyCreateBase `json:"user_baby" validate:"omitempty"`
-	ConsentLog *CreateConsentBase  `json:"consent_log" validate:"omitempty"`
+	BirthDate  *string               `json:"birth_date" validate:"omitempty,datetime=2006-01-02"`
+	Address    *AddressCreateBase    `json:"address" validate:"omitempty"`
+	UserBaby   *[]UserBabyCreateBase `json:"user_baby" validate:"omitempty,max=20,dive"`
+	ConsentLog *CreateConsentBase    `json:"consent_log" validate:"omitempty"`
 
 	//nurse/admn
 	ActionBy   *string `reqHeader:"action-by" validate:"omitempty,id"`

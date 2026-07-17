@@ -154,12 +154,14 @@ func (h *HandlerCreateUser) handleCommon(ctx c.Context, data *dto.CreateUserReq,
 		}
 
 		if data.UserBaby != nil {
-			errHandler := h.createUserBaby(ctx, &dto.CreateUserBabyReq{
-				ActionBy:           idUser,
-				UserBabyCreateBase: *data.UserBaby,
-			}, tx)
-			if errHandler != nil {
-				return &createUserTxError{err: errHandler}
+			for _, userBaby := range *data.UserBaby {
+				errHandler := h.createUserBaby(ctx, &dto.CreateUserBabyReq{
+					ActionBy:           idUser,
+					UserBabyCreateBase: userBaby,
+				}, tx)
+				if errHandler != nil {
+					return &createUserTxError{err: errHandler}
+				}
 			}
 		}
 
