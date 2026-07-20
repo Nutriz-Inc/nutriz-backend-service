@@ -19,7 +19,7 @@ func TestGetAddress(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		addressID := "adr_01JTX0H1V8N5Q3W7E2R4T6Y8ZXE"
-		endpoint := fmt.Sprintf("/internal/address/%s", addressID)
+		endpoint := fmt.Sprintf("/internal/user/address/%s", addressID)
 
 		status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, headers)
 
@@ -34,7 +34,7 @@ func TestGetAddress(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		t.Run("Address not found", func(t *testing.T) {
-			endpoint := "/internal/address/adr_01JTX0H1V8N5Q3W7E2R4T6Y8ZZZ"
+			endpoint := "/internal/user/address/adr_01JTX0H1V8N5Q3W7E2R4T6Y8ZZZ"
 
 			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, headers)
 
