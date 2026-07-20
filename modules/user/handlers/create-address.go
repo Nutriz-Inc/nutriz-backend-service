@@ -76,7 +76,7 @@ func (h *HandlerCreateAddress) Execute(ctx c.Context, data *dto.CreateAddressReq
 
 	repoData := &repositories.CreateAddressRepositoryReq{
 		IdAddress:    idAddress,
-		IdUser:       user.IdUser,
+		IdUser:       &user.IdUser,
 		Zipcode:      data.ZipCode,
 		Street:       addressData.Street,
 		Number:       data.Number,

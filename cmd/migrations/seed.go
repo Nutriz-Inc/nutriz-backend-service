@@ -524,7 +524,7 @@ INSERT INTO address (
 ),
 (
     'adr_01JTX0H1V8N5Q3W7E2R4T6Y8ADM',
-    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
     NULL,
     '04538132',
     'Avenida Brigadeiro Faria Lima',
