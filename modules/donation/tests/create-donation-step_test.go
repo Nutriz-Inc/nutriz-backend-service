@@ -122,6 +122,15 @@ func TestCreateDonationStep(t *testing.T) {
 			assert.Equal(t, "Previous donation step is not completed", resp["message"])
 		})
 
+		t.Run("Donation step with the same name already exists", func(t *testing.T) {
+			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcKR", nil)
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(t, "Donation step with the same name already exists", resp["message"])
+		})
+
 		t.Run("Set date must be in the future", func(t *testing.T) {
 			setDate := time.Now().Add(-24 * time.Hour).UTC().Format(time.RFC3339)
 			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcKI", &setDate)
