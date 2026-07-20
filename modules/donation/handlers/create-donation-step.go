@@ -94,6 +94,12 @@ func (h *HandlerCreateDonationStep) Execute(ctx c.Context, data *dto.CreateDonat
 					"previous_step.incomplete",
 				)
 			}
+			if step.Name == data.Name {
+				return nil, fluxgo.ErrorBadRequest(
+					"Donation step with the same name already exists",
+					"donation_step.duplicate_name",
+				)
+			}
 		}
 	}
 
