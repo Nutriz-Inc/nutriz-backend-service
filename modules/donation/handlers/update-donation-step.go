@@ -101,6 +101,9 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 	validator := data.ValidateUpdateDonationStepOptionalFields()
 
 	var setDateTime *time.Time
+	var isFailed bool
+	var isDone bool
+
 	if validator.HasStatus {
 		if *data.Status == entities.EnumDonationStepStatusDone || *data.Status == entities.EnumDonationStepStatusFailed {
 			if validator.HasSetDate {
@@ -111,6 +114,14 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 			}
 
 			req.IsComplete = true
+
+			if *data.Status == entities.EnumDonationStepStatusDone {
+				isDone = true
+			}
+
+			if *data.Status == entities.EnumDonationStepStatusFailed {
+				isFailed = true
+			}
 		}
 
 		req.Status = data.Status
@@ -167,7 +178,7 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 			return fmt.Errorf("error to update donation step: %w", err)
 		}
 
-		if req.IsComplete {
+		if (isDone && donationStep.Name == entities.EnumDonationStepMilkAnalysis) || isFailed {
 			err = h.donationRepo.UpdateDonationTx(ctx, tx, &repositories.UpdateDonationRepositoryReq{
 				IdDonation: donation.IdDonation,
 				IdUser:     data.ActionBy,
