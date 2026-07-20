@@ -249,7 +249,7 @@ func Module() *fluxgo.FluxModule {
 			f,
 			"/internal",
 			"GET",
-			"/address/:id",
+			"/user/address/:id",
 			fluxgo.RouteIncome{
 				Entity:     dto.GetAddressReq{},
 				FromParam:  true,
