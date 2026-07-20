@@ -86,7 +86,7 @@ func (r *AddressRepository) GetAddressByZipcodeAndIdUser(ctx c.Context, zipcode 
 
 type CreateAddressRepositoryReq struct {
 	IdAddress    string
-	IdUser       string
+	IdUser       *string
 	Zipcode      string
 	Street       string
 	Number       *string
