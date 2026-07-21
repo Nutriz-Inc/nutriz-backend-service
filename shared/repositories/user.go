@@ -276,6 +276,7 @@ type UpdateUserRepositoryReq struct {
 	PhoneNumber        *string
 	Email              *string
 	Password           *string
+	MilkDonated        *float64
 }
 
 func (r *UserRepository) updateUser(ctx c.Context, exec sqlx.ExtContext, data *UpdateUserRepositoryReq) error {
@@ -311,6 +312,10 @@ func (r *UserRepository) updateUser(ctx c.Context, exec sqlx.ExtContext, data *U
 	if data.Password != nil {
 		sets = append(sets, "password = :password")
 		params["password"] = *data.Password
+	}
+	if data.MilkDonated != nil {
+		sets = append(sets, "milk_donated = :milk_donated")
+		params["milk_donated"] = *data.MilkDonated
 	}
 
 	query := `

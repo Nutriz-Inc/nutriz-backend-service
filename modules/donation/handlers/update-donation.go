@@ -2,6 +2,8 @@ package handlers
 
 import (
 	c "context"
+	"errors"
+	"fmt"
 	dto "nutriz-backend-service/modules/donation/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
@@ -9,18 +11,22 @@ import (
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"
+	"github.com/jmoiron/sqlx"
 )
 
 type HandlerUpdateDonation struct {
+	db           *fluxgo.Database
 	donationRepo *repositories.DonationRepository
 	userRepo     *repositories.UserRepository
 }
 
 func HandlerUpdateDonationStart(
+	db *fluxgo.Database,
 	donationRepo *repositories.DonationRepository,
 	userRepo *repositories.UserRepository,
 ) *HandlerUpdateDonation {
 	return &HandlerUpdateDonation{
+		db,
 		donationRepo,
 		userRepo,
 	}
@@ -66,9 +72,10 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 			return nil, utils.ErrorForbidden("You don't have permission to access this resource", "donation.forbidden")
 		}
 
-		if validator.HasUserFeedback {
+		if validator.HasFeedback {
 			req.UserFeedback = data.UserFeedback
-			fieldsToUpdate++
+			req.ScoreFeedback = data.ScoreFeedback
+			fieldsToUpdate = fieldsToUpdate + 2
 		}
 	}
 
@@ -88,9 +95,31 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 		return nil, fluxgo.ErrorBadRequest("At least one field must be sent to update", "no_fields_to_update")
 	}
 
-	err = h.donationRepo.UpdateDonation(ctx, &req)
+	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
+		err := h.donationRepo.UpdateDonationTx(ctx, tx, &req)
+		if err != nil {
+			return fmt.Errorf("error to update donation: %w", err)
+		}
+
+		if validator.HasQuantityDonated {
+			err = h.userRepo.UpdateUserTx(ctx, tx, &repositories.UpdateUserRepositoryReq{
+				IdUser:      donation.CreatedBy,
+				ActionBy:    data.ActionBy,
+				MilkDonated: req.QuantityDonated,
+			})
+			if err != nil {
+				return fmt.Errorf("error to update user milk donated: %w", err)
+			}
+		}
+
+		return nil
+	})
 	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to update donation")
+		var txErr *utils.TxError
+		if errors.As(err, &txErr) {
+			return nil, txErr.Err
+		}
+		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
 
 	donation, err = h.donationRepo.GetDonationById(ctx, data.Id)
