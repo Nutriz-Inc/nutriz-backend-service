@@ -103,7 +103,8 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 
 		if validator.HasQuantityDonated {
 			err = h.userRepo.UpdateUserTx(ctx, tx, &repositories.UpdateUserRepositoryReq{
-				IdUser:      data.ActionBy,
+				IdUser:      donation.CreatedBy,
+				ActionBy:    data.ActionBy,
 				MilkDonated: req.QuantityDonated,
 			})
 			if err != nil {
