@@ -19,6 +19,7 @@ func TestUpdateDonation(t *testing.T) {
 	adminHeaders := &utils.TestHeadersAdmin
 	commonHeaders := &utils.TestHeaders
 	nurseHeaders := &utils.TestHeadersNurse
+	scoreFeedback := int16(5)
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Admin", func(t *testing.T) {
@@ -46,7 +47,8 @@ func TestUpdateDonation(t *testing.T) {
 		t.Run("Common", func(t *testing.T) {
 			userFeedback := "Feedback atualizado"
 			body := dto.UpdateDonationReq{
-				UserFeedback: &userFeedback,
+				UserFeedback:  &userFeedback,
+				ScoreFeedback: &scoreFeedback,
 			}
 
 			status, resp := fluxgo.RunTestRequest(
@@ -67,7 +69,8 @@ func TestUpdateDonation(t *testing.T) {
 		t.Run("User does not have permission to update donation", func(t *testing.T) {
 			userFeedback := "Sem permissao"
 			body := dto.UpdateDonationReq{
-				UserFeedback: &userFeedback,
+				UserFeedback:  &userFeedback,
+				ScoreFeedback: &scoreFeedback,
 			}
 
 			status, resp := fluxgo.RunTestRequest(
@@ -103,7 +106,8 @@ func TestUpdateDonation(t *testing.T) {
 		t.Run("You don't have permission to access this resource", func(t *testing.T) {
 			userFeedback := "Sem permissao de acesso"
 			body := dto.UpdateDonationReq{
-				UserFeedback: &userFeedback,
+				UserFeedback:  &userFeedback,
+				ScoreFeedback: &scoreFeedback,
 			}
 
 			status, resp := fluxgo.RunTestRequest(

@@ -185,7 +185,7 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 				IsActive:   utils.BoolPtr(false),
 			})
 			if err != nil {
-				return fmt.Errorf("error to update donation step: %w", err)
+				return fmt.Errorf("error to update donation: %w", err)
 			}
 		}
 
