@@ -27,8 +27,16 @@ func (r *DonationRepository) ListDonationByFilters(
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	currentStepSubquery := `(
+	currentStepNameSubquery := `(
 		SELECT ds.name
+		FROM "donation_step" ds
+		WHERE ds.id_donation = d.id_donation
+		ORDER BY ds.created_at DESC
+		LIMIT 1
+	)`
+
+	currentStepStatusSubquery := `(
+		SELECT ds.status
 		FROM "donation_step" ds
 		WHERE ds.id_donation = d.id_donation
 		ORDER BY ds.created_at DESC
@@ -38,7 +46,8 @@ func (r *DonationRepository) ListDonationByFilters(
 	qb := q.NewQueryBuilder(q.SetOtelSpan(span)).
 		Select(
 			"d.*",
-			"COALESCE("+currentStepSubquery+"::text, '') AS current_step",
+			"COALESCE("+currentStepNameSubquery+"::text, '') AS current_step",
+			"COALESCE("+currentStepStatusSubquery+" = '"+string(entities.EnumDonationStepStatusFailed)+"', false) AS has_error",
 		).
 		From("donation", "d").
 		Join(q.Join{
@@ -100,7 +109,7 @@ func (r *DonationRepository) ListDonationByFilters(
 
 	if filter.CurrentStep != nil {
 		qb.WhereAnd(q.Where{
-			Column: currentStepSubquery,
+			Column: currentStepNameSubquery,
 			Type:   "=",
 			Val:    *filter.CurrentStep,
 		})
