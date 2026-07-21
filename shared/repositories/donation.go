@@ -186,6 +186,7 @@ type UpdateDonationRepositoryReq struct {
 	IsActive        *bool
 	QuantityDonated *float64
 	UserFeedback    *string
+	ScoreFeedback   *int16
 }
 
 func (r *DonationRepository) updateDonation(ctx c.Context, exec sqlx.ExtContext, data *UpdateDonationRepositoryReq) error {
@@ -209,6 +210,10 @@ func (r *DonationRepository) updateDonation(ctx c.Context, exec sqlx.ExtContext,
 	if data.UserFeedback != nil {
 		sets = append(sets, "user_feedback = :user_feedback")
 		params["user_feedback"] = data.UserFeedback
+	}
+	if data.ScoreFeedback != nil {
+		sets = append(sets, "score_feedback = :score_feedback")
+		params["score_feedback"] = data.ScoreFeedback
 	}
 
 	if len(sets) == 0 {
