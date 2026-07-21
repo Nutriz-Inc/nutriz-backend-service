@@ -20,6 +20,7 @@ type DonationRes struct {
 	UserName     *string                    `json:"user_name,omitempty" db:"user_name"`
 	UserDocument *string                    `json:"user_document,omitempty" db:"user_document"`
 	CurrentStep  entities.EnumDonationSteps `json:"current_step" db:"current_step"`
+	HasError     bool                       `json:"has_error" db:"has_error"`
 }
 
 type ListDonationRes struct {
