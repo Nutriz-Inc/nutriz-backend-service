@@ -29,6 +29,8 @@ func TestGetJob(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, id, body["id_job"])
+			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", body["id_user_common"])
+			assert.Nil(t, body["id_address"])
 		})
 	})
 

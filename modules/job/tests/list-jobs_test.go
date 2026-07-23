@@ -167,6 +167,22 @@ func TestListJobs(t *testing.T) {
 				assert.Contains(t, row["user_common_name"], "Maria")
 			}
 		})
+
+		t.Run("status filter", func(t *testing.T) {
+			route := fmt.Sprintf("%s&status=done", endpoint)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Equal(t, "done", row["status"])
+			}
+		})
 	})
 
 	t.Run("Error", func(t *testing.T) {
