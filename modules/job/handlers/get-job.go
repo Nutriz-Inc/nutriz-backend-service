@@ -45,7 +45,7 @@ func (h *HandlerGetJob) Execute(ctx c.Context, filters *dto.GetJobReq) (*dto.Get
 		return nil, utils.ErrorForbidden("User does not have permission to get job", "user.forbidden")
 	}
 
-	job, err := h.jobRepo.GetJobById(ctx, filters.Id)
+	job, err := h.jobRepo.GetJobInfoById(ctx, filters.Id)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get job")
 	}
@@ -60,6 +60,6 @@ func (h *HandlerGetJob) Execute(ctx c.Context, filters *dto.GetJobReq) (*dto.Get
 	}
 
 	return &dto.GetJobRes{
-		Job: *job,
+		JobInfoRes: *job,
 	}, nil
 }
