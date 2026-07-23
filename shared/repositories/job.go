@@ -120,6 +120,14 @@ func (r *JobRepository) ListJobsByFilters(
 		})
 	}
 
+	if filter.Status != nil {
+		qb.WhereAnd(q.Where{
+			Column: "j.status",
+			Type:   "=",
+			Val:    *filter.Status,
+		})
+	}
+
 	rows, total, err := utils.ListQuery[jobRow](
 		ctx,
 		r.DB.ReadOnlyDB(),
@@ -203,6 +211,26 @@ func (r *JobRepository) GetJobById(ctx c.Context, id string) (*entities.Job, err
 		r.DB.ReadOnlyDB(),
 		span,
 		`SELECT * FROM "job" WHERE id_job = $1 AND removed_at IS NULL`,
+		id,
+	)
+}
+
+func (r *JobRepository) GetJobInfoById(ctx c.Context, id string) (*dto.JobInfoRes, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.Get[dto.JobInfoRes](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT
+			j.*,
+			d.created_by AS id_user_common,
+			ds.id_address AS id_address
+		FROM "job" j
+		LEFT JOIN donation_step ds ON ds.id_donation_step = j.id_step
+		LEFT JOIN donation d ON d.id_donation = ds.id_donation
+		WHERE j.id_job = $1 AND j.removed_at IS NULL`,
 		id,
 	)
 }
