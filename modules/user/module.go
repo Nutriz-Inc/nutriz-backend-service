@@ -99,7 +99,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/user"},
+				CacheInvalidate: []string{"/internal/user", "/internal/dashboard"},
 			},
 			handler.HandleHttp,
 		)

@@ -115,6 +115,25 @@ func Get[T any](
 	return &data, nil
 }
 
+func List[T any](
+	ctx c.Context,
+	db *sqlx.DB,
+	span trace.Span,
+	query string,
+	args ...any,
+) (*[]T, error) {
+	resp := make([]T, 0)
+
+	err := db.SelectContext(ctx, &resp, query, args...)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, err.Error())
+		return nil, err
+	}
+
+	return &resp, nil
+}
+
 func Delete(
 	ctx c.Context,
 	db *sqlx.DB,
