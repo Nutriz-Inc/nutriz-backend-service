@@ -79,7 +79,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/donation", "internal/user", "/internal/dashboard"},
+				CacheInvalidate: []string{"/internal/donation", "internal/user"},
 			},
 			handler.HandleHttp,
 		)
@@ -99,7 +99,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/donation", "/internal/user", "/internal/dashboard"},
+				CacheInvalidate: []string{"/internal/donation", "/internal/user"},
 			},
 			handler.HandleHttp,
 		)
@@ -119,7 +119,7 @@ func Module() *fluxgo.FluxModule {
 				FromBody:        true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/donation", "/internal/user", "/internal/donation/step/:id/timeline", "/internal/dashboard"},
+				CacheInvalidate: []string{"/internal/donation", "/internal/user", "/internal/donation/step/:id/timeline"},
 			},
 			handler.HandleHttp,
 		)
@@ -139,7 +139,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/donation", "/internal/user", "/internal/donation/step/:id/timeline", "/internal/dashboard"},
+				CacheInvalidate: []string{"/internal/donation", "/internal/user", "/internal/donation/step/:id/timeline"},
 			},
 			handler.HandleHttp,
 		)

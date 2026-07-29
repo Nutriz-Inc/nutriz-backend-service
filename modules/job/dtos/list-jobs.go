@@ -22,6 +22,7 @@ type JobRes struct {
 	UserCommonName *string           `json:"user_common_name,omitempty" db:"user_common_name"`
 	UserNurseName  *string           `json:"user_nurse_name,omitempty" db:"user_nurse_name"`
 	Address        *entities.Address `json:"address,omitempty" db:"-"`
+	IdDonation     *string           `json:"id_donation,omitempty" db:"id_donation"`
 }
 
 type ListJobsRes struct {

@@ -34,6 +34,7 @@ func (r *JobRepository) ListJobsByFilters(
 			"un.name AS user_nurse_name",
 			"uc.name AS user_common_name",
 			"ds.id_address AS id_address_ref",
+			"d.id_donation AS id_donation",
 		).
 		From("job", "j").
 		Join(q.Join{

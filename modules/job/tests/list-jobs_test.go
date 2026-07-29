@@ -45,6 +45,7 @@ func TestListJobs(t *testing.T) {
 
 			first := fluxgo.ConvertToMap(data[0])
 			assert.NotEmpty(t, first["id_job"])
+			assert.NotEmpty(t, first["id_donation"])
 
 			for _, item := range data {
 				row := fluxgo.ConvertToMap(item)
