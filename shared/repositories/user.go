@@ -111,6 +111,14 @@ func (r *UserRepository) ListUsersByFilters(
 		})
 	}
 
+	if filter.Cpf != nil {
+		qb.WhereAnd(q.Where{
+			Column: "u.cpf",
+			Type:   "=",
+			Val:    *filter.Cpf,
+		})
+	}
+
 	return utils.ListQuery[entities.User](
 		ctx,
 		r.DB.ReadOnlyDB(),

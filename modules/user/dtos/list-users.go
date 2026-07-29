@@ -6,10 +6,11 @@ import (
 )
 
 type ListUsersReq struct {
-	Name               *string                 `query:"name" validate:"omitempty,max=120"`
-	Type               *entities.EnumUserType  `query:"type" validate:"omitempty,oneof=common adm nurse"`
-	InternalIdentifier *string                 `query:"internal_identifier" validate:"omitempty,max=36"`
-	ActionBy           string                  `reqHeader:"action-by" validate:"required,id"`
+	Name               *string                `query:"name" validate:"omitempty,max=120"`
+	Type               *entities.EnumUserType `query:"type" validate:"omitempty,oneof=common adm nurse"`
+	InternalIdentifier *string                `query:"internal_identifier" validate:"omitempty,max=36"`
+	Cpf                *string                `query:"cpf" validate:"omitempty,document"`
+	ActionBy           string                 `reqHeader:"action-by" validate:"required,id"`
 	utils.PaginationReq
 }
 
