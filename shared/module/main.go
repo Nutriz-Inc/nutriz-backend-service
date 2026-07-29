@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"nutriz-backend-service/config"
 	"nutriz-backend-service/modules/auth"
+	"nutriz-backend-service/modules/dashboard"
 	"nutriz-backend-service/modules/donation"
 	"nutriz-backend-service/modules/job"
 	"nutriz-backend-service/modules/user"
@@ -56,12 +57,14 @@ func Module() *fluxgo.FluxGo {
 	flux.AddDependency(repositories.DonationStepRepositoryStart)
 	flux.AddDependency(repositories.DonationStepTimelineRepositoryStart)
 	flux.AddDependency(repositories.ConsentLogRepositoryStart)
+	flux.AddDependency(repositories.DashboardRepositoryStart)
 
 	//Modules
 	flux.AddModule(donation.Module())
 	flux.AddModule(auth.Module())
 	flux.AddModule(user.Module())
 	flux.AddModule(job.Module())
+	flux.AddModule(dashboard.Module())
 
 	return flux
 }
