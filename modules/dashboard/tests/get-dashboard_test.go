@@ -65,6 +65,24 @@ func TestGetDashboard(t *testing.T) {
 				_, ok := body["average_service_time_hours"].(float64)
 				assert.True(t, ok, "average_service_time_hours should be a number when present")
 			}
+
+			activeDonationsByStep := fluxgo.ConvertToList(body["active_donations_by_step"])
+			assert.Len(t, activeDonationsByStep, 4, "should always report all 4 possible donation steps")
+			var sumPercentage float64
+			for _, item := range activeDonationsByStep {
+				row := fluxgo.ConvertToMap(item)
+				assert.NotEmpty(t, row["step"])
+				count, ok := row["count"].(float64)
+				assert.True(t, ok)
+				assert.GreaterOrEqual(t, count, float64(0))
+
+				percentage, ok := row["percentage"].(float64)
+				assert.True(t, ok)
+				assert.GreaterOrEqual(t, percentage, float64(0))
+				assert.LessOrEqual(t, percentage, float64(100))
+				sumPercentage += percentage
+			}
+			assert.LessOrEqual(t, sumPercentage, float64(100.01), "percentages across the 4 steps should never exceed 100%")
 		})
 
 		t.Run("Date range with no data returns empty metrics", func(t *testing.T) {
@@ -88,6 +106,14 @@ func TestGetDashboard(t *testing.T) {
 			for _, item := range feedback {
 				row := fluxgo.ConvertToMap(item)
 				assert.Equal(t, float64(0), row["count"])
+			}
+
+			activeDonationsByStep := fluxgo.ConvertToList(body["active_donations_by_step"])
+			assert.Len(t, activeDonationsByStep, 4)
+			for _, item := range activeDonationsByStep {
+				row := fluxgo.ConvertToMap(item)
+				assert.Equal(t, float64(0), row["count"])
+				assert.Equal(t, float64(0), row["percentage"])
 			}
 		})
 	})

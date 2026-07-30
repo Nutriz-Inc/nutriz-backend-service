@@ -53,9 +53,6 @@ func (h *HandlerListJobs) Execute(ctx c.Context, filters *dto.ListJobsReq) (*dto
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list jobs")
 	}
-	if jobs == nil || len(*jobs) == 0 {
-		return nil, fluxgo.ErrorNotFound("Jobs not found")
-	}
 
 	return &dto.ListJobsRes{
 		Data: *jobs,
