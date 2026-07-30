@@ -94,6 +94,11 @@ func (h *HandlerGetDashboard) Execute(ctx c.Context, filters *dto.GetDashboardRe
 		return nil, fluxgo.ErrorInternalError("Error to get donor recurrence rate")
 	}
 
+	activeDonationsByStep, err := h.dashboardRepo.GetActiveDonationsByCurrentStep(ctx, startDate, endDateExclusive)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get active donations by step")
+	}
+
 	return &dto.GetDashboardRes{
 		TotalMilkCollected:      totalMilkCollected,
 		MilkCollectedByMonth:    milkByMonth,
@@ -101,5 +106,6 @@ func (h *HandlerGetDashboard) Execute(ctx c.Context, filters *dto.GetDashboardRe
 		AverageServiceTimeHours: averageServiceTimeHours,
 		DonationsWithError:      donationsWithError,
 		DonorRecurrenceRate:     donorRecurrenceRate,
+		ActiveDonationsByStep:   activeDonationsByStep,
 	}, nil
 }

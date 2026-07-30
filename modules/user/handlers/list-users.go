@@ -44,9 +44,6 @@ func (h *HandlerListUsers) Execute(ctx c.Context, filters *dto.ListUsersReq) (*d
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list users")
 	}
-	if users == nil || len(*users) == 0 {
-		return nil, fluxgo.ErrorNotFound("Users not found")
-	}
 
 	return &dto.ListUsersRes{
 		Data: *users,

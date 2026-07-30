@@ -2,6 +2,7 @@ package repositories
 
 import (
 	c "context"
+	"math"
 	dto "nutriz-backend-service/modules/dashboard/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
@@ -187,6 +188,76 @@ func (r *DashboardRepository) GetDonationsWithErrorCount(ctx c.Context, start, e
 	}
 
 	return *result, nil
+}
+
+type activeDonationStepCountRow struct {
+	Step  string `db:"step"`
+	Count int64  `db:"count"`
+}
+
+func (r *DashboardRepository) GetActiveDonationsByCurrentStep(ctx c.Context, start, end *time.Time) ([]dto.ActiveDonationsByStep, error) {
+	ctx, span := r.StartSpan(ctx, "GetActiveDonationsByCurrentStep")
+	defer span.End()
+
+	rows, err := utils.List[activeDonationStepCountRow](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`
+		SELECT
+			COALESCE(current_step.name::text, '') AS step,
+			COUNT(*) AS count
+		FROM donation d
+		LEFT JOIN LATERAL (
+			SELECT ds.name
+			FROM donation_step ds
+			WHERE ds.id_donation = d.id_donation
+			ORDER BY ds.created_at DESC
+			LIMIT 1
+		) current_step ON true
+		WHERE d.removed_at IS NULL
+		  AND d.is_active = true
+		  AND `+dateRangeFilter+`
+		GROUP BY current_step.name
+		`,
+		start,
+		end,
+	)
+	if err != nil || rows == nil {
+		return nil, err
+	}
+
+	countByStep := make(map[string]int64, len(*rows))
+	var total int64
+	for _, row := range *rows {
+		countByStep[row.Step] = row.Count
+		total += row.Count
+	}
+
+	steps := []entities.EnumDonationSteps{
+		entities.EnumDonationStepBloodTest,
+		entities.EnumDonationStepDeliverMilkingKit,
+		entities.EnumDonationStepCollectMilk,
+		entities.EnumDonationStepMilkAnalysis,
+	}
+
+	result := make([]dto.ActiveDonationsByStep, 0, len(steps))
+	for _, step := range steps {
+		count := countByStep[string(step)]
+
+		var percentage float64
+		if total > 0 {
+			percentage = math.Round(float64(count)*10000/float64(total)) / 100
+		}
+
+		result = append(result, dto.ActiveDonationsByStep{
+			Step:       step,
+			Count:      count,
+			Percentage: percentage,
+		})
+	}
+
+	return result, nil
 }
 
 func (r *DashboardRepository) GetDonorRecurrenceRate(ctx c.Context, start, end *time.Time) (float64, error) {

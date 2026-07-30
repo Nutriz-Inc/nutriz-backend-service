@@ -44,9 +44,6 @@ func (h *HandlerListDonationPoints) Execute(ctx c.Context, filters *dto.ListDona
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list donation points")
 	}
-	if donationPoints == nil || len(*donationPoints) == 0 {
-		return nil, fluxgo.ErrorNotFound("Donation points not found")
-	}
 
 	return &dto.ListDonationPointsRes{
 		Data: *donationPoints,
@@ -59,7 +56,7 @@ func (h *HandlerListDonationPoints) Execute(ctx c.Context, filters *dto.ListDona
 }
 
 func (h *HandlerListDonationPoints) getCoordinatesByZipcode(ctx c.Context, zipCode string) (*entities.Coordinates, *fluxgo.GlobalError) {
-	addressData, err := utils.GetAddressByZipCode(ctx, zipCode, h.config)
+	addressData, err := utils.GetAddressByZipCodeOptionalCoordinates(ctx, zipCode, h.config)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
