@@ -41,11 +41,7 @@ func (h *HandlerListJobs) Execute(ctx c.Context, filters *dto.ListJobsReq) (*dto
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	if user.Type == entities.EnumUserTypeCommon {
-		return nil, utils.ErrorForbidden("User does not have permission to list jobs", "user.forbidden")
-	}
-
-	if user.Type == entities.EnumUserTypeAdmin {
+	if user.Type == entities.EnumUserTypeAdmin || user.Type == entities.EnumUserTypeCommon {
 		filters.ActionBy = nil
 	}
 

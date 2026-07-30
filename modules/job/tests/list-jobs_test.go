@@ -185,14 +185,4 @@ func TestListJobs(t *testing.T) {
 			}
 		})
 	})
-
-	t.Run("Error", func(t *testing.T) {
-		t.Run("No permission", func(t *testing.T) {
-			commonHeaders := &utils.TestHeaders
-			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, commonHeaders)
-
-			assert.Equal(t, http.StatusForbidden, status)
-			assert.Equal(t, "User does not have permission to list jobs", body["message"])
-		})
-	})
 }
