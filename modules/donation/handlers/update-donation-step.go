@@ -271,7 +271,7 @@ func (h *HandlerUpdateDonationStep) handleAddress(ctx c.Context, tx *sqlx.Tx, da
 }
 
 func (h *HandlerUpdateDonationStep) createAddress(ctx c.Context, data *dto.AddressCreateBase, tx *sqlx.Tx) (*string, *fluxgo.GlobalError) {
-	addressData, err := utils.GetAddressByZipCode(ctx, data.ZipCode, h.config)
+	addressData, err := utils.GetAddressByZipCodeOptionalCoordinates(ctx, data.ZipCode, h.config)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError(err.Error())
 	}
