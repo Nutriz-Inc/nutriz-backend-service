@@ -1,6 +1,7 @@
 package dtos
 
 import (
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 )
 
@@ -36,5 +37,5 @@ func (c CreateUserReq) ValidateCreateUserOptionalFields() CreateUserOptionalFiel
 }
 
 type CreateUserRes struct {
-	entities.User
+	sharedDto.UserOut
 }

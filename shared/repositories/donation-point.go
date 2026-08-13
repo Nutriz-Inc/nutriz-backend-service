@@ -3,6 +3,7 @@ package repositories
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/donation/dtos"
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 	"strconv"
@@ -109,7 +110,7 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 		})
 	}
 
-	return utils.ListQuery[dto.DonationPointsRes](
+	rows, total, err := utils.ListQuery[donationPointRow](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
@@ -117,4 +118,32 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 		utils.IntPtr(filter.PageSize),
 		true,
 	)
+	if err != nil || rows == nil {
+		return nil, total, err
+	}
+
+	donationPoints := make([]dto.DonationPointsRes, len(*rows))
+	for i, row := range *rows {
+		var address *sharedDto.AddressOut
+		if row.Address != nil {
+			out := sharedDto.NewAddressOut(*row.Address)
+			address = &out
+		}
+		donationPoints[i] = dto.DonationPointsRes{
+			DonationPointOut: sharedDto.NewDonationPointOut(row.DonationPoint),
+			Address:          address,
+			DistanceFromYou:  row.DistanceFromYou,
+		}
+	}
+
+	return &donationPoints, total, nil
+}
+
+// donationPointRow is a scan-only shape used to map SQL columns (including
+// the optional joined address and the computed distance) via sqlx. It never
+// leaves this file - callers only see dto.DonationPointsRes.
+type donationPointRow struct {
+	entities.DonationPoint
+	Address         *entities.Address `db:"address"`
+	DistanceFromYou *float64          `db:"distance_from_you"`
 }

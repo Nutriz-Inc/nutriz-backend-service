@@ -1,7 +1,7 @@
 package dtos
 
 import (
-	"nutriz-backend-service/shared/entities"
+	sharedDto "nutriz-backend-service/shared/dtos"
 )
 
 type CreateAddressReq struct {
@@ -16,5 +16,5 @@ type AddressCreateBase struct {
 }
 
 type CreateAddressRes struct {
-	entities.Address
+	sharedDto.AddressOut
 }

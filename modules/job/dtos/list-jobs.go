@@ -1,6 +1,7 @@
 package dtos
 
 import (
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 )
@@ -18,11 +19,11 @@ type ListJobsReq struct {
 }
 
 type JobRes struct {
-	entities.Job
-	UserCommonName *string           `json:"user_common_name,omitempty" db:"user_common_name"`
-	UserNurseName  *string           `json:"user_nurse_name,omitempty" db:"user_nurse_name"`
-	Address        *entities.Address `json:"address,omitempty" db:"-"`
-	IdDonation     *string           `json:"id_donation,omitempty" db:"id_donation"`
+	sharedDto.JobOut
+	UserCommonName *string               `json:"user_common_name,omitempty"`
+	UserNurseName  *string               `json:"user_nurse_name,omitempty"`
+	Address        *sharedDto.AddressOut `json:"address,omitempty"`
+	IdDonation     *string               `json:"id_donation,omitempty"`
 }
 
 type ListJobsRes struct {

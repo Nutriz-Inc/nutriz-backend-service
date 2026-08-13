@@ -2,6 +2,7 @@ package handlers
 
 import (
 	c "context"
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -62,8 +63,14 @@ func (h *HandlerGetDonation) Execute(ctx c.Context, filters *dto.GetDonationReq)
 		return nil, fluxgo.ErrorInternalError("Error to get donation steps")
 	}
 
+	var stepsOut *[]sharedDto.DonationStepOut
+	if donationSteps != nil {
+		out := sharedDto.NewDonationStepsOut(*donationSteps)
+		stepsOut = &out
+	}
+
 	return &dto.GetDonationRes{
-		Donation: *donation,
-		Steps:    donationSteps,
+		DonationOut: sharedDto.NewDonationOut(*donation),
+		Steps:       stepsOut,
 	}, nil
 }

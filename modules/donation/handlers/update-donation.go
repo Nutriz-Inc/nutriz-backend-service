@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	dto "nutriz-backend-service/modules/donation/dtos"
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -131,6 +132,6 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 	}
 
 	return &dto.UpdateDonationRes{
-		Donation: *donation,
+		DonationOut: sharedDto.NewDonationOut(*donation),
 	}, nil
 }

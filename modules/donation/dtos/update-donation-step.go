@@ -1,6 +1,7 @@
 package dto
 
 import (
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 )
@@ -16,7 +17,7 @@ type UpdateDonationStepReq struct {
 }
 
 type UpdateDonationStepRes struct {
-	entities.DonationStep
+	sharedDto.DonationStepOut
 }
 
 type UpdateDonationStepOptionalFields struct {

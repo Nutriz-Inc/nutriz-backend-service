@@ -1,6 +1,7 @@
 package dto
 
 import (
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 )
 
@@ -25,5 +26,5 @@ func (c CreateDonationStepReq) HasAddress() bool {
 }
 
 type CreateDonationStepRes struct {
-	entities.DonationStep
+	sharedDto.DonationStepOut
 }

@@ -2,11 +2,13 @@ package http
 
 import (
 	"nutriz-backend-service/config"
+	"nutriz-backend-service/docs"
 	"nutriz-backend-service/shared/utils"
 	"strings"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"
+	swagger "github.com/gofiber/swagger"
 )
 
 func GetHttp(apm *fluxgo.Apm, prom *fluxgo.Prometheus, env *config.Env) *fluxgo.Http {
@@ -23,7 +25,24 @@ func GetHttp(apm *fluxgo.Apm, prom *fluxgo.Prometheus, env *config.Env) *fluxgo.
 	http.CreateRouter("/public")
 	http.CreateRouter("/internal", authMiddleware(env))
 
+	registerDocsRoutes(http.GetApp())
+
 	return http
+}
+
+// registerDocsRoutes exposes the hand-written OpenAPI spec (docs/openapi.json)
+// as raw JSON plus an interactive Swagger UI, so endpoints can be documented
+// and tested without going through the module/route income system.
+func registerDocsRoutes(app *fiber.App) {
+	app.Get("/openapi.json", func(c *fiber.Ctx) error {
+		c.Type("json")
+		return c.Send(docs.OpenAPISpec)
+	})
+
+	app.Get("/docs/*", swagger.New(swagger.Config{
+		URL:   "/openapi.json",
+		Title: "Nutriz API Docs",
+	}))
 }
 
 const UserContextKey = "id_user"

@@ -3,6 +3,7 @@ package repositories
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/job/dtos"
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 	"strings"
@@ -149,9 +150,15 @@ func (r *JobRepository) ListJobsByFilters(
 	return jobs, total, nil
 }
 
+// jobRow is a scan-only shape used to map SQL columns (including the joined
+// user names and referenced address/donation ids) via sqlx. It never leaves
+// this file - callers only see dto.JobRes.
 type jobRow struct {
-	dto.JobRes
-	IdAddressRef *string `db:"id_address_ref"`
+	entities.Job
+	UserNurseName  *string `db:"user_nurse_name"`
+	UserCommonName *string `db:"user_common_name"`
+	IdAddressRef   *string `db:"id_address_ref"`
+	IdDonation     *string `db:"id_donation"`
 }
 
 func (r *JobRepository) attachAddresses(ctx c.Context, span fluxgo.Span, rows []jobRow) (*[]dto.JobRes, error) {
@@ -191,12 +198,18 @@ func (r *JobRepository) attachAddresses(ctx c.Context, span fluxgo.Span, rows []
 
 	jobs := make([]dto.JobRes, len(rows))
 	for i, row := range rows {
-		jobs[i] = row.JobRes
+		jobs[i] = dto.JobRes{
+			JobOut:         sharedDto.NewJobOut(row.Job),
+			UserNurseName:  row.UserNurseName,
+			UserCommonName: row.UserCommonName,
+			IdDonation:     row.IdDonation,
+		}
 		if row.IdAddressRef == nil {
 			continue
 		}
 		if address, ok := addressById[*row.IdAddressRef]; ok {
-			jobs[i].Address = &address
+			addressOut := sharedDto.NewAddressOut(address)
+			jobs[i].Address = &addressOut
 		}
 	}
 
@@ -216,11 +229,19 @@ func (r *JobRepository) GetJobById(ctx c.Context, id string) (*entities.Job, err
 	)
 }
 
+// jobInfoRow is a scan-only shape used to map the joined user/address ids
+// via sqlx. It never leaves this file - callers only see dto.JobInfoRes.
+type jobInfoRow struct {
+	entities.Job
+	IdUserCommon *string `db:"id_user_common"`
+	IdAddress    *string `db:"id_address"`
+}
+
 func (r *JobRepository) GetJobInfoById(ctx c.Context, id string) (*dto.JobInfoRes, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	return utils.Get[dto.JobInfoRes](
+	row, err := utils.Get[jobInfoRow](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
@@ -234,6 +255,15 @@ func (r *JobRepository) GetJobInfoById(ctx c.Context, id string) (*dto.JobInfoRe
 		WHERE j.id_job = $1 AND j.removed_at IS NULL`,
 		id,
 	)
+	if err != nil || row == nil {
+		return nil, err
+	}
+
+	return &dto.JobInfoRes{
+		JobOut:       sharedDto.NewJobOut(row.Job),
+		IdUserCommon: row.IdUserCommon,
+		IdAddress:    row.IdAddress,
+	}, nil
 }
 
 type CreateJobRepositoryReq struct {

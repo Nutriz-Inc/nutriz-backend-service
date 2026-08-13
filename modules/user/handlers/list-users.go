@@ -3,6 +3,7 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -46,7 +47,7 @@ func (h *HandlerListUsers) Execute(ctx c.Context, filters *dto.ListUsersReq) (*d
 	}
 
 	return &dto.ListUsersRes{
-		Data: *users,
+		Data: sharedDto.NewUsersOut(*users),
 		PaginationRes: utils.PaginationRes{
 			Page:     filters.Page,
 			PageSize: filters.PageSize,

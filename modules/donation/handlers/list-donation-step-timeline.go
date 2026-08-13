@@ -3,6 +3,7 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/donation/dtos"
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -74,6 +75,6 @@ func (h *HandlerListDonationStepTimeline) Execute(ctx c.Context, filters *dto.Li
 	}
 
 	return &dto.ListDonationStepTimelineRes{
-		Data: *donationStepTimeline,
+		Data: sharedDto.NewDonationStepTimelinesOut(*donationStepTimeline),
 	}, nil
 }

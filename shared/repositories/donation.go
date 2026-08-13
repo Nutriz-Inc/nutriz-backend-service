@@ -3,6 +3,7 @@ package repositories
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/donation/dtos"
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 	"strings"
@@ -115,7 +116,7 @@ func (r *DonationRepository) ListDonationByFilters(
 		})
 	}
 
-	return utils.ListQuery[dto.DonationRes](
+	rows, total, err := utils.ListQuery[donationRow](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
@@ -123,6 +124,33 @@ func (r *DonationRepository) ListDonationByFilters(
 		utils.IntPtr(filter.PageSize),
 		true,
 	)
+	if err != nil || rows == nil {
+		return nil, total, err
+	}
+
+	donations := make([]dto.DonationRes, len(*rows))
+	for i, row := range *rows {
+		donations[i] = dto.DonationRes{
+			DonationOut:  sharedDto.NewDonationOut(row.Donation),
+			UserName:     row.UserName,
+			UserDocument: row.UserDocument,
+			CurrentStep:  row.CurrentStep,
+			HasError:     row.HasError,
+		}
+	}
+
+	return &donations, total, nil
+}
+
+// donationRow is a scan-only shape used to map SQL columns (including the
+// computed current_step/has_error and the joined user fields) via sqlx.
+// It never leaves this file - callers only see dto.DonationRes.
+type donationRow struct {
+	entities.Donation
+	UserName     *string                    `db:"user_name"`
+	UserDocument *string                    `db:"user_document"`
+	CurrentStep  entities.EnumDonationSteps `db:"current_step"`
+	HasError     bool                       `db:"has_error"`
 }
 
 func (r *DonationRepository) GetDonationById(ctx c.Context, id string) (*entities.Donation, error) {

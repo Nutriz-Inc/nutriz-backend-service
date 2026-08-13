@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/donation/dtos"
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -176,7 +177,7 @@ func (h *HandlerCreateDonationStep) Execute(ctx c.Context, data *dto.CreateDonat
 	}
 
 	return &dto.CreateDonationStepRes{
-		DonationStep: *donationStep,
+		DonationStepOut: sharedDto.NewDonationStepOut(*donationStep),
 	}, nil
 }
 

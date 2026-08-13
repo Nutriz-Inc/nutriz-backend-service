@@ -1,6 +1,7 @@
 package dto
 
 import (
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 )
@@ -16,11 +17,11 @@ type ListDonationReq struct {
 }
 
 type DonationRes struct {
-	entities.Donation
-	UserName     *string                    `json:"user_name,omitempty" db:"user_name"`
-	UserDocument *string                    `json:"user_document,omitempty" db:"user_document"`
-	CurrentStep  entities.EnumDonationSteps `json:"current_step" db:"current_step"`
-	HasError     bool                       `json:"has_error" db:"has_error"`
+	sharedDto.DonationOut
+	UserName     *string                    `json:"user_name,omitempty"`
+	UserDocument *string                    `json:"user_document,omitempty"`
+	CurrentStep  entities.EnumDonationSteps `json:"current_step"`
+	HasError     bool                       `json:"has_error"`
 }
 
 type ListDonationRes struct {

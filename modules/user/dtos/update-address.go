@@ -1,7 +1,7 @@
 package dtos
 
 import (
-	"nutriz-backend-service/shared/entities"
+	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/utils"
 )
 
@@ -14,7 +14,7 @@ type UpdateAddressReq struct {
 }
 
 type UpdateAddressRes struct {
-	entities.Address
+	sharedDto.AddressOut
 }
 
 type UpdateAddressOptionalFields struct {

@@ -4,15 +4,19 @@ WORKDIR /app
 
 COPY . .
 
-RUN go mod tidy
+RUN go mod download
 RUN go build -o server main.go
+RUN go build -o migrate cmd/migrations/run.go cmd/migrations/seed.go
 
 FROM alpine:latest
 
 WORKDIR /app
 
 COPY --from=builder /app/server .
+COPY --from=builder /app/migrate .
+COPY --from=builder /app/.env.development .
+COPY --from=builder /app/shared/database/migrations ./shared/database/migrations
 
-EXPOSE 8080
+EXPOSE 3333
 
 CMD ["./server"]
