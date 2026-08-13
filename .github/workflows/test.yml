@@ -26,7 +26,7 @@ jobs:
         run: go build -o bin/main main.go
 
       - name: Docker compose
-        run: docker compose up -d --wait
+        run: docker compose up -d --wait database redis
 
       - name: Migrations
         run: |
