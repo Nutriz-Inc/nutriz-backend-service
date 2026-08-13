@@ -1,0 +1,894 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Nutriz Backend Service API",
+    "description": "API REST do Nutriz: cadastro de usuárias/doadoras, gestão de doações de leite materno, etapas do processo de doação, pontos de doação, jobs internos (agenda de coleta/entrega) e dashboard de métricas.\n\nTodas as rotas são versionadas por grupo de acesso: `/public` (sem autenticação) e `/internal` (requer `Authorization: Bearer <token>` obtido em `/public/auth/login`). O cabeçalho `action-by`, usado internamente para autorização por tipo de usuário, é preenchido automaticamente pelo middleware a partir do token — não precisa ser enviado pelo cliente.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    { "url": "http://localhost:3333", "description": "Ambiente local" }
+  ],
+  "tags": [
+    { "name": "Auth", "description": "Autenticação" },
+    { "name": "Users", "description": "Usuárias, bebês, endereços e consentimento" },
+    { "name": "Donations", "description": "Doações, etapas e pontos de doação" },
+    { "name": "Jobs", "description": "Agenda interna de coleta/entrega" },
+    { "name": "Dashboard", "description": "Métricas agregadas" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "parameters": {
+      "IdPathParam": {
+        "name": "id",
+        "in": "path",
+        "required": true,
+        "schema": { "type": "string" }
+      },
+      "PageParam": {
+        "name": "page",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "default": 1 }
+      },
+      "PageSizeParam": {
+        "name": "page_size",
+        "in": "query",
+        "schema": { "type": "integer", "minimum": 1, "maximum": 50, "default": 25 }
+      }
+    },
+    "schemas": {
+      "ErrorRes": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string" },
+          "code": { "type": "string" }
+        }
+      },
+      "DeleteRes": {
+        "type": "object",
+        "properties": { "success": { "type": "boolean" } }
+      },
+      "PaginationRes": {
+        "type": "object",
+        "properties": {
+          "page": { "type": "integer" },
+          "page_size": { "type": "integer" },
+          "total": { "type": "integer" }
+        }
+      },
+      "EnumUserType": { "type": "string", "enum": ["common", "adm", "nurse"] },
+      "EnumDonationSteps": {
+        "type": "string",
+        "enum": ["Exame de sangue", "Entregar kit de ordenha", "Coletar leite", "Análise de leite"]
+      },
+      "EnumDonationStepStatus": {
+        "type": "string",
+        "enum": ["pending", "review", "done", "warn", "failed"]
+      },
+      "EnumJobStatus": { "type": "string", "enum": ["pending", "done", "failed"] },
+
+      "UserOut": {
+        "type": "object",
+        "properties": {
+          "id_user": { "type": "string" },
+          "internal_identifier": { "type": "string", "nullable": true },
+          "type": { "$ref": "#/components/schemas/EnumUserType" },
+          "name": { "type": "string" },
+          "cpf": { "type": "string" },
+          "birth_date": { "type": "string", "format": "date-time" },
+          "phone_number": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "milk_donated": { "type": "number", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string" },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true },
+          "updated_by": { "type": "string", "nullable": true },
+          "removed_at": { "type": "string", "format": "date-time", "nullable": true },
+          "removed_by": { "type": "string", "nullable": true }
+        }
+      },
+      "AddressOut": {
+        "type": "object",
+        "properties": {
+          "id_address": { "type": "string" },
+          "id_user": { "type": "string", "nullable": true },
+          "id_donation_point": { "type": "string", "nullable": true },
+          "zipcode": { "type": "string" },
+          "street": { "type": "string" },
+          "number": { "type": "string", "nullable": true },
+          "city": { "type": "string" },
+          "state": { "type": "string" },
+          "neighborhood": { "type": "string" },
+          "complement": { "type": "string", "nullable": true },
+          "latitude": { "type": "number", "nullable": true },
+          "longitude": { "type": "number", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true },
+          "removed_at": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "UserBabyOut": {
+        "type": "object",
+        "properties": {
+          "id_user_baby": { "type": "string" },
+          "id_user": { "type": "string" },
+          "name": { "type": "string", "nullable": true },
+          "birth_date": { "type": "string", "format": "date-time" },
+          "created_at": { "type": "string", "format": "date-time" },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true },
+          "removed_at": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "ConsentLogOut": {
+        "type": "object",
+        "properties": {
+          "id_consent_log": { "type": "string" },
+          "id_user": { "type": "string" },
+          "terms_version": { "type": "string" },
+          "accepted_at": { "type": "string", "format": "date-time" },
+          "ip_address": { "type": "string" },
+          "user_agent": { "type": "string" }
+        }
+      },
+      "DonationOut": {
+        "type": "object",
+        "properties": {
+          "id_donation": { "type": "string" },
+          "is_active": { "type": "boolean" },
+          "quantity_donated": { "type": "number", "nullable": true },
+          "user_feedback": { "type": "string", "nullable": true },
+          "score_feedback": { "type": "integer", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string" },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true },
+          "updated_by": { "type": "string", "nullable": true },
+          "removed_at": { "type": "string", "format": "date-time", "nullable": true },
+          "removed_by": { "type": "string", "nullable": true }
+        }
+      },
+      "DonationStepOut": {
+        "type": "object",
+        "properties": {
+          "id_donation_step": { "type": "string" },
+          "id_donation": { "type": "string" },
+          "id_address": { "type": "string", "nullable": true },
+          "name": { "$ref": "#/components/schemas/EnumDonationSteps" },
+          "description": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/EnumDonationStepStatus" },
+          "set_date": { "type": "string", "format": "date-time", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string" },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true },
+          "updated_by": { "type": "string", "nullable": true },
+          "completed_at": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "DonationStepTimelineOut": {
+        "type": "object",
+        "properties": {
+          "id_donation_step_timeline": { "type": "string" },
+          "id_donation_step": { "type": "string" },
+          "id_address": { "type": "string", "nullable": true },
+          "description": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/EnumDonationStepStatus" },
+          "set_date": { "type": "string", "format": "date-time", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string" }
+        }
+      },
+      "DonationPointOut": {
+        "type": "object",
+        "properties": {
+          "id_donation_point": { "type": "string" },
+          "name": { "type": "string" },
+          "description": { "type": "string", "nullable": true },
+          "has_home": { "type": "boolean" },
+          "phone_number": { "type": "string", "nullable": true },
+          "email": { "type": "string", "nullable": true },
+          "opening_hours": { "type": "string", "nullable": true },
+          "removed_at": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "JobOut": {
+        "type": "object",
+        "properties": {
+          "id_job": { "type": "string" },
+          "id_user": { "type": "string" },
+          "id_step": { "type": "string" },
+          "status": { "$ref": "#/components/schemas/EnumJobStatus" },
+          "name": { "type": "string" },
+          "description": { "type": "string" },
+          "date_set": { "type": "string", "format": "date-time", "nullable": true },
+          "user_feedback": { "type": "string", "nullable": true },
+          "created_at": { "type": "string", "format": "date-time" },
+          "created_by": { "type": "string" },
+          "updated_at": { "type": "string", "format": "date-time", "nullable": true },
+          "updated_by": { "type": "string", "nullable": true },
+          "removed_at": { "type": "string", "format": "date-time", "nullable": true },
+          "removed_by": { "type": "string", "nullable": true }
+        }
+      },
+
+      "AddressCreateBase": {
+        "type": "object",
+        "required": ["zip_code"],
+        "properties": {
+          "zip_code": { "type": "string", "example": "01001000" },
+          "number": { "type": "string", "nullable": true },
+          "complement": { "type": "string", "nullable": true }
+        }
+      },
+      "UserBabyCreateBase": {
+        "type": "object",
+        "required": ["birth_date"],
+        "properties": {
+          "name": { "type": "string", "nullable": true },
+          "birth_date": { "type": "string", "format": "date", "example": "2024-01-01" }
+        }
+      },
+      "CreateConsentBase": {
+        "type": "object",
+        "required": ["terms_version", "ip_address", "user_agent"],
+        "properties": {
+          "terms_version": { "type": "string" },
+          "ip_address": { "type": "string", "format": "ipv4" },
+          "user_agent": { "type": "string" }
+        }
+      },
+
+      "LoginReq": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string", "minLength": 6 }
+        }
+      },
+      "LoginRes": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string" },
+          "id_user": { "type": "string" },
+          "name": { "type": "string" },
+          "type": { "$ref": "#/components/schemas/EnumUserType" }
+        }
+      },
+
+      "CreateUserReq": {
+        "type": "object",
+        "required": ["type", "name", "cpf", "email", "password", "phone_number"],
+        "properties": {
+          "type": { "$ref": "#/components/schemas/EnumUserType" },
+          "name": { "type": "string", "maxLength": 120 },
+          "cpf": { "type": "string", "description": "CPF válido, apenas dígitos" },
+          "email": { "type": "string", "format": "email" },
+          "password": { "type": "string", "minLength": 8 },
+          "phone_number": { "type": "string", "description": "Formato E.164, ex: +5511991111111" },
+          "birth_date": { "type": "string", "format": "date", "nullable": true, "description": "Obrigatório para type=common" },
+          "address": { "allOf": [{ "$ref": "#/components/schemas/AddressCreateBase" }], "nullable": true, "description": "Obrigatório para type=common" },
+          "user_baby": { "type": "array", "items": { "$ref": "#/components/schemas/UserBabyCreateBase" }, "maxItems": 20, "nullable": true },
+          "consent_log": { "allOf": [{ "$ref": "#/components/schemas/CreateConsentBase" }], "nullable": true, "description": "Obrigatório para type=common" },
+          "identifier": { "type": "string", "maxLength": 50, "nullable": true, "description": "Obrigatório para type=adm ou nurse" }
+        }
+      },
+      "UpdateUserReq": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "maxLength": 120, "nullable": true },
+          "phone_number": { "type": "string", "nullable": true },
+          "email": { "type": "string", "format": "email", "nullable": true },
+          "password": { "type": "string", "minLength": 8, "nullable": true }
+        }
+      },
+      "CreateUserBabyReq": {
+        "type": "object",
+        "required": ["birth_date"],
+        "properties": {
+          "name": { "type": "string", "nullable": true },
+          "birth_date": { "type": "string", "format": "date" }
+        }
+      },
+      "UpdateUserBabyReq": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "nullable": true },
+          "birth_date": { "type": "string", "format": "date", "nullable": true }
+        }
+      },
+      "CreateAddressReq": { "$ref": "#/components/schemas/AddressCreateBase" },
+      "UpdateAddressReq": {
+        "type": "object",
+        "properties": {
+          "zip_code": { "type": "string", "nullable": true },
+          "number": { "type": "string", "nullable": true },
+          "complement": { "type": "string", "nullable": true }
+        }
+      },
+      "CreateConsentReq": { "$ref": "#/components/schemas/CreateConsentBase" },
+
+      "GetUserRes": {
+        "allOf": [
+          { "$ref": "#/components/schemas/UserOut" },
+          {
+            "type": "object",
+            "properties": {
+              "donations_completed": { "type": "integer", "nullable": true },
+              "current_donation": { "allOf": [{ "$ref": "#/components/schemas/GetDonationRes" }], "nullable": true },
+              "addresses": { "type": "array", "items": { "$ref": "#/components/schemas/AddressOut" }, "nullable": true },
+              "babies": { "type": "array", "items": { "$ref": "#/components/schemas/UserBabyOut" }, "nullable": true }
+            }
+          }
+        ]
+      },
+      "ListUsersRes": {
+        "type": "object",
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationRes" },
+          { "type": "object", "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/UserOut" } } } }
+        ]
+      },
+
+      "CreateDonationStepReq": {
+        "type": "object",
+        "required": ["id_donation", "name", "description"],
+        "properties": {
+          "id_donation": { "type": "string" },
+          "id_address": { "type": "string", "nullable": true },
+          "address": { "allOf": [{ "$ref": "#/components/schemas/AddressCreateBase" }], "nullable": true },
+          "name": { "$ref": "#/components/schemas/EnumDonationSteps" },
+          "description": { "type": "string" },
+          "set_date": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "UpdateDonationStepReq": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": { "type": "string" },
+          "set_date": { "type": "string", "format": "date-time", "nullable": true },
+          "status": { "$ref": "#/components/schemas/EnumDonationStepStatus", "nullable": true },
+          "id_address": { "type": "string", "nullable": true },
+          "address": { "allOf": [{ "$ref": "#/components/schemas/AddressCreateBase" }], "nullable": true }
+        }
+      },
+      "UpdateDonationReq": {
+        "type": "object",
+        "properties": {
+          "is_active": { "type": "boolean", "nullable": true, "description": "Uso administrativo, para encerrar a doação" },
+          "quantity_donated": { "type": "number", "exclusiveMinimum": 0, "nullable": true, "description": "Uso administrativo" },
+          "user_feedback": { "type": "string", "nullable": true, "description": "Uso da doadora" },
+          "score_feedback": { "type": "integer", "minimum": 0, "maximum": 5, "nullable": true, "description": "Uso da doadora" }
+        }
+      },
+      "GetDonationRes": {
+        "allOf": [
+          { "$ref": "#/components/schemas/DonationOut" },
+          { "type": "object", "properties": { "steps": { "type": "array", "items": { "$ref": "#/components/schemas/DonationStepOut" }, "nullable": true } } }
+        ]
+      },
+      "ListDonationRes": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationRes" },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/DonationOut" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "user_name": { "type": "string", "nullable": true },
+                        "user_document": { "type": "string", "nullable": true },
+                        "current_step": { "$ref": "#/components/schemas/EnumDonationSteps" },
+                        "has_error": { "type": "boolean" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      "ListDonationStepTimelineRes": {
+        "type": "object",
+        "properties": { "data": { "type": "array", "items": { "$ref": "#/components/schemas/DonationStepTimelineOut" } } }
+      },
+      "ListDonationPointsRes": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationRes" },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/DonationPointOut" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "address": { "allOf": [{ "$ref": "#/components/schemas/AddressOut" }], "nullable": true },
+                        "distance_from_you": { "type": "number", "nullable": true, "description": "km, presente quando latitude/longitude ou zipcode são informados" }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+
+      "CreateJobReq": {
+        "type": "object",
+        "required": ["id_user", "id_step", "name", "description"],
+        "properties": {
+          "id_user": { "type": "string" },
+          "id_step": { "type": "string" },
+          "name": { "type": "string", "maxLength": 100 },
+          "description": { "type": "string", "maxLength": 100 },
+          "date_set": { "type": "string", "format": "date-time", "nullable": true }
+        }
+      },
+      "UpdateJobReq": {
+        "type": "object",
+        "properties": {
+          "id_user": { "type": "string", "nullable": true },
+          "status": { "type": "string", "enum": ["done", "failed"], "nullable": true },
+          "description": { "type": "string", "maxLength": 100, "nullable": true },
+          "date_set": { "type": "string", "format": "date-time", "nullable": true },
+          "user_feedback": { "type": "string", "maxLength": 500, "nullable": true }
+        }
+      },
+      "GetJobRes": {
+        "allOf": [
+          { "$ref": "#/components/schemas/JobOut" },
+          {
+            "type": "object",
+            "properties": {
+              "id_user_common": { "type": "string", "nullable": true },
+              "id_address": { "type": "string", "nullable": true }
+            }
+          }
+        ]
+      },
+      "ListJobsRes": {
+        "allOf": [
+          { "$ref": "#/components/schemas/PaginationRes" },
+          {
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "allOf": [
+                    { "$ref": "#/components/schemas/JobOut" },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "user_common_name": { "type": "string", "nullable": true },
+                        "user_nurse_name": { "type": "string", "nullable": true },
+                        "address": { "allOf": [{ "$ref": "#/components/schemas/AddressOut" }], "nullable": true },
+                        "id_donation": { "type": "string", "nullable": true }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+
+      "GetDashboardRes": {
+        "type": "object",
+        "properties": {
+          "total_milk_collected": { "type": "number" },
+          "milk_collected_by_month": {
+            "type": "array",
+            "items": { "type": "object", "properties": { "month": { "type": "string" }, "total": { "type": "number" } } }
+          },
+          "feedback_by_score": {
+            "type": "array",
+            "items": { "type": "object", "properties": { "score": { "type": "integer" }, "count": { "type": "integer" } } }
+          },
+          "average_service_time_hours": { "type": "number", "nullable": true },
+          "donations_with_error": { "type": "integer" },
+          "donor_recurrence_rate": { "type": "number" },
+          "active_donations_by_step": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "step": { "$ref": "#/components/schemas/EnumDonationSteps" },
+                "count": { "type": "integer" },
+                "percentage": { "type": "number" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/public/auth/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Login",
+        "description": "Autentica um usuário e retorna um JWT a ser usado como `Authorization: Bearer <token>` nas rotas `/internal`.",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginReq" } } } },
+        "responses": {
+          "200": { "description": "Login efetuado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/LoginRes" } } } },
+          "400": { "description": "Credenciais inválidas", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorRes" } } } }
+        }
+      }
+    },
+    "/public/user": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Autocadastro de usuária comum",
+        "description": "Cria uma usuária do tipo `common` sem necessidade de autenticação (autocadastro).",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateUserReq" } } } },
+        "responses": {
+          "201": { "description": "Usuária criada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserOut" } } } },
+          "400": { "description": "Dados inválidos", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ErrorRes" } } } }
+        }
+      }
+    },
+    "/public/donation/point": {
+      "get": {
+        "tags": ["Donations"],
+        "summary": "Listar pontos de doação",
+        "description": "Listagem pública dos pontos de doação, com endereço opcional e distância quando `zipcode` ou `latitude`/`longitude` são informados.",
+        "parameters": [
+          { "$ref": "#/components/parameters/PageParam" },
+          { "$ref": "#/components/parameters/PageSizeParam" },
+          { "name": "show_address", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "name", "in": "query", "schema": { "type": "string" } },
+          { "name": "has_home", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "zipcode", "in": "query", "schema": { "type": "string" } },
+          { "name": "latitude", "in": "query", "schema": { "type": "number" } },
+          { "name": "longitude", "in": "query", "schema": { "type": "number" } }
+        ],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ListDonationPointsRes" } } } }
+        }
+      }
+    },
+
+    "/internal/user/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Buscar usuária por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/IdPathParam" },
+          { "name": "show_address", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "show_baby", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "show_donations_completed", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "show_current_donation", "in": "query", "schema": { "type": "boolean" } }
+        ],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GetUserRes" } } } },
+          "401": { "description": "Não autenticado" },
+          "403": { "description": "Sem permissão" },
+          "404": { "description": "Não encontrada" }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Atualizar usuária",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateUserReq" } } } },
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserOut" } } } },
+          "400": { "description": "Nenhum campo para atualizar / dados inválidos" }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Remover usuária (soft delete)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeleteRes" } } } }
+        }
+      }
+    },
+    "/internal/user": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Listar usuárias",
+        "description": "Requer usuária autenticada do tipo `adm` ou `nurse`.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PageParam" },
+          { "$ref": "#/components/parameters/PageSizeParam" },
+          { "name": "name", "in": "query", "schema": { "type": "string" } },
+          { "name": "type", "in": "query", "schema": { "$ref": "#/components/schemas/EnumUserType" } },
+          { "name": "internal_identifier", "in": "query", "schema": { "type": "string" } },
+          { "name": "cpf", "in": "query", "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ListUsersRes" } } } },
+          "403": { "description": "Sem permissão" }
+        }
+      },
+      "post": {
+        "tags": ["Users"],
+        "summary": "Criar usuária (equipe interna)",
+        "description": "Cria uma usuária do tipo `adm` ou `nurse` (requer autenticação) ou `common` em nome de outra pessoa.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateUserReq" } } } },
+        "responses": {
+          "201": { "description": "Criada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserOut" } } } }
+        }
+      }
+    },
+    "/internal/user/baby": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Adicionar bebê da usuária autenticada",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateUserBabyReq" } } } },
+        "responses": {
+          "201": { "description": "Criado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserBabyOut" } } } },
+          "400": { "description": "Limite de bebês atingido / dados inválidos" }
+        }
+      }
+    },
+    "/internal/user/baby/{id}": {
+      "put": {
+        "tags": ["Users"],
+        "summary": "Atualizar bebê",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateUserBabyReq" } } } },
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UserBabyOut" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Remover bebê",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeleteRes" } } } }
+        }
+      }
+    },
+    "/internal/user/address": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Adicionar endereço da usuária autenticada",
+        "description": "O endereço (rua, bairro, cidade, estado) é derivado automaticamente do CEP informado.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateAddressReq" } } } },
+        "responses": {
+          "201": { "description": "Criado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AddressOut" } } } }
+        }
+      }
+    },
+    "/internal/user/address/{id}": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Buscar endereço por id",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AddressOut" } } } }
+        }
+      },
+      "put": {
+        "tags": ["Users"],
+        "summary": "Atualizar endereço",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateAddressReq" } } } },
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/AddressOut" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Users"],
+        "summary": "Remover endereço",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeleteRes" } } } }
+        }
+      }
+    },
+    "/internal/user/consent": {
+      "post": {
+        "tags": ["Users"],
+        "summary": "Registrar consentimento (LGPD) da usuária autenticada",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateConsentReq" } } } },
+        "responses": {
+          "201": { "description": "Criado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ConsentLogOut" } } } }
+        }
+      }
+    },
+
+    "/internal/donation": {
+      "get": {
+        "tags": ["Donations"],
+        "summary": "Listar doações",
+        "description": "Usuária comum vê apenas suas próprias doações; adm/nurse podem filtrar por doadora.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PageParam" },
+          { "$ref": "#/components/parameters/PageSizeParam" },
+          { "name": "is_active", "in": "query", "schema": { "type": "boolean" } },
+          { "name": "user_document", "in": "query", "schema": { "type": "string" } },
+          { "name": "user_name", "in": "query", "schema": { "type": "string" } },
+          { "name": "id_user_common", "in": "query", "schema": { "type": "string" } },
+          { "name": "current_step", "in": "query", "schema": { "$ref": "#/components/schemas/EnumDonationSteps" } }
+        ],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ListDonationRes" } } } }
+        }
+      },
+      "post": {
+        "tags": ["Donations"],
+        "summary": "Criar doação",
+        "description": "Inicia uma nova doação ativa para a usuária autenticada (limite de 1 doação ativa por vez).",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "201": { "description": "Criada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DonationOut" } } } },
+          "400": { "description": "Já existe doação ativa" }
+        }
+      }
+    },
+    "/internal/donation/{id}": {
+      "get": {
+        "tags": ["Donations"],
+        "summary": "Buscar doação por id (com etapas)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GetDonationRes" } } } },
+          "403": { "description": "Sem permissão para ver doação de outra usuária" }
+        }
+      },
+      "put": {
+        "tags": ["Donations"],
+        "summary": "Atualizar doação",
+        "description": "Uso administrativo (encerrar/definir quantidade) ou da doadora (feedback/nota).",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateDonationReq" } } } },
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DonationOut" } } } }
+        }
+      }
+    },
+    "/internal/donation/step": {
+      "post": {
+        "tags": ["Donations"],
+        "summary": "Criar etapa de doação",
+        "description": "Registra a próxima etapa do processo (exame de sangue, entrega de kit, coleta, análise), com endereço novo ou existente.",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateDonationStepReq" } } } },
+        "responses": {
+          "201": { "description": "Criada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DonationStepOut" } } } }
+        }
+      }
+    },
+    "/internal/donation/step/{id}": {
+      "put": {
+        "tags": ["Donations"],
+        "summary": "Atualizar etapa de doação",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateDonationStepReq" } } } },
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DonationStepOut" } } } },
+          "400": { "description": "Etapa já concluída/falha, não pode ser atualizada" }
+        }
+      }
+    },
+    "/internal/donation/step/{id}/timeline": {
+      "get": {
+        "tags": ["Donations"],
+        "summary": "Histórico (timeline) de uma etapa de doação",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ListDonationStepTimelineRes" } } } },
+          "404": { "description": "Sem histórico" }
+        }
+      }
+    },
+
+    "/internal/job": {
+      "get": {
+        "tags": ["Jobs"],
+        "summary": "Listar jobs (agenda interna)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "$ref": "#/components/parameters/PageParam" },
+          { "$ref": "#/components/parameters/PageSizeParam" },
+          { "name": "date_set", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "id_step", "in": "query", "schema": { "type": "string" } },
+          { "name": "id_user_common", "in": "query", "schema": { "type": "string" } },
+          { "name": "id_user_nurse", "in": "query", "schema": { "type": "string" } },
+          { "name": "user_common_name", "in": "query", "schema": { "type": "string" } },
+          { "name": "user_nurse_name", "in": "query", "schema": { "type": "string" } },
+          { "name": "status", "in": "query", "schema": { "$ref": "#/components/schemas/EnumJobStatus" } }
+        ],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ListJobsRes" } } } }
+        }
+      },
+      "post": {
+        "tags": ["Jobs"],
+        "summary": "Criar job",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CreateJobReq" } } } },
+        "responses": {
+          "201": { "description": "Criado", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobOut" } } } }
+        }
+      }
+    },
+    "/internal/job/{id}": {
+      "get": {
+        "tags": ["Jobs"],
+        "summary": "Buscar job por id",
+        "description": "Requer usuária autenticada do tipo `adm` ou `nurse`.",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GetJobRes" } } } },
+          "403": { "description": "Sem permissão" }
+        }
+      },
+      "put": {
+        "tags": ["Jobs"],
+        "summary": "Atualizar job",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/UpdateJobReq" } } } },
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/JobOut" } } } }
+        }
+      },
+      "delete": {
+        "tags": ["Jobs"],
+        "summary": "Remover job (soft delete)",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [{ "$ref": "#/components/parameters/IdPathParam" }],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/DeleteRes" } } } }
+        }
+      }
+    },
+
+    "/internal/dashboard": {
+      "get": {
+        "tags": ["Dashboard"],
+        "summary": "Métricas agregadas de doações",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          { "name": "start_date", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "end_date", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": {
+          "200": { "description": "OK", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/GetDashboardRes" } } } }
+        }
+      }
+    }
+  }
+}

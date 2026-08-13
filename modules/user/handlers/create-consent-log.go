@@ -3,7 +3,6 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -71,6 +70,6 @@ func (h *HandlerCreateConsentLog) Execute(ctx c.Context, data *dto.CreateConsent
 	}
 
 	return &dto.CreateConsentRes{
-		ConsentLogOut: sharedDto.NewConsentLogOut(*consentLog),
+		ConsentLogOut: entities.NewConsentLogOut(*consentLog),
 	}, nil
 }

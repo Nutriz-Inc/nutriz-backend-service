@@ -52,3 +52,43 @@ func (d DonationStep) CanUpdate() bool {
 	}
 	return true
 }
+
+type DonationStepOut struct {
+	IdDonationStep string                 `json:"id_donation_step"`
+	IdDonation     string                 `json:"id_donation"`
+	IdAddress      *string                `json:"id_address"`
+	Name           EnumDonationSteps      `json:"name"`
+	Description    string                 `json:"description"`
+	Status         EnumDonationStepStatus `json:"status"`
+	SetDate        *time.Time             `json:"set_date"`
+	CreatedAt      time.Time              `json:"created_at"`
+	CreatedBy      string                 `json:"created_by"`
+	UpdatedAt      *time.Time             `json:"updated_at"`
+	UpdatedBy      *string                `json:"updated_by"`
+	CompletedAt    *time.Time             `json:"completed_at"`
+}
+
+func NewDonationStepOut(s DonationStep) DonationStepOut {
+	return DonationStepOut{
+		IdDonationStep: s.IdDonationStep,
+		IdDonation:     s.IdDonation,
+		IdAddress:      s.IdAddress,
+		Name:           s.Name,
+		Description:    s.Description,
+		Status:         s.Status,
+		SetDate:        s.SetDate,
+		CreatedAt:      s.CreatedAt,
+		CreatedBy:      s.CreatedBy,
+		UpdatedAt:      s.UpdatedAt,
+		UpdatedBy:      s.UpdatedBy,
+		CompletedAt:    s.CompletedAt,
+	}
+}
+
+func NewDonationStepsOut(steps []DonationStep) []DonationStepOut {
+	out := make([]DonationStepOut, 0, len(steps))
+	for _, s := range steps {
+		out = append(out, NewDonationStepOut(s))
+	}
+	return out
+}

@@ -1,7 +1,7 @@
 package dtos
 
 import (
-	sharedDto "nutriz-backend-service/shared/dtos"
+	"nutriz-backend-service/shared/entities"
 )
 
 type CreateUserBabyReq struct {
@@ -15,5 +15,5 @@ type UserBabyCreateBase struct {
 }
 
 type CreateUserBabyRes struct {
-	sharedDto.UserBabyOut
+	entities.UserBabyOut
 }

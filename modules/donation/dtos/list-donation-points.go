@@ -1,7 +1,7 @@
 package dto
 
 import (
-	sharedDto "nutriz-backend-service/shared/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 )
 
@@ -16,9 +16,9 @@ type ListDonationPointsReq struct {
 }
 
 type DonationPointsRes struct {
-	sharedDto.DonationPointOut
-	Address         *sharedDto.AddressOut `json:"address,omitempty"`
-	DistanceFromYou *float64              `json:"distance_from_you,omitempty"`
+	entities.DonationPointOut
+	Address         *entities.AddressOut `json:"address,omitempty"`
+	DistanceFromYou *float64             `json:"distance_from_you,omitempty"`
 }
 
 type ListDonationPointsRes struct {

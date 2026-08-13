@@ -2,7 +2,6 @@ package handlers
 
 import (
 	c "context"
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -119,20 +118,20 @@ func (h *HandlerGetUser) Execute(ctx c.Context, filters *dto.GetUserReq) (*dto.G
 		}
 	}
 
-	var addressesOut *[]sharedDto.AddressOut
+	var addressesOut *[]entities.AddressOut
 	if addresses != nil {
-		out := sharedDto.NewAddressesOut(*addresses)
+		out := entities.NewAddressesOut(*addresses)
 		addressesOut = &out
 	}
 
-	var babiesOut *[]sharedDto.UserBabyOut
+	var babiesOut *[]entities.UserBabyOut
 	if babies != nil {
-		out := sharedDto.NewUserBabiesOut(*babies)
+		out := entities.NewUserBabiesOut(*babies)
 		babiesOut = &out
 	}
 
 	return &dto.GetUserRes{
-		UserOut:            sharedDto.NewUserOut(*user),
+		UserOut:            entities.NewUserOut(*user),
 		Addresses:          addressesOut,
 		Babies:             babiesOut,
 		DonationsCompleted: donationsCompleted,

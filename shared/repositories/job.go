@@ -3,7 +3,6 @@ package repositories
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/job/dtos"
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 	"strings"
@@ -199,7 +198,7 @@ func (r *JobRepository) attachAddresses(ctx c.Context, span fluxgo.Span, rows []
 	jobs := make([]dto.JobRes, len(rows))
 	for i, row := range rows {
 		jobs[i] = dto.JobRes{
-			JobOut:         sharedDto.NewJobOut(row.Job),
+			JobOut:         entities.NewJobOut(row.Job),
 			UserNurseName:  row.UserNurseName,
 			UserCommonName: row.UserCommonName,
 			IdDonation:     row.IdDonation,
@@ -208,7 +207,7 @@ func (r *JobRepository) attachAddresses(ctx c.Context, span fluxgo.Span, rows []
 			continue
 		}
 		if address, ok := addressById[*row.IdAddressRef]; ok {
-			addressOut := sharedDto.NewAddressOut(address)
+			addressOut := entities.NewAddressOut(address)
 			jobs[i].Address = &addressOut
 		}
 	}
@@ -260,7 +259,7 @@ func (r *JobRepository) GetJobInfoById(ctx c.Context, id string) (*dto.JobInfoRe
 	}
 
 	return &dto.JobInfoRes{
-		JobOut:       sharedDto.NewJobOut(row.Job),
+		JobOut:       entities.NewJobOut(row.Job),
 		IdUserCommon: row.IdUserCommon,
 		IdAddress:    row.IdAddress,
 	}, nil

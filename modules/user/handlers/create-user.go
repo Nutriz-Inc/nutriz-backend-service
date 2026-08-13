@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/user/dtos"
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -184,7 +183,7 @@ func (h *HandlerCreateUser) handleCommon(ctx c.Context, data *dto.CreateUserReq,
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	return &dto.CreateUserRes{UserOut: sharedDto.NewUserOut(*user)}, nil
+	return &dto.CreateUserRes{UserOut: entities.NewUserOut(*user)}, nil
 }
 
 func (h *HandlerCreateUser) handleWorker(ctx c.Context, data *dto.CreateUserReq, req *repositories.CreateUserRepositoryReq, validator dto.CreateUserOptionalFields, idUser string) (*dto.CreateUserRes, *fluxgo.GlobalError) {
@@ -219,7 +218,7 @@ func (h *HandlerCreateUser) handleWorker(ctx c.Context, data *dto.CreateUserReq,
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	return &dto.CreateUserRes{UserOut: sharedDto.NewUserOut(*user)}, nil
+	return &dto.CreateUserRes{UserOut: entities.NewUserOut(*user)}, nil
 }
 
 func (h *HandlerCreateUser) createConsentLog(ctx c.Context, data *dto.CreateConsentReq, tx *sqlx.Tx) *fluxgo.GlobalError {

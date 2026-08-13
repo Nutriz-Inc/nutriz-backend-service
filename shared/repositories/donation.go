@@ -3,7 +3,6 @@ package repositories
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/donation/dtos"
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 	"strings"
@@ -131,7 +130,7 @@ func (r *DonationRepository) ListDonationByFilters(
 	donations := make([]dto.DonationRes, len(*rows))
 	for i, row := range *rows {
 		donations[i] = dto.DonationRes{
-			DonationOut:  sharedDto.NewDonationOut(row.Donation),
+			DonationOut:  entities.NewDonationOut(row.Donation),
 			UserName:     row.UserName,
 			UserDocument: row.UserDocument,
 			CurrentStep:  row.CurrentStep,

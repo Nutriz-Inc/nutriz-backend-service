@@ -1,7 +1,6 @@
 package dto
 
 import (
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 )
@@ -17,7 +16,7 @@ type ListDonationReq struct {
 }
 
 type DonationRes struct {
-	sharedDto.DonationOut
+	entities.DonationOut
 	UserName     *string                    `json:"user_name,omitempty"`
 	UserDocument *string                    `json:"user_document,omitempty"`
 	CurrentStep  entities.EnumDonationSteps `json:"current_step"`

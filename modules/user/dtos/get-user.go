@@ -2,7 +2,7 @@ package dtos
 
 import (
 	dto "nutriz-backend-service/modules/donation/dtos"
-	sharedDto "nutriz-backend-service/shared/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 )
 
@@ -16,9 +16,9 @@ type GetUserReq struct {
 }
 
 type GetUserRes struct {
-	sharedDto.UserOut
-	DonationsCompleted *int64                   `json:"donations_completed"`
-	CurrentDonation    *dto.GetDonationRes      `json:"current_donation"`
-	Addresses          *[]sharedDto.AddressOut  `json:"addresses"`
-	Babies             *[]sharedDto.UserBabyOut `json:"babies"`
+	entities.UserOut
+	DonationsCompleted *int64                  `json:"donations_completed"`
+	CurrentDonation    *dto.GetDonationRes     `json:"current_donation"`
+	Addresses          *[]entities.AddressOut  `json:"addresses"`
+	Babies             *[]entities.UserBabyOut `json:"babies"`
 }

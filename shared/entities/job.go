@@ -34,3 +34,39 @@ func (j Job) TableName() string {
 func (j Job) PrimaryKey() string {
 	return "id_job"
 }
+
+type JobOut struct {
+	IdJob        string        `json:"id_job"`
+	IdUser       string        `json:"id_user"`
+	IdStep       string        `json:"id_step"`
+	Status       EnumJobStatus `json:"status"`
+	Name         string        `json:"name"`
+	Description  string        `json:"description"`
+	DateSet      *time.Time    `json:"date_set"`
+	UserFeedback *string       `json:"user_feedback"`
+	CreatedAt    time.Time     `json:"created_at"`
+	CreatedBy    string        `json:"created_by"`
+	UpdatedAt    *time.Time    `json:"updated_at"`
+	UpdatedBy    *string       `json:"updated_by"`
+	RemovedAt    *time.Time    `json:"removed_at"`
+	RemovedBy    *string       `json:"removed_by"`
+}
+
+func NewJobOut(j Job) JobOut {
+	return JobOut{
+		IdJob:        j.IdJob,
+		IdUser:       j.IdUser,
+		IdStep:       j.IdStep,
+		Status:       j.Status,
+		Name:         j.Name,
+		Description:  j.Description,
+		DateSet:      j.DateSet,
+		UserFeedback: j.UserFeedback,
+		CreatedAt:    j.CreatedAt,
+		CreatedBy:    j.CreatedBy,
+		UpdatedAt:    j.UpdatedAt,
+		UpdatedBy:    j.UpdatedBy,
+		RemovedAt:    j.RemovedAt,
+		RemovedBy:    j.RemovedBy,
+	}
+}

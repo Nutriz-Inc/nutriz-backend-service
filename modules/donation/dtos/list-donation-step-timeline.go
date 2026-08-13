@@ -1,7 +1,7 @@
 package dto
 
 import (
-	sharedDto "nutriz-backend-service/shared/dtos"
+	"nutriz-backend-service/shared/entities"
 )
 
 type ListDonationStepTimelineReq struct {
@@ -10,5 +10,5 @@ type ListDonationStepTimelineReq struct {
 }
 
 type ListDonationStepTimelineRes struct {
-	Data []sharedDto.DonationStepTimelineOut `json:"data"`
+	Data []entities.DonationStepTimelineOut `json:"data"`
 }

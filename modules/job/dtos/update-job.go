@@ -1,7 +1,6 @@
 package dtos
 
 import (
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 )
@@ -17,7 +16,7 @@ type UpdateJobReq struct {
 }
 
 type UpdateJobRes struct {
-	sharedDto.JobOut
+	entities.JobOut
 }
 
 type UpdateJobOptionalFields struct {

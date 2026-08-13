@@ -1,7 +1,7 @@
 package dtos
 
 import (
-	sharedDto "nutriz-backend-service/shared/dtos"
+	"nutriz-backend-service/shared/entities"
 )
 
 type CreateJobReq struct {
@@ -14,5 +14,5 @@ type CreateJobReq struct {
 }
 
 type CreateJobRes struct {
-	sharedDto.JobOut
+	entities.JobOut
 }

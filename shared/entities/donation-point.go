@@ -20,3 +20,27 @@ func (d DonationPoint) TableName() string {
 func (d DonationPoint) PrimaryKey() string {
 	return "id_donation_point"
 }
+
+type DonationPointOut struct {
+	IdDonationPoint string     `json:"id_donation_point"`
+	Name            string     `json:"name"`
+	Description     *string    `json:"description"`
+	HasHome         bool       `json:"has_home"`
+	PhoneNumber     *string    `json:"phone_number"`
+	Email           *string    `json:"email"`
+	OpeningHours    *string    `json:"opening_hours"`
+	RemovedAt       *time.Time `json:"removed_at"`
+}
+
+func NewDonationPointOut(dp DonationPoint) DonationPointOut {
+	return DonationPointOut{
+		IdDonationPoint: dp.IdDonationPoint,
+		Name:            dp.Name,
+		Description:     dp.Description,
+		HasHome:         dp.HasHome,
+		PhoneNumber:     dp.PhoneNumber,
+		Email:           dp.Email,
+		OpeningHours:    dp.OpeningHours,
+		RemovedAt:       dp.RemovedAt,
+	}
+}

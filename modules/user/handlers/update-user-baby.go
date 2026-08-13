@@ -3,7 +3,6 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -102,5 +101,5 @@ func (h *HandlerUpdateUserBaby) Execute(ctx c.Context, data *dto.UpdateUserBabyR
 		return nil, fluxgo.ErrorNotFound("User baby not found")
 	}
 
-	return &dto.UpdateUserBabyRes{UserBabyOut: sharedDto.NewUserBabyOut(*userBaby)}, nil
+	return &dto.UpdateUserBabyRes{UserBabyOut: entities.NewUserBabyOut(*userBaby)}, nil
 }

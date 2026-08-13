@@ -1,7 +1,7 @@
 package dtos
 
 import (
-	sharedDto "nutriz-backend-service/shared/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 )
 
@@ -11,7 +11,7 @@ type GetJobReq struct {
 }
 
 type JobInfoRes struct {
-	sharedDto.JobOut
+	entities.JobOut
 	IdUserCommon *string `json:"id_user_common,omitempty"`
 	IdAddress    *string `json:"id_address,omitempty"`
 }

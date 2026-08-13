@@ -1,6 +1,6 @@
 package dtos
 
-import sharedDto "nutriz-backend-service/shared/dtos"
+import "nutriz-backend-service/shared/entities"
 
 type CreateConsentReq struct {
 	ActionBy string `reqHeader:"action-by" validate:"required,id"`
@@ -14,5 +14,5 @@ type CreateConsentBase struct {
 }
 
 type CreateConsentRes struct {
-	sharedDto.ConsentLogOut
+	entities.ConsentLogOut
 }

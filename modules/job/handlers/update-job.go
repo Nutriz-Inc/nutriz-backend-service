@@ -3,7 +3,6 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/job/dtos"
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -104,7 +103,7 @@ func (h *HandlerUpdateJob) Execute(ctx c.Context, data *dto.UpdateJobReq) (*dto.
 	}
 
 	return &dto.UpdateJobRes{
-		JobOut: sharedDto.NewJobOut(*updatedJob),
+		JobOut: entities.NewJobOut(*updatedJob),
 	}, nil
 }
 

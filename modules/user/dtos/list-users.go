@@ -1,7 +1,6 @@
 package dtos
 
 import (
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 )
@@ -16,6 +15,6 @@ type ListUsersReq struct {
 }
 
 type ListUsersRes struct {
-	Data []sharedDto.UserOut `json:"data"`
+	Data []entities.UserOut `json:"data"`
 	utils.PaginationRes
 }

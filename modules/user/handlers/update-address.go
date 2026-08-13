@@ -4,7 +4,6 @@ import (
 	c "context"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/user/dtos"
-	sharedDto "nutriz-backend-service/shared/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
@@ -128,6 +127,6 @@ func (h *HandlerUpdateAddress) Execute(ctx c.Context, data *dto.UpdateAddressReq
 	}
 
 	return &dto.UpdateAddressRes{
-		AddressOut: sharedDto.NewAddressOut(*address),
+		AddressOut: entities.NewAddressOut(*address),
 	}, nil
 }

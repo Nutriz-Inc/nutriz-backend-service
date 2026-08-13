@@ -4,7 +4,7 @@ import (
 	c "context"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/user/dtos"
-	sharedDto "nutriz-backend-service/shared/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -113,5 +113,5 @@ func (h *HandlerUpdateUser) Execute(ctx c.Context, data *dto.UpdateUserReq) (*dt
 		return nil, fluxgo.ErrorNotFound("Updated user not found")
 	}
 
-	return &dto.UpdateUserRes{UserOut: sharedDto.NewUserOut(*updatedUser)}, nil
+	return &dto.UpdateUserRes{UserOut: entities.NewUserOut(*updatedUser)}, nil
 }
