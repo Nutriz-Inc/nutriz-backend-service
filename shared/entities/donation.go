@@ -25,3 +25,21 @@ func (d Donation) PrimaryKey() string {
 }
 
 const MAX_DONATION_ACTIVE_QUANTITY_PER_USER = 1
+
+type DonationOut struct {
+	IdDonation      string     `json:"id_donation"`
+	IsActive        bool       `json:"is_active"`
+	QuantityDonated *float64   `json:"quantity_donated"`
+	UserFeedback    *string    `json:"user_feedback"`
+	ScoreFeedback   *int16     `json:"score_feedback"`
+	CreatedAt       time.Time  `json:"created_at"`
+	CreatedBy       string     `json:"created_by"`
+	UpdatedAt       *time.Time `json:"updated_at"`
+	UpdatedBy       *string    `json:"updated_by"`
+	RemovedAt       *time.Time `json:"removed_at"`
+	RemovedBy       *string    `json:"removed_by"`
+}
+
+func NewDonationOut(d Donation) DonationOut {
+	return DonationOut(d)
+}

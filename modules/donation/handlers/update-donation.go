@@ -131,6 +131,6 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 	}
 
 	return &dto.UpdateDonationRes{
-		Donation: *donation,
+		DonationOut: entities.NewDonationOut(*donation),
 	}, nil
 }

@@ -70,6 +70,6 @@ func (h *HandlerCreateConsentLog) Execute(ctx c.Context, data *dto.CreateConsent
 	}
 
 	return &dto.CreateConsentRes{
-		ConsentLog: *consentLog,
+		ConsentLogOut: entities.NewConsentLogOut(*consentLog),
 	}, nil
 }

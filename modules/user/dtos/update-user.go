@@ -15,7 +15,7 @@ type UpdateUserReq struct {
 }
 
 type UpdateUserRes struct {
-	entities.User
+	entities.UserOut
 }
 
 type UpdateUserOptionalFields struct {

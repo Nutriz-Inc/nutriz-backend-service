@@ -14,7 +14,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerGetDashboard) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"GET",
 			"/dashboard",
 			fluxgo.RouteIncome{

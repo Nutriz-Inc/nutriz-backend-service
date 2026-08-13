@@ -118,10 +118,22 @@ func (h *HandlerGetUser) Execute(ctx c.Context, filters *dto.GetUserReq) (*dto.G
 		}
 	}
 
+	var addressesOut *[]entities.AddressOut
+	if addresses != nil {
+		out := entities.NewAddressesOut(*addresses)
+		addressesOut = &out
+	}
+
+	var babiesOut *[]entities.UserBabyOut
+	if babies != nil {
+		out := entities.NewUserBabiesOut(*babies)
+		babiesOut = &out
+	}
+
 	return &dto.GetUserRes{
-		User:               *user,
-		Addresses:          addresses,
-		Babies:             babies,
+		UserOut:            entities.NewUserOut(*user),
+		Addresses:          addressesOut,
+		Babies:             babiesOut,
 		DonationsCompleted: donationsCompleted,
 		CurrentDonation:    currentDonation,
 	}, nil

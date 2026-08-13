@@ -74,6 +74,6 @@ func (h *HandlerListDonationStepTimeline) Execute(ctx c.Context, filters *dto.Li
 	}
 
 	return &dto.ListDonationStepTimelineRes{
-		Data: *donationStepTimeline,
+		Data: entities.NewDonationStepTimelinesOut(*donationStepTimeline),
 	}, nil
 }

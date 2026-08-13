@@ -9,5 +9,5 @@ type CreateDonationReq struct {
 }
 
 type CreateDonationRes struct {
-	entities.Donation
+	entities.DonationOut
 }

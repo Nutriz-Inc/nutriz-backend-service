@@ -16,9 +16,9 @@ type GetUserReq struct {
 }
 
 type GetUserRes struct {
-	entities.User
-	DonationsCompleted *int64               `json:"donations_completed"`
-	CurrentDonation    *dto.GetDonationRes  `json:"current_donation"`
-	Addresses          *[]entities.Address  `json:"addresses"`
-	Babies             *[]entities.UserBaby `json:"babies"`
+	entities.UserOut
+	DonationsCompleted *int64                  `json:"donations_completed"`
+	CurrentDonation    *dto.GetDonationRes     `json:"current_donation"`
+	Addresses          *[]entities.AddressOut  `json:"addresses"`
+	Babies             *[]entities.UserBabyOut `json:"babies"`
 }

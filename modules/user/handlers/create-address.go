@@ -102,6 +102,6 @@ func (h *HandlerCreateAddress) Execute(ctx c.Context, data *dto.CreateAddressReq
 	}
 
 	return &dto.CreateAddressRes{
-		Address: *address,
+		AddressOut: entities.NewAddressOut(*address),
 	}, nil
 }

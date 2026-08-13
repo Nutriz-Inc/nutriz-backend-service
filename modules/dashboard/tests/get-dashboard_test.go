@@ -15,7 +15,7 @@ func TestGetDashboard(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/dashboard"
+	endpoint := "/v1/internal/dashboard"
 	adminHeaders := &utils.TestHeadersAdmin
 	commonHeaders := &utils.TestHeaders
 

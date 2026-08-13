@@ -16,7 +16,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonationPoints) error {
 		return mod.HttpRoute(
 			f,
-			"/public",
+			"/v1/public",
 			"GET",
 			"/donation/point",
 			fluxgo.RouteIncome{
@@ -35,7 +35,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, handler *handlers.HandlerListDonations) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"GET",
 			"/donation",
 			fluxgo.RouteIncome{
@@ -52,7 +52,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetDonation) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"GET",
 			"/donation/:id",
 			fluxgo.RouteIncome{
@@ -71,7 +71,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateDonation) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"POST",
 			"/donation",
 			fluxgo.RouteIncome{
@@ -79,7 +79,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/donation", "internal/user"},
+				CacheInvalidate: []string{"/v1/internal/donation", "v1/internal/user"},
 			},
 			handler.HandleHttp,
 		)
@@ -89,7 +89,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerUpdateDonation) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"PUT",
 			"/donation/:id",
 			fluxgo.RouteIncome{
@@ -99,7 +99,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/donation", "/internal/user"},
+				CacheInvalidate: []string{"/v1/internal/donation", "/v1/internal/user"},
 			},
 			handler.HandleHttp,
 		)
@@ -110,7 +110,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateDonationStep) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"POST",
 			"/donation/step",
 			fluxgo.RouteIncome{
@@ -119,7 +119,7 @@ func Module() *fluxgo.FluxModule {
 				FromBody:        true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/donation", "/internal/user", "/internal/donation/step/:id/timeline"},
+				CacheInvalidate: []string{"/v1/internal/donation", "/v1/internal/user", "/v1/internal/donation/step/:id/timeline"},
 			},
 			handler.HandleHttp,
 		)
@@ -129,7 +129,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerUpdateDonationStep) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"PUT",
 			"/donation/step/:id",
 			fluxgo.RouteIncome{
@@ -139,7 +139,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/donation", "/internal/user", "/internal/donation/step/:id/timeline"},
+				CacheInvalidate: []string{"/v1/internal/donation", "/v1/internal/user", "/v1/internal/donation/step/:id/timeline"},
 			},
 			handler.HandleHttp,
 		)
@@ -150,7 +150,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListDonationStepTimeline) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"GET",
 			"/donation/step/:id/timeline",
 			fluxgo.RouteIncome{

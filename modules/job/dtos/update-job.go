@@ -16,7 +16,7 @@ type UpdateJobReq struct {
 }
 
 type UpdateJobRes struct {
-	entities.Job
+	entities.JobOut
 }
 
 type UpdateJobOptionalFields struct {

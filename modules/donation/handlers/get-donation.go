@@ -62,8 +62,14 @@ func (h *HandlerGetDonation) Execute(ctx c.Context, filters *dto.GetDonationReq)
 		return nil, fluxgo.ErrorInternalError("Error to get donation steps")
 	}
 
+	var stepsOut *[]entities.DonationStepOut
+	if donationSteps != nil {
+		out := entities.NewDonationStepsOut(*donationSteps)
+		stepsOut = &out
+	}
+
 	return &dto.GetDonationRes{
-		Donation: *donation,
-		Steps:    donationSteps,
+		DonationOut: entities.NewDonationOut(*donation),
+		Steps:       stepsOut,
 	}, nil
 }

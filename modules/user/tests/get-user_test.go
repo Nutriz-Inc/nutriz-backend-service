@@ -16,7 +16,7 @@ func TestGetUser(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/user"
+	endpoint := "/v1/internal/user"
 	headers := &utils.TestHeaders
 
 	t.Run("Success", func(t *testing.T) {

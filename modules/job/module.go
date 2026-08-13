@@ -15,7 +15,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListJobs) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"GET",
 			"/job",
 			fluxgo.RouteIncome{
@@ -33,7 +33,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetJob) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"GET",
 			"/job/:id",
 			fluxgo.RouteIncome{
@@ -53,7 +53,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateJob) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"POST",
 			"/job",
 			fluxgo.RouteIncome{
@@ -62,7 +62,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/job"},
+				CacheInvalidate: []string{"/v1/internal/job"},
 			},
 			handler.HandleHttp,
 		)
@@ -72,7 +72,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerUpdateJob) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"PUT",
 			"/job/:id",
 			fluxgo.RouteIncome{
@@ -82,7 +82,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/job"},
+				CacheInvalidate: []string{"/v1/internal/job"},
 			},
 			handler.HandleHttp,
 		)
@@ -92,7 +92,7 @@ func Module() *fluxgo.FluxModule {
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerRemoveJob) error {
 		return mod.HttpRoute(
 			f,
-			"/internal",
+			"/v1/internal",
 			"DELETE",
 			"/job/:id",
 			fluxgo.RouteIncome{
@@ -101,7 +101,7 @@ func Module() *fluxgo.FluxModule {
 				FromHeader:      true,
 				Validate:        true,
 				Cache:           redis,
-				CacheInvalidate: []string{"/internal/job"},
+				CacheInvalidate: []string{"/v1/internal/job"},
 			},
 			handler.HandleHttp,
 		)

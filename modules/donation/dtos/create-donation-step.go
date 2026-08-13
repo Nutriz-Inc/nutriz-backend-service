@@ -25,5 +25,5 @@ func (c CreateDonationStepReq) HasAddress() bool {
 }
 
 type CreateDonationStepRes struct {
-	entities.DonationStep
+	entities.DonationStepOut
 }

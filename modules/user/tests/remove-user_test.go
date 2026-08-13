@@ -21,7 +21,7 @@ func TestRemoveUser(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Remove common user by nurse", func(t *testing.T) {
 			userID := "usr_2veL1FPpuXxUaZcFaEC57BfpcKF"
-			endpoint := fmt.Sprintf("/internal/user/%s", userID)
+			endpoint := fmt.Sprintf("/v1/internal/user/%s", userID)
 
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", endpoint, nil, nurseHeaders)
 
@@ -31,7 +31,7 @@ func TestRemoveUser(t *testing.T) {
 
 		t.Run("Remove nurse user by admin", func(t *testing.T) {
 			userID := "usr_2veL1FPpuXxUaZcFaEC57BfpcKH"
-			endpoint := fmt.Sprintf("/internal/user/%s", userID)
+			endpoint := fmt.Sprintf("/v1/internal/user/%s", userID)
 
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", endpoint, nil, adminHeaders)
 
@@ -42,7 +42,7 @@ func TestRemoveUser(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		t.Run("User not found", func(t *testing.T) {
-			route := "/internal/user/usr_2veL1FPpuXxUaZcAbEC57BfpcMM"
+			route := "/v1/internal/user/usr_2veL1FPpuXxUaZcAbEC57BfpcMM"
 
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", route, nil, adminHeaders)
 
@@ -52,7 +52,7 @@ func TestRemoveUser(t *testing.T) {
 
 		t.Run("No permission", func(t *testing.T) {
 			userID := "usr_2veL1FPpuXxUaZcFaEC57BfpcKG"
-			endpoint := fmt.Sprintf("/internal/user/%s", userID)
+			endpoint := fmt.Sprintf("/v1/internal/user/%s", userID)
 
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", endpoint, nil, adminHeaders)
 

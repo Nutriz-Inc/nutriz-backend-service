@@ -14,7 +14,7 @@ type UpdateAddressReq struct {
 }
 
 type UpdateAddressRes struct {
-	entities.Address
+	entities.AddressOut
 }
 
 type UpdateAddressOptionalFields struct {

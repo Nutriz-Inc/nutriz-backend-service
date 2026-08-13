@@ -15,7 +15,7 @@ func TestLogin(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/public/auth/login"
+	endpoint := "/v1/public/auth/login"
 
 	t.Run("Success", func(t *testing.T) {
 		data := dtos.LoginReq{

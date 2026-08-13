@@ -18,7 +18,7 @@ func TestListJobs(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/job?page=1&page_size=25"
+	endpoint := "/v1/internal/job?page=1&page_size=25"
 	adminHeaders := &utils.TestHeadersAdmin
 	headers := &utils.TestHeadersNurse
 
@@ -26,7 +26,7 @@ func TestListJobs(t *testing.T) {
 	fluxgo.RunTestRequest(
 		app,
 		"PUT",
-		"/internal/job/job_3EEMMlZS3VexkBHkGHPjq0Qt86V",
+		"/v1/internal/job/job_3EEMMlZS3VexkBHkGHPjq0Qt86V",
 		dto.UpdateJobReq{
 			IdUser:  utils.StringPtr("usr_2veL1FPpuXxUaZcFaEC57BfplNV"),
 			DateSet: utils.StringPtr(dateSetInTwoDays),

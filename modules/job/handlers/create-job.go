@@ -141,6 +141,6 @@ func (h *HandlerCreateJob) Execute(ctx c.Context, data *dto.CreateJobReq) (*dto.
 	}
 
 	return &dto.CreateJobRes{
-		Job: *job,
+		JobOut: entities.NewJobOut(*job),
 	}, nil
 }

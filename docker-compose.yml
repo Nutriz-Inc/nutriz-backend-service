@@ -26,3 +26,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+
+  app:
+    build: .
+    container_name: app
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - 3333:3333
+    environment:
+      - DATABASE_DSN=postgres://postgres:postgres@database:5432/nutriz?sslmode=disable
+      - REDIS_ADDR=redis:6379

@@ -10,5 +10,5 @@ type ListDonationStepTimelineReq struct {
 }
 
 type ListDonationStepTimelineRes struct {
-	Data []entities.DonationStepTimeline `json:"data"`
+	Data []entities.DonationStepTimelineOut `json:"data"`
 }

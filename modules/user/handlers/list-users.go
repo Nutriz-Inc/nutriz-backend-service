@@ -46,7 +46,7 @@ func (h *HandlerListUsers) Execute(ctx c.Context, filters *dto.ListUsersReq) (*d
 	}
 
 	return &dto.ListUsersRes{
-		Data: *users,
+		Data: entities.NewUsersOut(*users),
 		PaginationRes: utils.PaginationRes{
 			Page:     filters.Page,
 			PageSize: filters.PageSize,

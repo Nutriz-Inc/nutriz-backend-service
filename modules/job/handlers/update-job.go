@@ -103,7 +103,7 @@ func (h *HandlerUpdateJob) Execute(ctx c.Context, data *dto.UpdateJobReq) (*dto.
 	}
 
 	return &dto.UpdateJobRes{
-		Job: *updatedJob,
+		JobOut: entities.NewJobOut(*updatedJob),
 	}, nil
 }
 

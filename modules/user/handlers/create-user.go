@@ -183,7 +183,7 @@ func (h *HandlerCreateUser) handleCommon(ctx c.Context, data *dto.CreateUserReq,
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	return &dto.CreateUserRes{User: *user}, nil
+	return &dto.CreateUserRes{UserOut: entities.NewUserOut(*user)}, nil
 }
 
 func (h *HandlerCreateUser) handleWorker(ctx c.Context, data *dto.CreateUserReq, req *repositories.CreateUserRepositoryReq, validator dto.CreateUserOptionalFields, idUser string) (*dto.CreateUserRes, *fluxgo.GlobalError) {
@@ -218,7 +218,7 @@ func (h *HandlerCreateUser) handleWorker(ctx c.Context, data *dto.CreateUserReq,
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	return &dto.CreateUserRes{User: *user}, nil
+	return &dto.CreateUserRes{UserOut: entities.NewUserOut(*user)}, nil
 }
 
 func (h *HandlerCreateUser) createConsentLog(ctx c.Context, data *dto.CreateConsentReq, tx *sqlx.Tx) *fluxgo.GlobalError {

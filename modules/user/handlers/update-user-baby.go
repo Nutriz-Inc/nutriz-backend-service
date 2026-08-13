@@ -101,5 +101,5 @@ func (h *HandlerUpdateUserBaby) Execute(ctx c.Context, data *dto.UpdateUserBabyR
 		return nil, fluxgo.ErrorNotFound("User baby not found")
 	}
 
-	return &dto.UpdateUserBabyRes{UserBaby: *userBaby}, nil
+	return &dto.UpdateUserBabyRes{UserBabyOut: entities.NewUserBabyOut(*userBaby)}, nil
 }

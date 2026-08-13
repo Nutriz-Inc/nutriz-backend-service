@@ -14,5 +14,5 @@ type CreateConsentBase struct {
 }
 
 type CreateConsentRes struct {
-	entities.ConsentLog
+	entities.ConsentLogOut
 }

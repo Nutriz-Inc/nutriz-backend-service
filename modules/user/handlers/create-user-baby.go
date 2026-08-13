@@ -79,5 +79,5 @@ func (h *HandlerCreateUserBaby) Execute(ctx c.Context, data *dto.CreateUserBabyR
 		return nil, fluxgo.ErrorNotFound("User baby not found")
 	}
 
-	return &dto.CreateUserBabyRes{UserBaby: *userBaby}, nil
+	return &dto.CreateUserBabyRes{UserBabyOut: entities.NewUserBabyOut(*userBaby)}, nil
 }

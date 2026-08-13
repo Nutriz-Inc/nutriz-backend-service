@@ -17,7 +17,7 @@ func TestUpdateJob(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/job"
+	endpoint := "/v1/internal/job"
 	adminHeaders := &utils.TestHeadersAdmin
 	nurseHeaders := &utils.TestHeadersNurse
 	commonHeaders := &utils.TestHeaders

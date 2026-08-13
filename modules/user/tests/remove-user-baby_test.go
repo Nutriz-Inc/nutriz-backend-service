@@ -19,7 +19,7 @@ func TestRemoveUserBaby(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		userBabyId := "usb_01JTG8K8N4P2R6T9V1X3Y5Z7DEL"
-		endpoint := fmt.Sprintf("/internal/user/baby/%s", userBabyId)
+		endpoint := fmt.Sprintf("/v1/internal/user/baby/%s", userBabyId)
 
 		status, resp := fluxgo.RunTestRequest(app, "DELETE", endpoint, nil, headers)
 
@@ -31,7 +31,7 @@ func TestRemoveUserBaby(t *testing.T) {
 		t.Run("No permission access endpoint", func(t *testing.T) {
 			invalidHeader := &utils.TestHeadersAdmin
 			userBabyId := "usb_01JTG8K8N4P2R6T9V1X3Y5Z7DEL"
-			endpoint := fmt.Sprintf("/internal/user/baby/%s", userBabyId)
+			endpoint := fmt.Sprintf("/v1/internal/user/baby/%s", userBabyId)
 
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", endpoint, nil, invalidHeader)
 
@@ -39,7 +39,7 @@ func TestRemoveUserBaby(t *testing.T) {
 			assert.Equal(t, "User does not have permission to delete baby", resp["message"])
 		})
 		t.Run("Baby not found", func(t *testing.T) {
-			route := "/internal/user/baby/usb_2veL1FPpuXxUaZcFaEC57BfpcZZ"
+			route := "/v1/internal/user/baby/usb_2veL1FPpuXxUaZcFaEC57BfpcZZ"
 
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", route, nil, headers)
 
@@ -49,7 +49,7 @@ func TestRemoveUserBaby(t *testing.T) {
 
 		t.Run("No permission to delete baby", func(t *testing.T) {
 			userBabyId := "usb_01JTG8K8N4P2R6T9V1X3Y5Z7MIP"
-			route := fmt.Sprintf("/internal/user/baby/%s", userBabyId)
+			route := fmt.Sprintf("/v1/internal/user/baby/%s", userBabyId)
 
 			status, resp := fluxgo.RunTestRequest(app, "DELETE", route, nil, headers)
 

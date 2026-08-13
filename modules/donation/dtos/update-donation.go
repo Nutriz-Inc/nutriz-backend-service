@@ -15,7 +15,7 @@ type UpdateDonationReq struct {
 }
 
 type UpdateDonationRes struct {
-	entities.Donation
+	entities.DonationOut
 }
 
 type UpdateDonationOptionalFields struct {

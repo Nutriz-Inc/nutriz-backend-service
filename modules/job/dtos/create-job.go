@@ -14,5 +14,5 @@ type CreateJobReq struct {
 }
 
 type CreateJobRes struct {
-	entities.Job
+	entities.JobOut
 }

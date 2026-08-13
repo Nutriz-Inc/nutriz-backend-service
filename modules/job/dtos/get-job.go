@@ -11,9 +11,9 @@ type GetJobReq struct {
 }
 
 type JobInfoRes struct {
-	entities.Job
-	IdUserCommon *string `json:"id_user_common,omitempty" db:"id_user_common"`
-	IdAddress    *string `json:"id_address,omitempty" db:"id_address"`
+	entities.JobOut
+	IdUserCommon *string `json:"id_user_common,omitempty"`
+	IdAddress    *string `json:"id_address,omitempty"`
 }
 
 type GetJobRes struct {

@@ -115,7 +115,7 @@ func (r *DonationRepository) ListDonationByFilters(
 		})
 	}
 
-	return utils.ListQuery[dto.DonationRes](
+	rows, total, err := utils.ListQuery[donationRow](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
@@ -123,6 +123,30 @@ func (r *DonationRepository) ListDonationByFilters(
 		utils.IntPtr(filter.PageSize),
 		true,
 	)
+	if err != nil || rows == nil {
+		return nil, total, err
+	}
+
+	donations := make([]dto.DonationRes, len(*rows))
+	for i, row := range *rows {
+		donations[i] = dto.DonationRes{
+			DonationOut:  entities.NewDonationOut(row.Donation),
+			UserName:     row.UserName,
+			UserDocument: row.UserDocument,
+			CurrentStep:  row.CurrentStep,
+			HasError:     row.HasError,
+		}
+	}
+
+	return &donations, total, nil
+}
+
+type donationRow struct {
+	entities.Donation
+	UserName     *string                    `db:"user_name"`
+	UserDocument *string                    `db:"user_document"`
+	CurrentStep  entities.EnumDonationSteps `db:"current_step"`
+	HasError     bool                       `db:"has_error"`
 }
 
 func (r *DonationRepository) GetDonationById(ctx c.Context, id string) (*entities.Donation, error) {

@@ -36,5 +36,5 @@ func (c CreateUserReq) ValidateCreateUserOptionalFields() CreateUserOptionalFiel
 }
 
 type CreateUserRes struct {
-	entities.User
+	entities.UserOut
 }

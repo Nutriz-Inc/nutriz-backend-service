@@ -15,6 +15,6 @@ type ListUsersReq struct {
 }
 
 type ListUsersRes struct {
-	Data []entities.User `json:"data"`
+	Data []entities.UserOut `json:"data"`
 	utils.PaginationRes
 }

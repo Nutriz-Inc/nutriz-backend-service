@@ -16,9 +16,9 @@ type ListDonationPointsReq struct {
 }
 
 type DonationPointsRes struct {
-	entities.DonationPoint
-	Address         *entities.Address `json:"address,omitempty"`
-	DistanceFromYou *float64          `json:"distance_from_you,omitempty" db:"distance_from_you"`
+	entities.DonationPointOut
+	Address         *entities.AddressOut `json:"address,omitempty"`
+	DistanceFromYou *float64             `json:"distance_from_you,omitempty"`
 }
 
 type ListDonationPointsRes struct {

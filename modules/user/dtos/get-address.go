@@ -11,5 +11,5 @@ type GetAddressReq struct {
 }
 
 type GetAddressRes struct {
-	entities.Address
+	entities.AddressOut
 }

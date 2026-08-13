@@ -127,6 +127,6 @@ func (h *HandlerUpdateAddress) Execute(ctx c.Context, data *dto.UpdateAddressReq
 	}
 
 	return &dto.UpdateAddressRes{
-		Address: *address,
+		AddressOut: entities.NewAddressOut(*address),
 	}, nil
 }

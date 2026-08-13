@@ -176,7 +176,7 @@ func (h *HandlerCreateDonationStep) Execute(ctx c.Context, data *dto.CreateDonat
 	}
 
 	return &dto.CreateDonationStepRes{
-		DonationStep: *donationStep,
+		DonationStepOut: entities.NewDonationStepOut(*donationStep),
 	}, nil
 }
 

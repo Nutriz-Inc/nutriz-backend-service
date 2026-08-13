@@ -16,7 +16,7 @@ func TestListUsers(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/user?page=1&page_size=25"
+	endpoint := "/v1/internal/user?page=1&page_size=25"
 	headers := &utils.TestHeadersAdmin
 
 	t.Run("Success", func(t *testing.T) {

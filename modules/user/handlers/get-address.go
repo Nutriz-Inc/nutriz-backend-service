@@ -2,6 +2,7 @@ package handlers
 
 import (
 	c "context"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 
 	dto "nutriz-backend-service/modules/user/dtos"
@@ -38,6 +39,6 @@ func (h *HandlerGetAddress) Execute(ctx c.Context, data *dto.GetAddressReq) (*dt
 	}
 
 	return &dto.GetAddressRes{
-		Address: *address,
+		AddressOut: entities.NewAddressOut(*address),
 	}, nil
 }

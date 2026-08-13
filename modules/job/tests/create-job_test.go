@@ -15,7 +15,7 @@ func TestCreateJob(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/job"
+	endpoint := "/v1/internal/job"
 	adminHeaders := &utils.TestHeadersAdmin
 	commonHeaders := &utils.TestHeaders
 

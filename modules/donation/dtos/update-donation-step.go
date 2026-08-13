@@ -16,7 +16,7 @@ type UpdateDonationStepReq struct {
 }
 
 type UpdateDonationStepRes struct {
-	entities.DonationStep
+	entities.DonationStepOut
 }
 
 type UpdateDonationStepOptionalFields struct {

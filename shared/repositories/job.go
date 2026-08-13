@@ -150,8 +150,11 @@ func (r *JobRepository) ListJobsByFilters(
 }
 
 type jobRow struct {
-	dto.JobRes
-	IdAddressRef *string `db:"id_address_ref"`
+	entities.Job
+	UserNurseName  *string `db:"user_nurse_name"`
+	UserCommonName *string `db:"user_common_name"`
+	IdAddressRef   *string `db:"id_address_ref"`
+	IdDonation     *string `db:"id_donation"`
 }
 
 func (r *JobRepository) attachAddresses(ctx c.Context, span fluxgo.Span, rows []jobRow) (*[]dto.JobRes, error) {
@@ -191,12 +194,18 @@ func (r *JobRepository) attachAddresses(ctx c.Context, span fluxgo.Span, rows []
 
 	jobs := make([]dto.JobRes, len(rows))
 	for i, row := range rows {
-		jobs[i] = row.JobRes
+		jobs[i] = dto.JobRes{
+			JobOut:         entities.NewJobOut(row.Job),
+			UserNurseName:  row.UserNurseName,
+			UserCommonName: row.UserCommonName,
+			IdDonation:     row.IdDonation,
+		}
 		if row.IdAddressRef == nil {
 			continue
 		}
 		if address, ok := addressById[*row.IdAddressRef]; ok {
-			jobs[i].Address = &address
+			addressOut := entities.NewAddressOut(address)
+			jobs[i].Address = &addressOut
 		}
 	}
 
@@ -216,11 +225,17 @@ func (r *JobRepository) GetJobById(ctx c.Context, id string) (*entities.Job, err
 	)
 }
 
+type jobInfoRow struct {
+	entities.Job
+	IdUserCommon *string `db:"id_user_common"`
+	IdAddress    *string `db:"id_address"`
+}
+
 func (r *JobRepository) GetJobInfoById(ctx c.Context, id string) (*dto.JobInfoRes, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
 
-	return utils.Get[dto.JobInfoRes](
+	row, err := utils.Get[jobInfoRow](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
@@ -234,6 +249,15 @@ func (r *JobRepository) GetJobInfoById(ctx c.Context, id string) (*dto.JobInfoRe
 		WHERE j.id_job = $1 AND j.removed_at IS NULL`,
 		id,
 	)
+	if err != nil || row == nil {
+		return nil, err
+	}
+
+	return &dto.JobInfoRes{
+		JobOut:       entities.NewJobOut(row.Job),
+		IdUserCommon: row.IdUserCommon,
+		IdAddress:    row.IdAddress,
+	}, nil
 }
 
 type CreateJobRepositoryReq struct {

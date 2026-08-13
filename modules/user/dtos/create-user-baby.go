@@ -15,5 +15,5 @@ type UserBabyCreateBase struct {
 }
 
 type CreateUserBabyRes struct {
-	entities.UserBaby
+	entities.UserBabyOut
 }

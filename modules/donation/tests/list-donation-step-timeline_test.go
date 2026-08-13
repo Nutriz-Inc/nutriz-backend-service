@@ -16,7 +16,7 @@ func TestListDonationStepTimeline(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/donation/step"
+	endpoint := "/v1/internal/donation/step"
 	headers := &utils.TestHeaders
 
 	t.Run("Success", func(t *testing.T) {

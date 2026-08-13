@@ -83,6 +83,6 @@ func (h *HandlerCreateDonation) Execute(ctx c.Context, data *dto.CreateDonationR
 	}
 
 	return &dto.CreateDonationRes{
-		Donation: *donation,
+		DonationOut: entities.NewDonationOut(*donation),
 	}, nil
 }

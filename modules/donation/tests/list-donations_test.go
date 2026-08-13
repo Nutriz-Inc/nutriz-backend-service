@@ -15,7 +15,7 @@ func TestListDonation(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/donation?page=1&page_size=25"
+	endpoint := "/v1/internal/donation?page=1&page_size=25"
 	headers := &utils.TestHeaders
 
 	t.Run("Success", func(t *testing.T) {

@@ -16,5 +16,5 @@ type AddressCreateBase struct {
 }
 
 type CreateAddressRes struct {
-	entities.Address
+	entities.AddressOut
 }

@@ -16,7 +16,7 @@ func TestGetJob(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/job"
+	endpoint := "/v1/internal/job"
 	headers := &utils.TestHeadersAdmin
 
 	t.Run("Success", func(t *testing.T) {

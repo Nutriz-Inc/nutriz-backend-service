@@ -18,7 +18,7 @@ func TestUpdateAddress(t *testing.T) {
 
 	addressID := "adr_01JTG8K8N4P2R6T9V1X3Y5Z7MIP"
 	duplicateZipcode := "01545000"
-	endpoint := fmt.Sprintf("/internal/user/address/%s", addressID)
+	endpoint := fmt.Sprintf("/v1/internal/user/address/%s", addressID)
 
 	headers := &utils.TestHeaders
 
@@ -61,7 +61,7 @@ func TestUpdateAddress(t *testing.T) {
 			body := dtos.UpdateAddressReq{
 				ZipCode: utils.StringPtr("22250040"),
 			}
-			route := "/internal/user/address/adr_01JTX0H1V8N5Q3W7E2R4T6Y8ZZZ"
+			route := "/v1/internal/user/address/adr_01JTX0H1V8N5Q3W7E2R4T6Y8ZZZ"
 
 			status, resp := fluxgo.RunTestRequest(app, "PUT", route, body, headers)
 
@@ -73,7 +73,7 @@ func TestUpdateAddress(t *testing.T) {
 			body := dtos.UpdateAddressReq{
 				ZipCode: utils.StringPtr("22250040"),
 			}
-			route := "/internal/user/address/adr_01JTX0H1V8N5Q3W7E2R4T6Y8MBL"
+			route := "/v1/internal/user/address/adr_01JTX0H1V8N5Q3W7E2R4T6Y8MBL"
 
 			status, resp := fluxgo.RunTestRequest(app, "PUT", route, body, headers)
 

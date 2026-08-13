@@ -109,7 +109,7 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 		})
 	}
 
-	return utils.ListQuery[dto.DonationPointsRes](
+	rows, total, err := utils.ListQuery[donationPointRow](
 		ctx,
 		r.DB.ReadOnlyDB(),
 		span,
@@ -117,4 +117,29 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 		utils.IntPtr(filter.PageSize),
 		true,
 	)
+	if err != nil || rows == nil {
+		return nil, total, err
+	}
+
+	donationPoints := make([]dto.DonationPointsRes, len(*rows))
+	for i, row := range *rows {
+		var address *entities.AddressOut
+		if row.Address != nil {
+			out := entities.NewAddressOut(*row.Address)
+			address = &out
+		}
+		donationPoints[i] = dto.DonationPointsRes{
+			DonationPointOut: entities.NewDonationPointOut(row.DonationPoint),
+			Address:          address,
+			DistanceFromYou:  row.DistanceFromYou,
+		}
+	}
+
+	return &donationPoints, total, nil
+}
+
+type donationPointRow struct {
+	entities.DonationPoint
+	Address         *entities.Address `db:"address"`
+	DistanceFromYou *float64          `db:"distance_from_you"`
 }
