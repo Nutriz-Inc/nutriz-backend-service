@@ -38,7 +38,5 @@ services:
     ports:
       - 3333:3333
     environment:
-      # Overrides the values loaded from .env.development so the app
-      # reaches the other containers by service name instead of localhost.
       - DATABASE_DSN=postgres://postgres:postgres@database:5432/nutriz?sslmode=disable
       - REDIS_ADDR=redis:6379

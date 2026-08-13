@@ -138,9 +138,6 @@ func (r *DonationPointRepository) ListDonationPointsByFilters(
 	return &donationPoints, total, nil
 }
 
-// donationPointRow is a scan-only shape used to map SQL columns (including
-// the optional joined address and the computed distance) via sqlx. It never
-// leaves this file - callers only see dto.DonationPointsRes.
 type donationPointRow struct {
 	entities.DonationPoint
 	Address         *entities.Address `db:"address"`

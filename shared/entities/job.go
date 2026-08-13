@@ -53,20 +53,5 @@ type JobOut struct {
 }
 
 func NewJobOut(j Job) JobOut {
-	return JobOut{
-		IdJob:        j.IdJob,
-		IdUser:       j.IdUser,
-		IdStep:       j.IdStep,
-		Status:       j.Status,
-		Name:         j.Name,
-		Description:  j.Description,
-		DateSet:      j.DateSet,
-		UserFeedback: j.UserFeedback,
-		CreatedAt:    j.CreatedAt,
-		CreatedBy:    j.CreatedBy,
-		UpdatedAt:    j.UpdatedAt,
-		UpdatedBy:    j.UpdatedBy,
-		RemovedAt:    j.RemovedAt,
-		RemovedBy:    j.RemovedBy,
-	}
+	return JobOut(j)
 }

@@ -149,9 +149,6 @@ func (r *JobRepository) ListJobsByFilters(
 	return jobs, total, nil
 }
 
-// jobRow is a scan-only shape used to map SQL columns (including the joined
-// user names and referenced address/donation ids) via sqlx. It never leaves
-// this file - callers only see dto.JobRes.
 type jobRow struct {
 	entities.Job
 	UserNurseName  *string `db:"user_nurse_name"`
@@ -228,8 +225,6 @@ func (r *JobRepository) GetJobById(ctx c.Context, id string) (*entities.Job, err
 	)
 }
 
-// jobInfoRow is a scan-only shape used to map the joined user/address ids
-// via sqlx. It never leaves this file - callers only see dto.JobInfoRes.
 type jobInfoRow struct {
 	entities.Job
 	IdUserCommon *string `db:"id_user_common"`

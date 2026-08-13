@@ -30,9 +30,6 @@ func GetHttp(apm *fluxgo.Apm, prom *fluxgo.Prometheus, env *config.Env) *fluxgo.
 	return http
 }
 
-// registerDocsRoutes exposes the hand-written OpenAPI spec (docs/openapi.json)
-// as raw JSON plus an interactive Swagger UI, so endpoints can be documented
-// and tested without going through the module/route income system.
 func registerDocsRoutes(app *fiber.App) {
 	app.Get("/openapi.json", func(c *fiber.Ctx) error {
 		c.Type("json")

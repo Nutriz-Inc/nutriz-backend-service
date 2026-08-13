@@ -141,9 +141,6 @@ func (r *DonationRepository) ListDonationByFilters(
 	return &donations, total, nil
 }
 
-// donationRow is a scan-only shape used to map SQL columns (including the
-// computed current_step/has_error and the joined user fields) via sqlx.
-// It never leaves this file - callers only see dto.DonationRes.
 type donationRow struct {
 	entities.Donation
 	UserName     *string                    `db:"user_name"`
