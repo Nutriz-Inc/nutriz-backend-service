@@ -150,16 +150,16 @@ docker compose up -d database redis
 
 ### Versionamento e documentação
 
-As rotas são agrupadas por nível de acesso (`/public` para rotas sem autenticação, `/internal` para rotas autenticadas). A documentação completa de todos os endpoints — parâmetros, corpo de requisição, respostas e códigos de erro — está disponível via Swagger/OpenAPI em `http://localhost:3333/docs` assim que a aplicação estiver no ar.
+Todas as rotas são versionadas com o prefixo `/v1` e agrupadas por nível de acesso (`/v1/public` para rotas sem autenticação, `/v1/internal` para rotas autenticadas). A documentação completa de todos os endpoints — parâmetros, corpo de requisição, respostas e códigos de erro — está disponível via Swagger/OpenAPI em `http://localhost:3333/docs` assim que a aplicação estiver no ar.
 
 ### Autenticação
 
-Rotas `/internal/*` exigem um JWT no cabeçalho `Authorization: Bearer <token>`, obtido no login. O cabeçalho `action-by`, usado para autorização por tipo de usuária, é preenchido automaticamente pelo middleware a partir do token — não precisa ser enviado manualmente.
+Rotas `/v1/internal/*` exigem um JWT no cabeçalho `Authorization: Bearer <token>`, obtido no login. O cabeçalho `action-by`, usado para autorização por tipo de usuária, é preenchido automaticamente pelo middleware a partir do token — não precisa ser enviado manualmente.
 
 ### Exemplo: cadastro de usuária (autocadastro, rota pública)
 
 ```bash
-curl -X POST http://localhost:3333/public/user \
+curl -X POST http://localhost:3333/v1/public/user \
   -H "Content-Type: application/json" \
   -d '{
     "type": "common",
@@ -181,24 +181,24 @@ curl -X POST http://localhost:3333/public/user \
 ### Exemplo: login
 
 ```bash
-curl -X POST http://localhost:3333/public/auth/login \
+curl -X POST http://localhost:3333/v1/public/auth/login \
   -H "Content-Type: application/json" \
   -d '{ "email": "joana.souza@email.com", "password": "12345678" }'
 ```
 
-A resposta traz um `token` JWT. Use-o nas chamadas às rotas `/internal/*`:
+A resposta traz um `token` JWT. Use-o nas chamadas às rotas `/v1/internal/*`:
 
 ### Exemplo: buscar a própria usuária (rota autenticada)
 
 ```bash
-curl http://localhost:3333/internal/user/<id_user> \
+curl http://localhost:3333/v1/internal/user/<id_user> \
   -H "Authorization: Bearer <token>"
 ```
 
 ### Exemplo: listar pontos de doação (rota pública)
 
 ```bash
-curl "http://localhost:3333/public/donation/point?page=1&page_size=25"
+curl "http://localhost:3333/v1/public/donation/point?page=1&page_size=25"
 ```
 
 Para os demais endpoints (doações, etapas de doação, jobs, dashboard), consulte a lista completa com exemplos de corpo de requisição, parâmetros e respostas em `http://localhost:3333/docs`.
