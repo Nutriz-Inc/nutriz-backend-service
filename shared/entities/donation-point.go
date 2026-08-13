@@ -33,14 +33,5 @@ type DonationPointOut struct {
 }
 
 func NewDonationPointOut(dp DonationPoint) DonationPointOut {
-	return DonationPointOut{
-		IdDonationPoint: dp.IdDonationPoint,
-		Name:            dp.Name,
-		Description:     dp.Description,
-		HasHome:         dp.HasHome,
-		PhoneNumber:     dp.PhoneNumber,
-		Email:           dp.Email,
-		OpeningHours:    dp.OpeningHours,
-		RemovedAt:       dp.RemovedAt,
-	}
+	return DonationPointOut(dp)
 }

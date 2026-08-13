@@ -33,16 +33,7 @@ type DonationStepTimelineOut struct {
 }
 
 func NewDonationStepTimelineOut(t DonationStepTimeline) DonationStepTimelineOut {
-	return DonationStepTimelineOut{
-		IdDonationStepTimeline: t.IdDonationStepTimeline,
-		IdDonationStep:         t.IdDonationStep,
-		IdAddress:              t.IdAddress,
-		Description:            t.Description,
-		Status:                 t.Status,
-		SetDate:                t.SetDate,
-		CreatedAt:              t.CreatedAt,
-		CreatedBy:              t.CreatedBy,
-	}
+	return DonationStepTimelineOut(t)
 }
 
 func NewDonationStepTimelinesOut(timeline []DonationStepTimeline) []DonationStepTimelineOut {

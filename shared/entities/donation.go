@@ -41,17 +41,5 @@ type DonationOut struct {
 }
 
 func NewDonationOut(d Donation) DonationOut {
-	return DonationOut{
-		IdDonation:      d.IdDonation,
-		IsActive:        d.IsActive,
-		QuantityDonated: d.QuantityDonated,
-		UserFeedback:    d.UserFeedback,
-		ScoreFeedback:   d.ScoreFeedback,
-		CreatedAt:       d.CreatedAt,
-		CreatedBy:       d.CreatedBy,
-		UpdatedAt:       d.UpdatedAt,
-		UpdatedBy:       d.UpdatedBy,
-		RemovedAt:       d.RemovedAt,
-		RemovedBy:       d.RemovedBy,
-	}
+	return DonationOut(d)
 }

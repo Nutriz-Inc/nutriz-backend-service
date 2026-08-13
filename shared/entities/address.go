@@ -55,23 +55,7 @@ type AddressOut struct {
 }
 
 func NewAddressOut(a Address) AddressOut {
-	return AddressOut{
-		IdAddress:       a.IdAddress,
-		IdUser:          a.IdUser,
-		IdDonationPoint: a.IdDonationPoint,
-		Zipcode:         a.Zipcode,
-		Street:          a.Street,
-		Number:          a.Number,
-		City:            a.City,
-		State:           a.State,
-		Neighborhood:    a.Neighborhood,
-		Complement:      a.Complement,
-		Latitude:        a.Latitude,
-		Longitude:       a.Longitude,
-		CreatedAt:       a.CreatedAt,
-		UpdatedAt:       a.UpdatedAt,
-		RemovedAt:       a.RemovedAt,
-	}
+	return AddressOut(a)
 }
 
 func NewAddressesOut(addresses []Address) []AddressOut {

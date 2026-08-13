@@ -33,15 +33,7 @@ type UserBabyOut struct {
 }
 
 func NewUserBabyOut(b UserBaby) UserBabyOut {
-	return UserBabyOut{
-		IdUserBaby: b.IdUserBaby,
-		IdUser:     b.IdUser,
-		Name:       b.Name,
-		BirthDate:  b.BirthDate,
-		CreatedAt:  b.CreatedAt,
-		UpdatedAt:  b.UpdatedAt,
-		RemovedAt:  b.RemovedAt,
-	}
+	return UserBabyOut(b)
 }
 
 func NewUserBabiesOut(babies []UserBaby) []UserBabyOut {

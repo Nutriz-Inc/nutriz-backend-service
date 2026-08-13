@@ -29,12 +29,5 @@ type ConsentLogOut struct {
 }
 
 func NewConsentLogOut(c ConsentLog) ConsentLogOut {
-	return ConsentLogOut{
-		IdConsentLog: c.IdConsentLog,
-		IdUser:       c.IdUser,
-		TermsVersion: c.TermsVersion,
-		AcceptedAt:   c.AcceptedAt,
-		IpAddress:    c.IpAddress,
-		UserAgent:    c.UserAgent,
-	}
+	return ConsentLogOut(c)
 }

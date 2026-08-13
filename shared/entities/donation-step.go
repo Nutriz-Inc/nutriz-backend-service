@@ -69,20 +69,7 @@ type DonationStepOut struct {
 }
 
 func NewDonationStepOut(s DonationStep) DonationStepOut {
-	return DonationStepOut{
-		IdDonationStep: s.IdDonationStep,
-		IdDonation:     s.IdDonation,
-		IdAddress:      s.IdAddress,
-		Name:           s.Name,
-		Description:    s.Description,
-		Status:         s.Status,
-		SetDate:        s.SetDate,
-		CreatedAt:      s.CreatedAt,
-		CreatedBy:      s.CreatedBy,
-		UpdatedAt:      s.UpdatedAt,
-		UpdatedBy:      s.UpdatedBy,
-		CompletedAt:    s.CompletedAt,
-	}
+	return DonationStepOut(s)
 }
 
 func NewDonationStepsOut(steps []DonationStep) []DonationStepOut {
