@@ -17,7 +17,7 @@ func TestUpdateDonationStep(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/donation/step"
+	endpoint := "/v1/internal/donation/step"
 	adminHeaders := &utils.TestHeadersAdmin
 	commonHeaders := &utils.TestHeaders
 

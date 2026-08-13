@@ -15,7 +15,7 @@ func TestListDonationPoint(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/public/donation/point?page=1&page_size=25"
+	endpoint := "/v1/public/donation/point?page=1&page_size=25"
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("No filters", func(t *testing.T) {

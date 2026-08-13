@@ -17,8 +17,8 @@ func TestCreateUser(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	publicEndpoint := "/public/user"
-	internalEndpoint := "/internal/user"
+	publicEndpoint := "/v1/public/user"
+	internalEndpoint := "/v1/internal/user"
 
 	makeAddress := func(zipcode string) *dto.AddressCreateBase {
 		return &dto.AddressCreateBase{

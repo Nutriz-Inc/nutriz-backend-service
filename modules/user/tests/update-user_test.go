@@ -15,7 +15,7 @@ func TestUpdateUser(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/user/usr_2veL1FPpuXxUaZcFaEC57BfpcKE"
+	endpoint := "/v1/internal/user/usr_2veL1FPpuXxUaZcFaEC57BfpcKE"
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Update name", func(t *testing.T) {
@@ -46,7 +46,7 @@ func TestUpdateUser(t *testing.T) {
 				Name: utils.StringPtr("Ninguem"),
 			}
 			headers := &utils.TestHeaders
-			status, body := fluxgo.RunTestRequest(app, "PUT", "/internal/user/usr_2veL1FPpuXxUaZcAbEC57BfpcMM", data, headers)
+			status, body := fluxgo.RunTestRequest(app, "PUT", "/v1/internal/user/usr_2veL1FPpuXxUaZcAbEC57BfpcMM", data, headers)
 
 			assert.Equal(t, http.StatusNotFound, status)
 			assert.Equal(t, "User not found", body["message"])

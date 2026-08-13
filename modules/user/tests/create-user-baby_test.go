@@ -17,7 +17,7 @@ func TestCreateUserBaby(t *testing.T) {
 	fx, app := module.Module().GetTestApp(t)
 	defer fx.RequireStart().RequireStop()
 
-	endpoint := "/internal/user/baby"
+	endpoint := "/v1/internal/user/baby"
 
 	headers := &utils.TestHeaders
 
@@ -67,7 +67,7 @@ func TestCreateUserBaby(t *testing.T) {
 			assert.Equal(t, "User does not have permission to create baby", resp["message"])
 		})
 		t.Run("User can have up to %d babies", func(t *testing.T) {
-			route := "/internal/user/usr_2veL1FPpuXxUaZcFaEC57BfpcKE?show_baby=true"
+			route := "/v1/internal/user/usr_2veL1FPpuXxUaZcFaEC57BfpcKE?show_baby=true"
 			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
 			assert.Equal(t, http.StatusOK, status)
 

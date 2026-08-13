@@ -22,8 +22,8 @@ func GetHttp(apm *fluxgo.Apm, prom *fluxgo.Prometheus, env *config.Env) *fluxgo.
 
 	http.GetValidator().Validate = utils.GetValidate()
 
-	http.CreateRouter("/public")
-	http.CreateRouter("/internal", authMiddleware(env))
+	http.CreateRouter("/v1/public")
+	http.CreateRouter("/v1/internal", authMiddleware(env))
 
 	registerDocsRoutes(http.GetApp())
 

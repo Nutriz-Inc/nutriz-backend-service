@@ -17,13 +17,13 @@ func TestUpdateUserBaby(t *testing.T) {
 	defer fx.RequireStart().RequireStop()
 
 	userBabyID := "usb_01JTG8J5F6W9K2M4P7Q1X8Y3ZAL"
-	endpoint := fmt.Sprintf("/internal/user/baby/%s", userBabyID)
+	endpoint := fmt.Sprintf("/v1/internal/user/baby/%s", userBabyID)
 	headers := &utils.TestHeaders
 
 	t.Run("Success", func(t *testing.T) {
 		body := dtos.UpdateUserBabyReq{
-			Name:		utils.StringPtr("Miguel Atualizado"),
-			BirthDate:	utils.StringPtr("2025-01-15"),
+			Name:      utils.StringPtr("Miguel Atualizado"),
+			BirthDate: utils.StringPtr("2025-01-15"),
 		}
 		status, resp := fluxgo.RunTestRequest(app, "PUT", endpoint, body, headers)
 		assert.Equal(t, http.StatusOK, status)
@@ -47,7 +47,7 @@ func TestUpdateUserBaby(t *testing.T) {
 			body := dtos.UpdateUserBabyReq{
 				Name: utils.StringPtr("Miguel Atualizado"),
 			}
-			route := "/internal/user/baby/usb_01JTG8J5F6W9K2M4P7Q1X8Y3ZAE"
+			route := "/v1/internal/user/baby/usb_01JTG8J5F6W9K2M4P7Q1X8Y3ZAE"
 			status, resp := fluxgo.RunTestRequest(app, "PUT", route, body, headers)
 			assert.Equal(t, http.StatusNotFound, status)
 			assert.Equal(t, "User baby not found", resp["message"])
@@ -57,7 +57,7 @@ func TestUpdateUserBaby(t *testing.T) {
 			body := dtos.UpdateUserBabyReq{
 				Name: utils.StringPtr("Miguel Atualizado"),
 			}
-			route := fmt.Sprintf("/internal/user/baby/%s", "usb_01JTG8K8N4P2R6T9V1X3Y5Z7MIP")
+			route := fmt.Sprintf("/v1/internal/user/baby/%s", "usb_01JTG8K8N4P2R6T9V1X3Y5Z7MIP")
 			status, resp := fluxgo.RunTestRequest(app, "PUT", route, body, headers)
 			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "You don't have permission to access this resource", resp["message"])
@@ -65,7 +65,7 @@ func TestUpdateUserBaby(t *testing.T) {
 
 		t.Run("Birthdate in the future", func(t *testing.T) {
 			body := dtos.UpdateUserBabyReq{
-			    BirthDate: utils.StringPtr("2099-01-01"),
+				BirthDate: utils.StringPtr("2099-01-01"),
 			}
 			status, resp := fluxgo.RunTestRequest(app, "PUT", endpoint, body, headers)
 			assert.Equal(t, http.StatusBadRequest, status)
