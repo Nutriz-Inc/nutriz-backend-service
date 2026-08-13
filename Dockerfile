@@ -17,6 +17,8 @@ COPY --from=builder /app/migrate .
 COPY --from=builder /app/.env.development .
 COPY --from=builder /app/shared/database/migrations ./shared/database/migrations
 
+RUN mkdir -p logs
+
 EXPOSE 3333
 
 CMD ["./server"]
