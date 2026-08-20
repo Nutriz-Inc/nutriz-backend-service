@@ -1,72 +1,82 @@
--- Extensão necessária (embeddings são vetores e não textos)
 CREATE EXTENSION IF NOT EXISTS vector;
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- ENUMS
-CREATE TYPE enum_message_role AS ENUM ('user', 'assistant');
-
--- CONVERSATION
-CREATE TABLE conversation (
-  id_conversation VARCHAR(36) PRIMARY KEY,
-
-  id_user VARCHAR(36) NOT NULL,
-
-  title VARCHAR(255),
-
-  created_at TIMESTAMP NOT NULL,
-  last_message_at TIMESTAMP,
-
-  CONSTRAINT fk_conversation_user FOREIGN KEY (id_user) REFERENCES "user"(id_user)
+CREATE TABLE IF NOT EXISTS kb_chunks (
+    id          UUID        NOT NULL DEFAULT gen_random_uuid(),
+    source      VARCHAR(100) NOT NULL,
+    content     TEXT        NOT NULL,
+    embedding   VECTOR(384) NOT NULL,
+    metadata    JSONB,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT kb_chunks_pkey PRIMARY KEY (id)
 );
 
--- MESSAGE
-CREATE TABLE message (
-  id_message VARCHAR(36) PRIMARY KEY,
+CREATE INDEX IF NOT EXISTS ix_kb_chunks_embedding
+    ON kb_chunks USING hnsw (embedding vector_cosine_ops)
+    WITH (m = 16, ef_construction = 64);
 
-  id_conversation VARCHAR(36) NOT NULL,
-
-  role enum_message_role NOT NULL,
-  content TEXT NOT NULL,
-  tokens_used INTEGER,
-
-  created_at TIMESTAMP NOT NULL,
-
-  CONSTRAINT fk_message_conversation FOREIGN KEY (id_conversation) REFERENCES conversation(id_conversation)
+CREATE TABLE IF NOT EXISTS conversations (
+    id               UUID        NOT NULL DEFAULT gen_random_uuid(),
+    user_id          VARCHAR(36) NOT NULL,
+    started_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    last_message_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    summary          TEXT,
+    CONSTRAINT conversations_pkey PRIMARY KEY (id),
+    CONSTRAINT conversations_user_id_fkey
+        FOREIGN KEY (user_id) REFERENCES "user" (id_user)
 );
 
--- KNOWLEDGE BASE CHUNKS
-CREATE TABLE kb_chunk (
-  id_kb_chunk VARCHAR(36) PRIMARY KEY,
-  
-  source VARCHAR(255) NOT NULL,
-  content TEXT NOT NULL,
-  embedding vector(384) NOT NULL,
-  metadata JSONB,
-  created_at TIMESTAMP NOT NULL
+CREATE INDEX IF NOT EXISTS ix_conversations_user_id
+    ON conversations (user_id);
+CREATE INDEX IF NOT EXISTS ix_conversations_last_message_at
+    ON conversations (last_message_at);
+
+CREATE TABLE IF NOT EXISTS messages (
+    id               UUID        NOT NULL DEFAULT gen_random_uuid(),
+    conversation_id  UUID        NOT NULL,
+    role             VARCHAR(20) NOT NULL,
+    content          TEXT        NOT NULL,
+    tokens_used      INTEGER,
+    created_at       TIMESTAMPTZ NOT NULL DEFAULT now(),
+    CONSTRAINT messages_pkey PRIMARY KEY (id),
+    CONSTRAINT messages_conversation_id_fkey
+        FOREIGN KEY (conversation_id) REFERENCES conversations (id)
+        ON DELETE CASCADE
 );
 
--- INDICE PARA BUSCA SEMANTICA (indice para melhorar perfomance de busca no vetor)
-CREATE INDEX kb_chunk_embedding_idx
-  on kb_chunk USING ivfflat (embedding vector_cosine_ops)
-  WITH (lists = 100);
+CREATE INDEX IF NOT EXISTS ix_messages_conversation_id
+    ON messages (conversation_id);
+CREATE INDEX IF NOT EXISTS ix_messages_created_at
+    ON messages (created_at);
 
--- LLM AUDIT
-CREATE TABLE llm_audit (
-  id_llm_audit VARCHAR(36) PRIMARY KEY,
-  
-  id_user VARCHAR(36) NOT NULL,
-  id_conversation VARCHAR(36) NOT NULL,
-  id_message VARCHAR(36) NOT NULL,
-
-  prompt_full JSONB NOT NULL,
-  chunks_used JSONB,
-
-  llm_provider VARCHAR(120) NOT NULL,
-  llm_model VARCHAR(120) NOT NULL,
-
-  tokens_input INTEGER,
-  tokens_output INTEGER,
-  latency_ms INTEGER,
-
-  created_at TIMESTAMP NOT NULL
---sem FOREIGN KEY: refs lógicas pra preservar auditoria após exclusão LGPD
+CREATE TABLE IF NOT EXISTS llm_audit (
+    id              UUID        NOT NULL DEFAULT gen_random_uuid(),
+    user_id         VARCHAR(36),
+    conversation_id UUID,
+    message_id      UUID,
+    prompt_full     JSONB       NOT NULL,
+    chunks_used     JSONB,
+    llm_provider    VARCHAR(30) NOT NULL,
+    llm_model       VARCHAR(50) NOT NULL,
+    tokens_input    INTEGER,
+    tokens_output   INTEGER,
+    latency_ms      INTEGER,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    is_anonymous    BOOLEAN     NOT NULL DEFAULT false,
+    session_id      VARCHAR(36),
+    ip_hash         VARCHAR(64),
+    action_emitted  VARCHAR(30),
+    CONSTRAINT llm_audit_pkey PRIMARY KEY (id)
 );
+
+CREATE INDEX IF NOT EXISTS ix_llm_audit_session_id
+    ON llm_audit (session_id);
+
+CREATE TABLE IF NOT EXISTS alembic_version (
+    version_num VARCHAR(32) NOT NULL,
+    CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num)
+);
+
+INSERT INTO alembic_version (version_num)
+    SELECT 'd4e91a7c22b0'
+    WHERE NOT EXISTS (SELECT 1 FROM alembic_version);
