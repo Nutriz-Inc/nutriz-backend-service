@@ -1,14 +1,21 @@
 # Indicadores de Negócio — Nutriz
 
-Os resultados abaixo foram apurados manualmente a partir da massa de dados de
-[`nutriz_seed.sql`](nutriz_seed.sql), aplicando as consultas de
-[`nutriz_indicators.sql`](nutriz_indicators.sql). Executando `nutriz.sql` →
-`nutriz_seed.sql` → a consulta correspondente em uma instância Oracle, os
-mesmos resultados devem ser reproduzidos.
+9 indicadores construídos a partir das consultas já desenvolvidas em
+[`nutriz_queries.sql`](nutriz_queries.sql), [`nutriz_joins.sql`](nutriz_joins.sql)
+e [`nutriz_indicators.sql`](nutriz_indicators.sql). Alguns são a própria consulta
+original; outros a envolvem em uma agregação simples para chegar a um número
+executivo — em ambos os casos, a fonte é indicada em cada item.
+
+Resultados apurados manualmente sobre a massa de dados de
+[`nutriz_seed.sql`](nutriz_seed.sql). Execute `nutriz.sql` (ou
+`nutriz-postgres.sql`) → o seed correspondente → a consulta, em um banco real,
+para reproduzir os mesmos números.
 
 ---
 
 ## 1. Ranking de doadoras por volume total doado
+
+**Fonte:** `nutriz_indicators.sql`, consulta 1.
 
 **Objetivo do indicador**
 Identificar as doadoras que mais contribuíram em volume de leite (ml), para
@@ -45,6 +52,8 @@ de prova social para atrair novas doadoras.
 
 ## 2. Doadoras recorrentes (mais de uma doação)
 
+**Fonte:** `nutriz_indicators.sql`, consulta 2.
+
 **Objetivo do indicador**
 Medir a taxa de retenção: quantas doadoras voltam a doar mais de uma vez.
 
@@ -65,50 +74,49 @@ ORDER BY qtd_doacoes DESC;
 | Maria Silva | 2 |
 
 **Benefício para o negócio**
-Apenas 1 de 10 doadoras cadastradas já iniciou uma segunda doação — um sinal
-de que o funil de retenção pós-primeira-doação precisa de reforço (ex.:
-lembretes automáticos, campanhas de reengajamento após alguns meses).
+Apenas 1 de 10 doadoras cadastradas já iniciou uma segunda doação — sinal de
+que o funil de retenção pós-primeira-doação precisa de reforço (ex.: lembretes
+automáticos, campanhas de reengajamento após alguns meses).
 
 ---
 
-## 3. Avaliação média por posto de coleta (amostra mínima de 2 doações)
+## 3. Cobertura de perfil do bebê entre as doadoras
+
+**Fonte:** `nutriz_joins.sql`, consulta 3 (`"user" LEFT JOIN user_baby`),
+agregada para obter o total comparável.
 
 **Objetivo do indicador**
-Comparar a qualidade percebida do atendimento entre os postos de coleta,
-descartando postos com amostra insuficiente (< 2 avaliações) para evitar
-conclusões enviesadas por um único caso.
+Medir quantas doadoras completaram o cadastro do bebê — dado usado para
+elegibilidade e para o app sugerir conteúdo relevante à fase da amamentação.
 
 **Consulta SQL utilizada**
 ```sql
-SELECT dp.name AS posto,
-       COUNT(DISTINCT d.id_donation) AS qtd_doacoes_avaliadas,
-       ROUND(AVG(d.score_feedback), 2) AS media_avaliacao
-FROM donation d
-INNER JOIN donation_step ds ON ds.id_donation = d.id_donation AND ds.name = 'Análise de leite'
-INNER JOIN address a ON a.id_address = ds.id_address
-INNER JOIN donation_point dp ON dp.id_donation_point = a.id_donation_point
-WHERE d.score_feedback IS NOT NULL
-GROUP BY dp.name
-HAVING COUNT(DISTINCT d.id_donation) >= 2
-ORDER BY media_avaliacao DESC;
+SELECT
+  COUNT(DISTINCT CASE WHEN u.type = 'common' THEN u.id_user END) AS total_doadoras,
+  COUNT(DISTINCT CASE WHEN u.type = 'common' AND b.id_user IS NOT NULL
+                  THEN u.id_user END) AS doadoras_com_bebe
+FROM "user" u
+LEFT JOIN user_baby b ON b.id_user = u.id_user;
 ```
 
 **Resultado obtido**
 
-| POSTO | QTD_DOACOES_AVALIADAS | MEDIA_AVALIACAO |
-|---|---|---|
-| Posto de Coleta de Leite Humano Amparo Maternal | 2 | 4.00 |
+| TOTAL_DOADORAS | DOADORAS_COM_BEBE |
+|---|---|
+| 10 | 7 (70%) |
+
+Sem bebê cadastrado: Amanda Rocha, Rafaela Pinto e Débora Nunes.
 
 **Benefício para o negócio**
-Com a massa de dados atual, apenas o posto Amparo Maternal atingiu a amostra
-mínima (2 doações concluídas e avaliadas: notas 5 e 3). Isso já aponta uma
-nota "puxada para baixo" por uma avaliação de 3 — um gatilho para a equipe
-investigar o que aconteceu naquele atendimento específico antes que vire
-padrão.
+70% de completude é um número acionável: as 3 doadoras sem bebê cadastrado
+viram uma lista direta para um lembrete de "complete seu perfil" dentro do
+app, reduzindo cadastros incompletos.
 
 ---
 
 ## 4. Volume de etapas do pipeline de doação por status
+
+**Fonte:** `nutriz_indicators.sql`, consulta 4.
 
 **Objetivo do indicador**
 Enxergar em que etapa do processo (exame, kit, coleta, análise) as doações
@@ -133,15 +141,49 @@ ORDER BY etapa, status;
 | Exame de sangue | done | 10 |
 
 **Benefício para o negócio**
-As 5 doações em andamento estão todas paradas na mesma etapa
-("Entregar kit de ordenha" pendente), enquanto o exame de sangue já foi
-concluído para todas. Isso identifica a entrega do kit como o gargalo atual
-do pipeline, orientando a equipe operacional a priorizar esse agendamento
-para não perder o engajamento inicial da doadora.
+As 5 doações em andamento estão todas paradas na mesma etapa (entrega do kit
+pendente), enquanto o exame de sangue já foi concluído para todas. Isso
+identifica a entrega do kit como o gargalo atual do pipeline.
 
 ---
 
-## 5. Produtividade da equipe: enfermeiras com mais visitas concluídas
+## 5. Cobertura de visitas (job) por etapa do pipeline
+
+**Fonte:** `nutriz_joins.sql`, consulta 6 (`job RIGHT JOIN donation_step`),
+agregada.
+
+**Objetivo do indicador**
+Medir que fração das etapas do pipeline gera uma tarefa de visita domiciliar
+(job) para a equipe, versus etapas puramente laboratoriais ou ainda sem
+tarefa criada.
+
+**Consulta SQL utilizada**
+```sql
+SELECT
+  COUNT(*) AS total_etapas,
+  COUNT(CASE WHEN j.id_job IS NOT NULL THEN 1 END) AS etapas_com_job,
+  COUNT(CASE WHEN j.id_job IS NULL THEN 1 END) AS etapas_sem_job
+FROM job j
+RIGHT JOIN donation_step ds ON ds.id_donation_step = j.id_step;
+```
+
+**Resultado obtido**
+
+| TOTAL_ETAPAS | ETAPAS_COM_JOB | ETAPAS_SEM_JOB |
+|---|---|---|
+| 30 | 10 (33%) | 20 (67%) |
+
+**Benefício para o negócio**
+Confirma que "Exame de sangue" e "Análise de leite" nunca geram visita (são
+etapas de laboratório), enquanto as 5 etapas de kit ainda pendentes das
+doações em andamento **também não têm job criado** — um ponto operacional a
+corrigir junto do gargalo identificado no indicador 4.
+
+---
+
+## 6. Produtividade da equipe: enfermeiras com mais visitas concluídas
+
+**Fonte:** `nutriz_indicators.sql`, consulta 5.
 
 **Objetivo do indicador**
 Medir a carga de trabalho concluída por enfermeira (entregas de kit e coletas
@@ -167,46 +209,48 @@ ORDER BY jobs_concluidos DESC;
 | Patrícia Gomes | 2 |
 
 **Benefício para o negócio**
-Mostra que a carga de visitas domiciliares está concentrada em duas
-enfermeiras (Fernanda e Juliana), enquanto Patrícia tem menos da metade do
-volume — um indicativo para rebalancear a distribuição de doadoras entre a
-equipe ou investigar se há diferença na região/dificuldade de cada carteira.
+Mostra que a carga de visitas está concentrada em duas enfermeiras (Fernanda
+e Juliana), enquanto Patrícia tem menos da metade do volume — indicativo para
+rebalancear a distribuição de doadoras entre a equipe.
 
 ---
 
-## 6. Doadoras com volume acima da média geral
+## 7. Cobertura de coleta domiciliar entre os postos de doação
+
+**Fonte:** `nutriz_queries.sql`, consulta 6, agregada.
 
 **Objetivo do indicador**
-Identificar doadoras "acima da média" para ações direcionadas (ex.: convite
-para virar embaixadora, entrevista para conteúdo institucional).
+Medir quantos dos postos parceiros oferecem coleta domiciliar — um
+diferencial que reduz o atrito da doadora e tende a aumentar a retenção
+(indicador 2).
 
 **Consulta SQL utilizada**
 ```sql
-SELECT name AS doadora, milk_donated
-FROM "user"
-WHERE milk_donated > (
-  SELECT AVG(milk_donated) FROM "user" WHERE milk_donated IS NOT NULL
-)
-ORDER BY milk_donated DESC;
+SELECT
+  COUNT(*) AS total_postos,
+  COUNT(CASE WHEN has_home = TRUE THEN 1 END) AS postos_com_coleta_domiciliar
+FROM donation_point;
 ```
 
 **Resultado obtido**
 
-Média geral (subquery): (1450 + 600 + 1200 + 450 + 900) / 5 = **920 ml**
-
-| DOADORA | MILK_DONATED |
+| TOTAL_POSTOS | POSTOS_COM_COLETA_DOMICILIAR |
 |---|---|
-| Maria Silva | 1450 |
-| Beatriz Alves | 1200 |
+| 5 | 1 (20%) |
+
+Único posto com coleta em domicílio: Banco de Leite Humano do Hospital Ipiranga.
 
 **Benefício para o negócio**
-Apenas 2 das 5 doadoras com histórico registrado superam a média — dá à
-equipe de marketing uma lista curta e objetiva de perfis de destaque para
-campanhas, sem depender de análise manual da base completa.
+Só 20% da rede oferece coleta domiciliar hoje. Como esse benefício reduz
+atrito, é um argumento de negociação concreto para expandir o serviço junto
+aos demais parceiros (Amparo Maternal, São Luiz Star, Anália Franco e Santa
+Casa).
 
 ---
 
-## 7. Doadoras cadastradas que ainda não iniciaram nenhuma doação
+## 8. Doadoras cadastradas que ainda não iniciaram nenhuma doação
+
+**Fonte:** `nutriz_indicators.sql`, consulta 8.
 
 **Objetivo do indicador**
 Medir o funil de conversão entre cadastro no app e a primeira doação
@@ -230,44 +274,40 @@ ORDER BY u.name;
 | Débora Nunes | debora.nunes@gmail.com |
 
 **Benefício para o negócio**
-De 10 usuárias comuns cadastradas, apenas 1 nunca iniciou uma doação —
-90% de conversão. Essa é exatamente a lista que uma campanha de ativação
+De 10 usuárias comuns cadastradas, apenas 1 nunca iniciou uma doação — 90% de
+conversão. Essa é exatamente a lista que uma campanha de ativação
 (notificação, e-mail, ligação da equipe) deve acionar primeiro.
 
 ---
 
-## 8. Postos de coleta com pelo menos uma doação nota máxima
+## 9. Concentração do stack de IA em produção
+
+**Fonte:** `nutriz_queries.sql`, consulta 8, envolvida em `COUNT(*)`.
 
 **Objetivo do indicador**
-Identificar unidades com casos de excelência (nota 5) no atendimento, para
-uso como referência interna de boas práticas.
+Verificar quantos provedores/modelos de IA distintos estão de fato em uso
+pelo assistente virtual — relevante para avaliar risco de dependência de um
+único fornecedor (vendor lock-in) e ausência de fallback.
 
 **Consulta SQL utilizada**
 ```sql
-SELECT dp.name AS posto
-FROM donation_point dp
-WHERE EXISTS (
-  SELECT 1
-  FROM donation_step ds
-  INNER JOIN address a ON a.id_address = ds.id_address
-  INNER JOIN donation dn ON dn.id_donation = ds.id_donation
-  WHERE a.id_donation_point = dp.id_donation_point
-    AND ds.name = 'Análise de leite'
-    AND dn.score_feedback = 5
-)
-ORDER BY dp.name;
+SELECT COUNT(*) AS combinacoes_distintas
+FROM (
+  SELECT DISTINCT llm_provider, llm_model
+  FROM llm_audit
+);
 ```
 
 **Resultado obtido**
 
-| POSTO |
+| COMBINACOES_DISTINTAS |
 |---|
-| Banco de Leite Humano do Hospital Ipiranga |
-| Banco de Leite Humano Rede Dor São Luiz - Unidade Anália Franco |
-| Posto de Coleta de Leite Humano Amparo Maternal |
+| 1 |
+
+As 10 interações auditadas usam sempre `anthropic` / `claude-sonnet-5`.
 
 **Benefício para o negócio**
-3 dos 5 postos já têm ao menos um atendimento nota máxima registrado — bons
-candidatos para mapear o que estão fazendo certo (tempo de resposta, contato
-com a doadora) e replicar nos postos que ainda não atingiram essa marca
-(São Luiz Star e Santa Casa).
+Confirma 100% de dependência de um único provedor/modelo. É um indicador de
+risco operacional: vale a pena avaliar um modelo de fallback (outro provedor
+ou versão) para continuidade do assistente em caso de indisponibilidade ou
+descontinuação do modelo atual.

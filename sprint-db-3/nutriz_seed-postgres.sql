@@ -1,9 +1,15 @@
 --------------------------------------------------------------------------------
--- nutriz_seed.sql
--- Massa de dados inicial (carga) para o banco de dados Nutriz.
+-- nutriz_seed-postgres.sql
+-- Massa de dados inicial (carga) para o banco de dados Nutriz — versão
+-- PostgreSQL de nutriz_seed.sql (Oracle).
 --
--- Pré-requisito: executar nutriz.sql antes deste script (cria tabelas e
--- constraints no Oracle).
+-- Pré-requisito: executar nutriz-postgres.sql antes deste script (cria
+-- tabelas e constraints no PostgreSQL).
+--
+-- Diferença em relação à versão Oracle: apenas a seção KB CHUNKS foi
+-- reescrita, pois usava um bloco PL/SQL (DECLARE/BEGIN/END com `TYPE ...
+-- RECORD`, `DBMS_RANDOM.VALUE`, `TO_VECTOR`) exclusivo do Oracle. O restante
+-- do arquivo já era SQL padrão e roda em ambos os bancos sem alteração.
 --
 -- Cenário de negócio: Nutriz conecta mães lactantes que desejam doar leite
 -- humano excedente a bancos/postos de coleta de leite humano em São Paulo.
@@ -410,31 +416,50 @@ VALUES ('usb_MOkIUpkDyr7OSJoRu1XXdo0cZuz', 'usr_zGD9pnLwddsFM41PREsIa2gBi4q', 'E
 
 --------------------------------------------------------------------------------
 -- KB CHUNKS (6: base de conhecimento do assistente de IA)
--- Os embeddings de 384 dimensões são gerados em PL/SQL (impraticável digitar
--- 384 números manualmente); o conteúdo textual é real e coerente com o domínio.
+-- Os embeddings de 384 dimensões são gerados em PL/pgSQL (impraticável
+-- digitar 384 números manualmente); o conteúdo textual é real e coerente
+-- com o domínio.
 --------------------------------------------------------------------------------
+DO $$
 DECLARE
-  TYPE t_chunk IS RECORD (
-    id        VARCHAR2(36),
-    source    VARCHAR2(100),
-    content   VARCHAR2(500),
-    metadata  VARCHAR2(200)
-  );
-  TYPE t_chunks IS TABLE OF t_chunk;
-  v_chunks t_chunks := t_chunks(
-    t_chunk('22f86792-1b03-4b72-badd-37ea17dd1590', 'faq_doacao_leite.pdf', 'Podem doar leite humano mulheres saudaveis, nao fumantes, que nao usam determinados medicamentos e que produzem leite excedente apos amamentar o proprio bebe.', '{"topic":"elegibilidade","lang":"pt-BR"}'),
-    t_chunk('7d84ddb1-a9f2-4ca5-92bb-6344cdb6c7ef', 'manual_banco_leite.pdf', 'Antes da ordenha, a doadora deve lavar as maos e os seios com agua e sabao neutro, e utilizar frascos esterilizados fornecidos pelo banco de leite.', '{"topic":"higiene","lang":"pt-BR"}'),
-    t_chunk('5d968845-5cae-4ced-a6c6-eb33cd84b093', 'manual_banco_leite.pdf', 'O leite ordenhado deve ser armazenado em freezer, identificado com data e hora da coleta, podendo ser mantido por ate 15 dias antes da coleta pelo banco de leite.', '{"topic":"armazenamento","lang":"pt-BR"}'),
-    t_chunk('d58b8009-7559-4a5e-a8ac-321e1dce4d08', 'faq_doacao_leite.pdf', 'A doadora passa por uma triagem com exame de sangue para descartar doencas infectocontagiosas antes de iniciar as doacoes regulares.', '{"topic":"exames","lang":"pt-BR"}'),
-    t_chunk('ccfd8cb5-a6cd-4526-9c8d-fb5b15421de9', 'guia_amamentacao.pdf', 'O leite humano doado e destinado prioritariamente a bebes prematuros e internados em UTI neonatal, auxiliando no fortalecimento do sistema imunologico.', '{"topic":"beneficios","lang":"pt-BR"}'),
-    t_chunk('e106098f-f104-4037-a30a-caf8d6c628f8', 'guia_amamentacao.pdf', 'O kit de ordenha, com frascos e etiquetas, e entregue gratuitamente na casa da doadora ou em um dos postos de coleta cadastrados no Nutriz.', '{"topic":"kit_coleta","lang":"pt-BR"}')
-  );
-  v_vec VARCHAR2(32767);
+  v_ids      UUID[] := ARRAY[
+    '22f86792-1b03-4b72-badd-37ea17dd1590',
+    '7d84ddb1-a9f2-4ca5-92bb-6344cdb6c7ef',
+    '5d968845-5cae-4ced-a6c6-eb33cd84b093',
+    'd58b8009-7559-4a5e-a8ac-321e1dce4d08',
+    'ccfd8cb5-a6cd-4526-9c8d-fb5b15421de9',
+    'e106098f-f104-4037-a30a-caf8d6c628f8'
+  ];
+  v_sources  TEXT[] := ARRAY[
+    'faq_doacao_leite.pdf',
+    'manual_banco_leite.pdf',
+    'manual_banco_leite.pdf',
+    'faq_doacao_leite.pdf',
+    'guia_amamentacao.pdf',
+    'guia_amamentacao.pdf'
+  ];
+  v_contents TEXT[] := ARRAY[
+    'Podem doar leite humano mulheres saudáveis, não fumantes, que não usam determinados medicamentos e que produzem leite excedente após amamentar o próprio bebê.',
+    'Antes da ordenha, a doadora deve lavar as mãos e os seios com água e sabão neutro, e utilizar frascos esterilizados fornecidos pelo banco de leite.',
+    'O leite ordenhado deve ser armazenado em freezer, identificado com data e hora da coleta, podendo ser mantido por até 15 dias antes da coleta pelo banco de leite.',
+    'A doadora passa por uma triagem com exame de sangue para descartar doenças infectocontagiosas antes de iniciar as doações regulares.',
+    'O leite humano doado é destinado prioritariamente a bebês prematuros e internados em UTI neonatal, auxiliando no fortalecimento do sistema imunológico.',
+    'O kit de ordenha, com frascos e etiquetas, é entregue gratuitamente na casa da doadora ou em um dos postos de coleta cadastrados no Nutriz.'
+  ];
+  v_metadata TEXT[] := ARRAY[
+    '{"topic":"elegibilidade","lang":"pt-BR"}',
+    '{"topic":"higiene","lang":"pt-BR"}',
+    '{"topic":"armazenamento","lang":"pt-BR"}',
+    '{"topic":"exames","lang":"pt-BR"}',
+    '{"topic":"beneficios","lang":"pt-BR"}',
+    '{"topic":"kit_coleta","lang":"pt-BR"}'
+  ];
+  v_vec TEXT;
 BEGIN
-  FOR i IN 1 .. v_chunks.COUNT LOOP
+  FOR i IN 1 .. array_length(v_ids, 1) LOOP
     v_vec := '[';
     FOR j IN 1 .. 384 LOOP
-      v_vec := v_vec || TO_CHAR(ROUND(DBMS_RANDOM.VALUE(-1, 1), 4));
+      v_vec := v_vec || round((random() * 2 - 1)::numeric, 4)::text;
       IF j < 384 THEN
         v_vec := v_vec || ',';
       END IF;
@@ -443,15 +468,14 @@ BEGIN
 
     INSERT INTO kb_chunks (id, source, content, embedding, metadata)
     VALUES (
-      v_chunks(i).id,
-      v_chunks(i).source,
-      v_chunks(i).content,
-      TO_VECTOR(v_vec, 384, FLOAT32),
-      v_chunks(i).metadata
+      v_ids[i],
+      v_sources[i],
+      v_contents[i],
+      v_vec::vector,
+      v_metadata[i]::jsonb
     );
   END LOOP;
-END;
-/
+END $$;
 
 --------------------------------------------------------------------------------
 -- CONVERSATIONS (8: doadoras conversando com o assistente de IA)
