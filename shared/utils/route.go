@@ -5,15 +5,21 @@ import (
 	"fmt"
 	"nutriz-backend-service/config"
 	"nutriz-backend-service/shared/provider/location"
+	"time"
 )
 
-func GetOptimizedStopOrder(ctx c.Context, coordinates []location.Coordinate, config *config.Env) ([]int, error) {
+type OptimizedRoute struct {
+	StopOrders []int
+	Duration   time.Duration
+}
+
+func GetOptimizedRoute(ctx c.Context, coordinates []location.Coordinate, config *config.Env) (*OptimizedRoute, error) {
 	if len(coordinates) == 0 {
 		return nil, fmt.Errorf("no coordinates provided")
 	}
 
 	if len(coordinates) == 1 {
-		return []int{0}, nil
+		return &OptimizedRoute{StopOrders: []int{0}, Duration: 0}, nil
 	}
 
 	provider, err := location.NewLocationProvider(config)
@@ -28,8 +34,11 @@ func GetOptimizedStopOrder(ctx c.Context, coordinates []location.Coordinate, con
 	if optimizedRoute == nil || len(optimizedRoute.Waypoints) != len(coordinates) {
 		return nil, fmt.Errorf("invalid optimized route response")
 	}
+	if len(optimizedRoute.Trips) == 0 {
+		return nil, fmt.Errorf("optimized route without trips")
+	}
 
-	order := make([]int, len(coordinates))
+	stopOrders := make([]int, len(coordinates))
 	used := make(map[int]bool, len(coordinates))
 
 	for index, waypoint := range optimizedRoute.Waypoints {
@@ -41,8 +50,11 @@ func GetOptimizedStopOrder(ctx c.Context, coordinates []location.Coordinate, con
 		}
 
 		used[waypoint.WaypointIndex] = true
-		order[index] = waypoint.WaypointIndex
+		stopOrders[index] = waypoint.WaypointIndex
 	}
 
-	return order, nil
+	return &OptimizedRoute{
+		StopOrders: stopOrders,
+		Duration:   time.Duration(optimizedRoute.Trips[0].Duration * float64(time.Second)),
+	}, nil
 }

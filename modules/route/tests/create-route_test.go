@@ -29,6 +29,7 @@ func TestCreateRoute(t *testing.T) {
 		idStepThree       = "dst_2veL1FPpuXxUaZcFaEC57BfpcR3"
 		idStepInactive    = "dst_2veL1FPpuXxUaZcFaEC57BfpcR4"
 		idStepNoCoords    = "dst_2veL1FPpuXxUaZcFaEC57BfpcR5"
+		idStepFarAway     = "dst_2veL1FPpuXxUaZcFaEC57BfpcR6"
 		idStepNotFound    = "dst_2veL1FPpuXxUaZcFaEC57Bfpd53"
 		futureDateSetDays = 2
 	)
@@ -84,7 +85,6 @@ func TestCreateRoute(t *testing.T) {
 			assert.True(t, ok)
 			assert.Len(t, stops, 3)
 
-			// stops come back ordered by stop_order and every position is used once
 			ordered := make([]string, 0, len(stops))
 			for index, item := range stops {
 				stop := item.(map[string]interface{})
@@ -98,9 +98,19 @@ func TestCreateRoute(t *testing.T) {
 				ordered = append(ordered, stop["id_donation_step"].(string))
 			}
 			assert.ElementsMatch(t, body.Stops, ordered)
-			// the mocked provider swaps the two first stops, so the order sent
-			// on the request is not the order stored on the route
 			assert.Equal(t, []string{idStepTwo, idStepOne, idStepThree}, ordered)
+		})
+
+		t.Run("With a stop whose address has no coordinates", func(t *testing.T) {
+			body := makeBody([]string{idStepOne, idStepNoCoords}, futureDate)
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusCreated, status)
+
+			stops, ok := resp["stops"].([]interface{})
+			assert.True(t, ok)
+			assert.Len(t, stops, 2)
 		})
 	})
 
@@ -182,18 +192,18 @@ func TestCreateRoute(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusBadRequest, status)
-			assert.Equal(t, "Donation is not active", resp["message"])
+			assert.Equal(t, "Donation of "+idStepInactive+" is not active", resp["message"])
 			assert.Equal(t, "donation.inactive", resp["code"])
 		})
 
-		t.Run("Donation step without coordinates", func(t *testing.T) {
-			body := makeBody([]string{idStepNoCoords}, futureDate)
+		t.Run("Route takes longer than the maximum duration", func(t *testing.T) {
+			body := makeBody([]string{idStepOne, idStepFarAway}, futureDate)
 
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusBadRequest, status)
-			assert.Equal(t, "Donation step does not have an address with coordinates", resp["message"])
-			assert.Equal(t, "donation_step.missing_coordinates", resp["code"])
+			assert.Equal(t, "route.max_duration_exceeded", resp["code"])
+			assert.Contains(t, resp["message"], "the maximum allowed is 6 hours")
 		})
 
 		t.Run("Empty stops", func(t *testing.T) {

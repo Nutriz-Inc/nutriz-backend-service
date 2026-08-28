@@ -180,6 +180,24 @@ INSERT INTO "user" (
     NULL,
     NULL,
     NULL
+),
+(
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcDR',
+    '234567898765440',
+    'driver',
+    'Carlos Motorista',
+    '15350946056',
+    CURRENT_DATE - INTERVAL '35 years',
+    '11999999990',
+    'carlos.motorista@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO donation_point (
@@ -385,6 +403,39 @@ INSERT INTO donation (
     NULL,
     NULL,
     NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    true,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR2',
+    true,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR3',
+    false,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO address (
@@ -522,6 +573,91 @@ INSERT INTO address (
     NOW(),
     NULL,
     NULL
+),
+(
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT1',
+    NULL,
+    NULL,
+    '01310200',
+    'Avenida Paulista',
+    '900',
+    'Sao Paulo',
+    'SP',
+    'Bela Vista',
+    NULL,
+    -23.563210,
+    -46.654500,
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT2',
+    NULL,
+    NULL,
+    '04101300',
+    'Rua Domingos de Morais',
+    '1200',
+    'Sao Paulo',
+    'SP',
+    'Vila Mariana',
+    NULL,
+    -23.588100,
+    -46.637900,
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT3',
+    NULL,
+    NULL,
+    '05409000',
+    'Rua Teodoro Sampaio',
+    '2100',
+    'Sao Paulo',
+    'SP',
+    'Pinheiros',
+    NULL,
+    -23.559000,
+    -46.688000,
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT4',
+    NULL,
+    NULL,
+    '02011000',
+    'Rua Sem Coordenadas',
+    '10',
+    'Sao Paulo',
+    'SP',
+    'Santana',
+    NULL,
+    NULL,
+    NULL,
+    NOW(),
+    NULL,
+    NULL
+),
+(
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT5',
+    NULL,
+    NULL,
+    '22041011',
+    'Avenida Atlantica',
+    '1702',
+    'Rio de Janeiro',
+    'RJ',
+    'Copacabana',
+    NULL,
+    -22.968700,
+    -43.180500,
+    NOW(),
+    NULL,
+    NULL
 );
 
 INSERT INTO user_baby (
@@ -574,6 +710,7 @@ VALUES
 INSERT INTO donation_step (
     id_donation_step,
     id_donation,
+    id_address,
     name,
     description,
     status,
@@ -587,6 +724,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcAA',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKE',
+    NULL,
     'Exame de sangue',
     'Coleta agendada com o doador',
     'pending',
@@ -600,6 +738,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcBB',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
+    NULL,
     'Entregar kit de ordenha',
     'Entregar kit de ordenha ao doador',
     'review',
@@ -613,6 +752,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcCC',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
+    NULL,
     'Coletar leite',                          -- ← corrigido
     'Step reservado para testes de criação de job',
     'pending',
@@ -626,6 +766,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcDD',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKJ',
+    NULL,
     'Análise de leite',
     'Step finalizado para testes de atualização',
     'done',
@@ -639,6 +780,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcEE',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKJ',
+    NULL,
     'Coletar leite',
     'Realizar coleta na residência da doadora',
     'pending',
@@ -652,6 +794,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcFF',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKJ',
+    NULL,
     'Entregar kit de ordenha',
     'Entregar kit de coleta ao doador',
     'pending',
@@ -665,6 +808,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfslJG',
     'don_2veL1FPpuXxUaZcFaEC57BfdsWG',
+    NULL,
     'Entregar kit de ordenha',
     'Entregar kit de ordenha ao doador',
     'review',
@@ -678,6 +822,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcG1',
     'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
+    NULL,
     'Exame de sangue',
     'Exame realizado com sucesso',
     'done',
@@ -691,6 +836,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcG2',
     'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
+    NULL,
     'Entregar kit de ordenha',
     'Kit entregue ao doador',
     'done',
@@ -704,6 +850,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcG3',
     'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
+    NULL,
     'Coletar leite',
     'Coleta realizada com sucesso',
     'done',
@@ -717,6 +864,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcG4',
     'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
+    NULL,
     'Análise de leite',
     'Análise concluída com sucesso',
     'done',
@@ -730,6 +878,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcH1',
     'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
+    NULL,
     'Exame de sangue',
     'Exame realizado com sucesso',
     'done',
@@ -743,6 +892,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcH2',
     'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
+    NULL,
     'Entregar kit de ordenha',
     'Kit entregue ao doador',
     'done',
@@ -756,6 +906,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcH3',
     'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
+    NULL,
     'Coletar leite',
     'Coleta realizada com sucesso',
     'done',
@@ -769,6 +920,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcH4',
     'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
+    NULL,
     'Análise de leite',
     'Análise concluída com sucesso',
     'done',
@@ -782,6 +934,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcII',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKO',
+    NULL,
     'Exame de sangue',
     'Step reservado para testes de atualização de endereço',
     'pending',
@@ -795,6 +948,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcJJ',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKO',
+    NULL,
     'Entregar kit de ordenha',
     'Step reservado para testes de criação de endereço via CEP',
     'pending',
@@ -808,6 +962,7 @@ INSERT INTO donation_step (
 (
     'dst_2veL1FPpuXxUaZcFaEC57BfpcKK',
     'don_2veL1FPpuXxUaZcFaEC57BfpcKR',
+    NULL,
     'Coletar leite',
     'Step reservado para testes de nome duplicado na criação',
     'done',
@@ -817,6 +972,90 @@ INSERT INTO donation_step (
     NOW() - INTERVAL '1 day',
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
     NOW() - INTERVAL '1 day'
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT1',
+    'Coletar leite',
+    'Parada de rota na Avenida Paulista',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcR2',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR2',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT2',
+    'Coletar leite',
+    'Parada de rota na Vila Mariana',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcR3',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR2',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT3',
+    'Entregar kit de ordenha',
+    'Parada de rota em Pinheiros',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcR4',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR3',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT1',
+    'Coletar leite',
+    'Parada de rota de doacao inativa',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcR5',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT4',
+    'Entregar kit de ordenha',
+    'Parada de rota sem coordenadas',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcR6',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR2',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT5',
+    'Coletar leite',
+    'Parada de rota fora de Sao Paulo',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO donation_step_timeline (
@@ -923,259 +1162,6 @@ INSERT INTO job (
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcAD',
     NULL,
-    NULL,
-    NULL,
-    NULL
-);
-
-INSERT INTO "user" (
-    id_user,
-    internal_identifier,
-    type,
-    name,
-    cpf,
-    birth_date,
-    phone_number,
-    email,
-    password,
-    milk_donated,
-    created_at,
-    created_by,
-    updated_at,
-    updated_by,
-    removed_at,
-    removed_by
-) VALUES
-(
-    'usr_2veL1FPpuXxUaZcFaEC57BfpcDR',
-    '234567898765440',
-    'driver',
-    'Carlos Motorista',
-    '15350946056',
-    CURRENT_DATE - INTERVAL '35 years',
-    '11999999990',
-    'carlos.motorista@email.com',
-    '2b9643d9671363af30ebed5463130ee7',
-    NULL,
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-);
-
-INSERT INTO address (
-    id_address,
-    id_user,
-    id_donation_point,
-    zipcode,
-    street,
-    number,
-    city,
-    state,
-    neighborhood,
-    complement,
-    latitude,
-    longitude,
-    created_at,
-    updated_at,
-    removed_at
-) VALUES
-(
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT1',
-    NULL,
-    NULL,
-    '01310200',
-    'Avenida Paulista',
-    '900',
-    'Sao Paulo',
-    'SP',
-    'Bela Vista',
-    NULL,
-    -23.563210,
-    -46.654500,
-    NOW(),
-    NULL,
-    NULL
-),
-(
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT2',
-    NULL,
-    NULL,
-    '04101300',
-    'Rua Domingos de Morais',
-    '1200',
-    'Sao Paulo',
-    'SP',
-    'Vila Mariana',
-    NULL,
-    -23.588100,
-    -46.637900,
-    NOW(),
-    NULL,
-    NULL
-),
-(
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT3',
-    NULL,
-    NULL,
-    '05409000',
-    'Rua Teodoro Sampaio',
-    '2100',
-    'Sao Paulo',
-    'SP',
-    'Pinheiros',
-    NULL,
-    -23.559000,
-    -46.688000,
-    NOW(),
-    NULL,
-    NULL
-),
-(
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT4',
-    NULL,
-    NULL,
-    '02011000',
-    'Rua Sem Coordenadas',
-    '10',
-    'Sao Paulo',
-    'SP',
-    'Santana',
-    NULL,
-    NULL,
-    NULL,
-    NOW(),
-    NULL,
-    NULL
-);
-
-INSERT INTO donation (
-    id_donation,
-    is_active,
-    user_feedback,
-    created_at,
-    created_by,
-    updated_at,
-    updated_by,
-    removed_at,
-    removed_by
-) VALUES
-(
-    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
-    true,
-    NULL,
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-),
-(
-    'don_2veL1FPpuXxUaZcFaEC57BfpcR2',
-    true,
-    NULL,
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-),
-(
-    'don_2veL1FPpuXxUaZcFaEC57BfpcR3',
-    false,
-    NULL,
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
-    NULL,
-    NULL,
-    NULL,
-    NULL
-);
-
-INSERT INTO donation_step (
-    id_donation_step,
-    id_donation,
-    id_address,
-    name,
-    description,
-    status,
-    set_date,
-    created_at,
-    created_by,
-    updated_at,
-    updated_by,
-    completed_at
-) VALUES
-(
-    'dst_2veL1FPpuXxUaZcFaEC57BfpcR1',
-    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT1',
-    'Coletar leite',
-    'Parada de rota na Avenida Paulista',
-    'pending',
-    NOW() + INTERVAL '2 days',
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
-    NULL,
-    NULL,
-    NULL
-),
-(
-    'dst_2veL1FPpuXxUaZcFaEC57BfpcR2',
-    'don_2veL1FPpuXxUaZcFaEC57BfpcR2',
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT2',
-    'Coletar leite',
-    'Parada de rota na Vila Mariana',
-    'pending',
-    NOW() + INTERVAL '2 days',
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
-    NULL,
-    NULL,
-    NULL
-),
-(
-    'dst_2veL1FPpuXxUaZcFaEC57BfpcR3',
-    'don_2veL1FPpuXxUaZcFaEC57BfpcR2',
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT3',
-    'Entregar kit de ordenha',
-    'Parada de rota em Pinheiros',
-    'pending',
-    NOW() + INTERVAL '2 days',
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
-    NULL,
-    NULL,
-    NULL
-),
-(
-    'dst_2veL1FPpuXxUaZcFaEC57BfpcR4',
-    'don_2veL1FPpuXxUaZcFaEC57BfpcR3',
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT1',
-    'Coletar leite',
-    'Parada de rota de doacao inativa',
-    'pending',
-    NOW() + INTERVAL '2 days',
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
-    NULL,
-    NULL,
-    NULL
-),
-(
-    'dst_2veL1FPpuXxUaZcFaEC57BfpcR5',
-    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
-    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT4',
-    'Entregar kit de ordenha',
-    'Parada de rota sem coordenadas',
-    'pending',
-    NOW() + INTERVAL '2 days',
-    NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
     NULL,
     NULL,
     NULL

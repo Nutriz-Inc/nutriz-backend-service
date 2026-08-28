@@ -39,3 +39,7 @@ func (r Route) TableName() string {
 func (r Route) PrimaryKey() string {
 	return "id_route"
 }
+
+const MAX_ROUTE_DURATION = 6 * time.Hour
+
+const ROUTE_STOP_SAFETY_TIME = 15 * time.Minute

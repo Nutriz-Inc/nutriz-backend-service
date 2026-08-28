@@ -10,6 +10,7 @@ import (
 	"nutriz-backend-service/shared/provider/location"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"
@@ -87,7 +88,7 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 		return nil, globalErr
 	}
 
-	stopOrders, globalErr := h.getStopOrders(ctx, donationSteps)
+	optimizedRoute, globalErr := h.getOptimizedRoute(ctx, donationSteps)
 	if globalErr != nil {
 		return nil, globalErr
 	}
@@ -116,7 +117,7 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 				IdRoute:             idRoute,
 				IdDonationStep:      donationStep.IdDonationStep,
 				IdUser:              data.ActionBy,
-				StopOrder:           stopOrders[index],
+				StopOrder:           int16(optimizedRoute.StopOrders[index]),
 			})
 			if err != nil {
 				return fmt.Errorf("error to create route donation step: %w", err)
@@ -194,41 +195,44 @@ func (h *HandlerCreateRoute) getDonationSteps(
 		if !donationStep.IsDonationActive {
 			return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("Donation of %s is not active", donationStep.IdDonationStep), "donation.inactive")
 		}
-		if donationStep.Latitude == nil || donationStep.Longitude == nil {
-			return nil, fluxgo.ErrorBadRequest(
-				"Donation step does not have an address with coordinates",
-				"donation_step.missing_coordinates",
-			)
-		}
-
 		ordered = append(ordered, donationStep)
 	}
 
 	return &ordered, nil
 }
 
-func (h *HandlerCreateRoute) getStopOrders(
+func (h *HandlerCreateRoute) getOptimizedRoute(
 	ctx c.Context,
 	donationSteps *[]repositories.DonationStepWithLocation,
-) ([]int16, *fluxgo.GlobalError) {
+) (*utils.OptimizedRoute, *fluxgo.GlobalError) {
 	coordinates := make([]location.Coordinate, 0, len(*donationSteps))
 
 	for _, donationStep := range *donationSteps {
+		latitude, longitude := utils.FillMissingCoordinates(donationStep.Latitude, donationStep.Longitude)
+
 		coordinates = append(coordinates, location.Coordinate{
-			Latitude:  *donationStep.Latitude,
-			Longitude: *donationStep.Longitude,
+			Latitude:  latitude,
+			Longitude: longitude,
 		})
 	}
 
-	order, err := utils.GetOptimizedStopOrder(ctx, coordinates, h.config)
+	optimizedRoute, err := utils.GetOptimizedRoute(ctx, coordinates, h.config)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to build the route: " + err.Error())
 	}
 
-	stopOrders := make([]int16, 0, len(order))
-	for _, position := range order {
-		stopOrders = append(stopOrders, int16(position))
+	totalDuration := optimizedRoute.Duration + time.Duration(len(coordinates))*entities.ROUTE_STOP_SAFETY_TIME
+
+	if totalDuration > entities.MAX_ROUTE_DURATION {
+		return nil, fluxgo.ErrorBadRequest(
+			fmt.Sprintf(
+				"Route takes %.1f hours and the maximum allowed is %.0f hours",
+				totalDuration.Hours(),
+				entities.MAX_ROUTE_DURATION.Hours(),
+			),
+			"route.max_duration_exceeded",
+		)
 	}
 
-	return stopOrders, nil
+	return optimizedRoute, nil
 }
