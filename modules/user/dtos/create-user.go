@@ -5,7 +5,7 @@ import (
 )
 
 type CreateUserReq struct {
-	Type        entities.EnumUserType `json:"type" validate:"required,oneof=common adm nurse"`
+	Type        entities.EnumUserType `json:"type" validate:"required,oneof=common adm nurse driver"`
 	Name        string                `json:"name" validate:"required,max=120"`
 	Cpf         string                `json:"cpf" validate:"required,document"`
 	Email       string                `json:"email" validate:"required,email"`

@@ -80,11 +80,6 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 	}
 
 	if user.Type == entities.EnumUserTypeAdmin {
-		if validator.HasQuantityDonated {
-			req.QuantityDonated = data.QuantityDonated
-			fieldsToUpdate++
-		}
-
 		if validator.HasIsActive {
 			req.IsActive = data.IsActive
 			fieldsToUpdate++
@@ -99,17 +94,6 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 		err := h.donationRepo.UpdateDonationTx(ctx, tx, &req)
 		if err != nil {
 			return fmt.Errorf("error to update donation: %w", err)
-		}
-
-		if validator.HasQuantityDonated {
-			err = h.userRepo.UpdateUserTx(ctx, tx, &repositories.UpdateUserRepositoryReq{
-				IdUser:      donation.CreatedBy,
-				ActionBy:    data.ActionBy,
-				MilkDonated: req.QuantityDonated,
-			})
-			if err != nil {
-				return fmt.Errorf("error to update user milk donated: %w", err)
-			}
 		}
 
 		return nil

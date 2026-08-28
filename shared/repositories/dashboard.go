@@ -25,57 +25,6 @@ func (r *DashboardRepository) StartSpan(ctx c.Context, name string) (c.Context, 
 
 const dateRangeFilter = `($1::timestamp IS NULL OR d.created_at >= $1) AND ($2::timestamp IS NULL OR d.created_at < $2)`
 
-func (r *DashboardRepository) GetTotalMilkCollected(ctx c.Context, start, end *time.Time) (float64, error) {
-	ctx, span := r.StartSpan(ctx, "GetTotalMilkCollected")
-	defer span.End()
-
-	result, err := utils.Get[float64](
-		ctx,
-		r.DB.ReadOnlyDB(),
-		span,
-		`
-		SELECT COALESCE(SUM(d.quantity_donated), 0)
-		FROM donation d
-		WHERE d.removed_at IS NULL
-		  AND `+dateRangeFilter,
-		start,
-		end,
-	)
-	if err != nil || result == nil {
-		return 0, err
-	}
-
-	return *result, nil
-}
-
-func (r *DashboardRepository) GetMilkCollectedByMonth(ctx c.Context, start, end *time.Time) ([]dto.MilkCollectedByMonth, error) {
-	ctx, span := r.StartSpan(ctx, "GetMilkCollectedByMonth")
-	defer span.End()
-
-	result, err := utils.List[dto.MilkCollectedByMonth](
-		ctx,
-		r.DB.ReadOnlyDB(),
-		span,
-		`
-		SELECT
-			TO_CHAR(d.created_at, 'YYYY-MM') AS month,
-			COALESCE(SUM(d.quantity_donated), 0) AS total
-		FROM donation d
-		WHERE d.removed_at IS NULL
-		  AND `+dateRangeFilter+`
-		GROUP BY TO_CHAR(d.created_at, 'YYYY-MM')
-		ORDER BY TO_CHAR(d.created_at, 'YYYY-MM')
-		`,
-		start,
-		end,
-	)
-	if err != nil || result == nil {
-		return nil, err
-	}
-
-	return *result, nil
-}
-
 func (r *DashboardRepository) GetFeedbackByScore(ctx c.Context, start, end *time.Time) ([]dto.FeedbackScoreCount, error) {
 	ctx, span := r.StartSpan(ctx, "GetFeedbackByScore")
 	defer span.End()

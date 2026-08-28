@@ -25,8 +25,8 @@ type ActiveDonationsByStep struct {
 }
 
 type GetDashboardRes struct {
-	TotalMilkCollected      float64                 `json:"total_milk_collected"`
-	MilkCollectedByMonth    []MilkCollectedByMonth  `json:"milk_collected_by_month"`
+	// TotalMilkCollected      float64                 `json:"total_milk_collected"`
+	// MilkCollectedByMonth    []MilkCollectedByMonth  `json:"milk_collected_by_month"`
 	FeedbackByScore         []FeedbackScoreCount    `json:"feedback_by_score"`
 	AverageServiceTimeHours *float64                `json:"average_service_time_hours"`
 	DonationsWithError      int64                   `json:"donations_with_error"`
