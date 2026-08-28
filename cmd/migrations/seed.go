@@ -213,7 +213,6 @@ INSERT INTO donation_point (
 INSERT INTO donation (
     id_donation,
     is_active,
-    quantity_donated,
     user_feedback,
     created_at,
     created_by,
@@ -225,7 +224,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKE',
     false,
-    1.5,
     'Doação realizada com sucesso',
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
@@ -237,7 +235,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKF',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -249,7 +246,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfdsWG',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -261,7 +257,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKG',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -273,7 +268,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKH',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -285,7 +279,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKI',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -297,7 +290,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKJ',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -309,7 +301,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcC1',
     false,
-    1.2,
     'Doação completa para testes de contagem',
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKE',
@@ -321,7 +312,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcC2',
     false,
-    1.2,
     'Doação completa de outro usuário para testes de escopo',
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -333,7 +323,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKM',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -345,7 +334,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKN',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -357,7 +345,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKO',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -369,7 +356,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKP',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -381,7 +367,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKQ',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -393,7 +378,6 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcKR',
     true,
-    0,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',

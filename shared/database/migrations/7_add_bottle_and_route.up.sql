@@ -1,5 +1,6 @@
 -- ENUMS
 CREATE TYPE enum_route_status AS ENUM ('pending', 'in_progress', 'done', 'canceled');
+ALTER TYPE enum_user_type ADD VALUE IF NOT EXISTS 'driver';
 
 -- BOTTLE
 CREATE TABLE bottle (
@@ -13,16 +14,10 @@ CREATE TABLE bottle (
 
   created_at TIMESTAMP NOT NULL,
   created_by VARCHAR(36) NOT NULL,
-  updated_at TIMESTAMP,
-  updated_by VARCHAR(36),
-  removed_at TIMESTAMP,
-  removed_by VARCHAR(36),
 
   CONSTRAINT fk_bottle_donation FOREIGN KEY (id_donation) REFERENCES donation(id_donation),
 
-  CONSTRAINT fk_bottle_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
-  CONSTRAINT fk_bottle_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
-  CONSTRAINT fk_bottle_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
+  CONSTRAINT fk_bottle_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user)
 );
 
 -- ROUTE
@@ -31,6 +26,11 @@ CREATE TABLE route (
 
   id_driver VARCHAR(36) NOT NULL,
 
+  name VARCHAR(150) NOT NULL,
+  description TEXT NOT NULL,
+  user_feedback TEXT,
+  city VARCHAR(100),
+  neighborhood VARCHAR(100),
   status enum_route_status NOT NULL,
   date_start TIMESTAMP,
   date_end TIMESTAMP,
@@ -64,6 +64,8 @@ CREATE TABLE route_donation_step (
 
   created_at TIMESTAMP NOT NULL,
   created_by VARCHAR(36) NOT NULL,
+  updated_at TIMESTAMP,
+  updated_by VARCHAR(36),
   removed_at TIMESTAMP,
   removed_by VARCHAR(36),
 
@@ -71,5 +73,6 @@ CREATE TABLE route_donation_step (
   CONSTRAINT fk_rds_donation_step FOREIGN KEY (id_donation_step) REFERENCES donation_step(id_donation_step),
 
   CONSTRAINT fk_rds_created_by FOREIGN KEY (created_by) REFERENCES "user"(id_user),
+  CONSTRAINT fk_rds_updated_by FOREIGN KEY (updated_by) REFERENCES "user"(id_user),
   CONSTRAINT fk_rds_removed_by FOREIGN KEY (removed_by) REFERENCES "user"(id_user)
 );

@@ -64,15 +64,15 @@ func (h *HandlerGetDashboard) Execute(ctx c.Context, filters *dto.GetDashboardRe
 		endDateExclusive = &exclusive
 	}
 
-	totalMilkCollected, err := h.dashboardRepo.GetTotalMilkCollected(ctx, startDate, endDateExclusive)
-	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to get total milk collected")
-	}
+	// totalMilkCollected, err := h.dashboardRepo.GetTotalMilkCollected(ctx, startDate, endDateExclusive)
+	// if err != nil {
+	// 	return nil, fluxgo.ErrorInternalError("Error to get total milk collected")
+	// }
 
-	milkByMonth, err := h.dashboardRepo.GetMilkCollectedByMonth(ctx, startDate, endDateExclusive)
-	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to get milk collected by month")
-	}
+	// milkByMonth, err := h.dashboardRepo.GetMilkCollectedByMonth(ctx, startDate, endDateExclusive)
+	// if err != nil {
+	// 	return nil, fluxgo.ErrorInternalError("Error to get milk collected by month")
+	// }
 
 	feedbackByScore, err := h.dashboardRepo.GetFeedbackByScore(ctx, startDate, endDateExclusive)
 	if err != nil {
@@ -100,8 +100,8 @@ func (h *HandlerGetDashboard) Execute(ctx c.Context, filters *dto.GetDashboardRe
 	}
 
 	return &dto.GetDashboardRes{
-		TotalMilkCollected:      totalMilkCollected,
-		MilkCollectedByMonth:    milkByMonth,
+		// TotalMilkCollected:      totalMilkCollected,
+		// MilkCollectedByMonth:    milkByMonth,
 		FeedbackByScore:         feedbackByScore,
 		AverageServiceTimeHours: averageServiceTimeHours,
 		DonationsWithError:      donationsWithError,

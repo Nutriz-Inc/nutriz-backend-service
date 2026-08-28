@@ -27,6 +27,7 @@ const (
 	EnumUserTypeCommon EnumUserType = "common"
 	EnumUserTypeAdmin  EnumUserType = "adm"
 	EnumUserTypeNurse  EnumUserType = "nurse"
+	EnumUserTypeDriver EnumUserType = "driver"
 )
 
 func (u User) TableName() string {
