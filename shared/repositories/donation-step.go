@@ -223,3 +223,44 @@ func (r *DonationStepRepository) UpdateDonationStep(
 		data,
 	)
 }
+
+type DonationStepWithLocation struct {
+	entities.DonationStep
+	IsDonationActive bool     `db:"is_donation_active" json:"is_donation_active"`
+	Latitude         *float64 `db:"latitude" json:"latitude"`
+	Longitude        *float64 `db:"longitude" json:"longitude"`
+}
+
+func (r *DonationStepRepository) GetDonationStepsWithLocationByIds(
+	ctx c.Context,
+	ids []string,
+) (*[]DonationStepWithLocation, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query, args, err := sqlx.In(
+		`SELECT
+			ds.*,
+			d.is_active AS is_donation_active,
+			a.latitude AS latitude,
+			a.longitude AS longitude
+		 FROM donation_step ds
+		 INNER JOIN donation d ON d.id_donation = ds.id_donation
+		 LEFT JOIN address a ON a.id_address = ds.id_address AND a.removed_at IS NULL
+		 WHERE ds.id_donation_step IN (?)`,
+		ids,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	query = r.DB.ReadOnlyDB().Rebind(query)
+
+	return utils.List[DonationStepWithLocation](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		query,
+		args...,
+	)
+}

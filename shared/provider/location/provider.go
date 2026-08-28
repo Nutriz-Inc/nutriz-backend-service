@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"nutriz-backend-service/config"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
@@ -74,4 +75,52 @@ func (n *LocationService) GetCoordinatesByAddress(ctx c.Context, address string)
 	}
 
 	return &resp[0], nil
+}
+
+// Osrm
+const OSRM_MAX_COORDINATES = 100
+
+func (o *LocationService) GetOptimizedRoute(ctx c.Context, coordinates []Coordinate) (*GetOptimizedRouteRes, error) {
+	if len(coordinates) == 0 {
+		return nil, fmt.Errorf("no coordinates provided")
+	}
+	if len(coordinates) > OSRM_MAX_COORDINATES {
+		return nil, fmt.Errorf("too many coordinates, maximum is %d", OSRM_MAX_COORDINATES)
+	}
+
+	points := make([]string, 0, len(coordinates))
+	for _, coordinate := range coordinates {
+		points = append(points, fmt.Sprintf("%f,%f", coordinate.Longitude, coordinate.Latitude))
+	}
+
+	var resp GetOptimizedRouteRes
+
+	endpoint := fmt.Sprintf(
+		"https://router.project-osrm.org/trip/v1/driving/%s",
+		strings.Join(points, ";"),
+	)
+
+	res, err := o.httpClient.R().
+		SetContext(ctx).
+		SetResult(&resp).
+		SetQueryParams(map[string]string{
+			"source":    "first",
+			"roundtrip": "false",
+			"overview":  "false",
+		}).
+		Get(endpoint)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if res.IsError() || resp.Code != "Ok" {
+		return nil, fmt.Errorf("osrm returned status %d and code %q", res.StatusCode(), resp.Code)
+	}
+
+	if len(resp.Waypoints) != len(coordinates) {
+		return nil, fmt.Errorf("osrm returned %d waypoints for %d coordinates", len(resp.Waypoints), len(coordinates))
+	}
+
+	return &resp, nil
 }

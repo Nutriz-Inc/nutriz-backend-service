@@ -33,3 +33,28 @@ func (m *LocationMock) GetCoordinatesByAddress(ctx c.Context, address string) (*
 
 	return &mockNominatimResponse[0], nil
 }
+
+func (m *LocationMock) GetOptimizedRoute(ctx c.Context, coordinates []Coordinate) (*GetOptimizedRouteRes, error) {
+	if len(coordinates) == 0 {
+		return nil, nil
+	}
+
+	waypoints := make([]OptimizedWaypoint, 0, len(coordinates))
+	for index := range coordinates {
+		waypoints = append(waypoints, OptimizedWaypoint{
+			WaypointIndex: index,
+			TripsIndex:    0,
+			Name:          "Mock street",
+		})
+	}
+
+	if len(waypoints) > 1 {
+		waypoints[0].WaypointIndex, waypoints[1].WaypointIndex = waypoints[1].WaypointIndex, waypoints[0].WaypointIndex
+	}
+
+	return &GetOptimizedRouteRes{
+		Code:      "Ok",
+		Waypoints: waypoints,
+		Trips:     []OptimizedTrip{{Distance: 1000, Duration: 600}},
+	}, nil
+}
