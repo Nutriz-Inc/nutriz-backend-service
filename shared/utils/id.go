@@ -19,6 +19,8 @@ const (
 	UserEntity                 EnumEntityType = "user"
 	UserBabyEntity             EnumEntityType = "user_baby"
 	ConsentLogEntity           EnumEntityType = "consent_log"
+	RouteEntity                EnumEntityType = "route"
+	RouteDonationStepEntity    EnumEntityType = "route_donation_step"
 )
 
 var prefixToEntity = map[string]EnumEntityType{
@@ -32,6 +34,8 @@ var prefixToEntity = map[string]EnumEntityType{
 	"usr_": UserEntity,
 	"usb_": UserBabyEntity,
 	"clg_": ConsentLogEntity,
+	"rot_": RouteEntity,
+	"rds_": RouteDonationStepEntity,
 }
 
 var entityToPrefix = func() map[EnumEntityType]string {

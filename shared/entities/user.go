@@ -37,3 +37,13 @@ func (u User) TableName() string {
 func (u User) PrimaryKey() string {
 	return "id_user"
 }
+
+type UserAction struct {
+	CanCreateRoute bool
+}
+
+func (u User) Action() UserAction {
+	return UserAction{
+		CanCreateRoute: u.Type == EnumUserTypeAdmin,
+	}
+}

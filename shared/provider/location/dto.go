@@ -26,3 +26,27 @@ type GetCoordinatesByAddressRes struct {
 	Lat string `json:"lat"`
 	Lon string `json:"lon"`
 }
+
+// OSRM
+type Coordinate struct {
+	Latitude  float64
+	Longitude float64
+}
+
+type GetOptimizedRouteRes struct {
+	Code      string              `json:"code"`
+	Waypoints []OptimizedWaypoint `json:"waypoints"`
+	Trips     []OptimizedTrip     `json:"trips"`
+}
+
+type OptimizedWaypoint struct {
+	// WaypointIndex is the position of the input coordinate inside the optimized trip
+	WaypointIndex int    `json:"waypoint_index"`
+	TripsIndex    int    `json:"trips_index"`
+	Name          string `json:"name"`
+}
+
+type OptimizedTrip struct {
+	Distance float64 `json:"distance"`
+	Duration float64 `json:"duration"`
+}
