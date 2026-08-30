@@ -40,10 +40,12 @@ func (u User) PrimaryKey() string {
 
 type UserAction struct {
 	CanCreateRoute bool
+	CanListRoute   bool
 }
 
 func (u User) Action() UserAction {
 	return UserAction{
 		CanCreateRoute: u.Type == EnumUserTypeAdmin,
+		CanListRoute:   u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeDriver || u.Type == EnumUserTypeNurse,
 	}
 }

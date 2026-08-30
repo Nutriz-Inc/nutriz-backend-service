@@ -9,8 +9,25 @@ import (
 
 func Module() *fluxgo.FluxModule {
 	mod := fluxgo.Module("route")
+	
+	mod.AddHandler(handlers.HandlerListRoutesStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerListRoutes) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"GET",
+			"/route",
+			fluxgo.RouteIncome{
+				Entity:     dto.ListRoutesReq{},
+				FromQuery:  true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      redis,
+			},
+			handler.HandleHttp,
+		)
+	})
 
-	// route
 	mod.AddHandler(handlers.HandlerCreateRouteStart)
 	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateRoute) error {
 		return mod.HttpRoute(
