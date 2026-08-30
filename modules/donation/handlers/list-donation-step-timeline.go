@@ -44,6 +44,9 @@ func (h *HandlerListDonationStepTimeline) Execute(ctx c.Context, filters *dto.Li
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
+	if !user.Action().CanViewDonationStepTimeline {
+		return nil, utils.ErrorForbidden("User does not have permission to list donation step timeline", "user.forbidden")
+	}
 
 	donationStep, err := h.donationStepRepo.GetDonationStepById(ctx, filters.IdDonationStep)
 	if err != nil {

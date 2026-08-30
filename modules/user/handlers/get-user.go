@@ -57,7 +57,7 @@ func (h *HandlerGetUser) Execute(ctx c.Context, filters *dto.GetUserReq) (*dto.G
 		return nil, fluxgo.ErrorNotFound("User action not found")
 	}
 
-	if userAction.Type == entities.EnumUserTypeCommon && user.IdUser != filters.ActionBy {
+	if !userAction.Action().CanViewAnyUser && user.IdUser != filters.ActionBy {
 		return nil, utils.ErrorForbidden("You don't have permission to access this resource", "user.forbidden")
 	}
 

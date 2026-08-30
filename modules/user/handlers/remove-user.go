@@ -4,7 +4,6 @@ import (
 	c "context"
 	"fmt"
 	dto "nutriz-backend-service/modules/user/dtos"
-	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -56,9 +55,7 @@ func (h *HandlerRemoveUser) Execute(ctx c.Context, data *dto.RemoveUserReq) (*dt
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
 
-	isForbidden := (userAction.Type == entities.EnumUserTypeAdmin && user.Type == entities.EnumUserTypeCommon) || (userAction.Type == entities.EnumUserTypeCommon && (user.Type != entities.EnumUserTypeCommon || user.IdUser != userAction.IdUser))
-
-	if isForbidden {
+	if !userAction.CanRemoveUser(*user) {
 		return nil, utils.ErrorForbidden("You don't have permission to access this resource", "user.forbidden")
 	}
 

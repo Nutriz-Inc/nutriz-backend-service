@@ -47,7 +47,7 @@ func (h *HandlerCreateAddress) Execute(ctx c.Context, data *dto.CreateAddressReq
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type != entities.EnumUserTypeCommon {
+	if !user.Action().CanCreateAddress {
 		return nil, utils.ErrorForbidden("User does not have permission to create address", "user.forbidden")
 	}
 

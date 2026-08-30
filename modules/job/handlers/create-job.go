@@ -49,8 +49,7 @@ func (h *HandlerCreateJob) Execute(ctx c.Context, data *dto.CreateJobReq) (*dto.
 	if creator == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-
-	if creator.Type != entities.EnumUserTypeAdmin {
+	if !creator.Action().CanCreateJob {
 		return nil, utils.ErrorForbidden(
 			"Only adms can create jobs",
 			"job.forbidden",
