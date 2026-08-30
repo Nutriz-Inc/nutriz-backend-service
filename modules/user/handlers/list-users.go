@@ -3,7 +3,6 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/user/dtos"
-	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -36,7 +35,7 @@ func (h *HandlerListUsers) Execute(ctx c.Context, filters *dto.ListUsersReq) (*d
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type == entities.EnumUserTypeCommon {
+	if !user.Action().CanListUsers {
 		return nil, utils.ErrorForbidden("User does not have permission to list users", "user.forbidden")
 	}
 

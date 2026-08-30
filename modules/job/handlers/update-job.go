@@ -42,8 +42,7 @@ func (h *HandlerUpdateJob) Execute(ctx c.Context, data *dto.UpdateJobReq) (*dto.
 	if actor == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-
-	if actor.Type != entities.EnumUserTypeAdmin && actor.Type != entities.EnumUserTypeNurse {
+	if !actor.Action().CanUpdateJob {
 		return nil, utils.ErrorForbidden(
 			"Only admins and nurses can update jobs",
 			"job.forbidden",

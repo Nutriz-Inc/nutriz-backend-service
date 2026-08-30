@@ -43,7 +43,7 @@ func (h *HandlerCreateDonation) Execute(ctx c.Context, data *dto.CreateDonationR
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type != entities.EnumUserTypeCommon {
+	if !user.Action().CanCreateDonation {
 		return nil, utils.ErrorForbidden("User does not have permission to create donation", "user.forbidden")
 	}
 

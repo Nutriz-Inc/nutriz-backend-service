@@ -39,11 +39,67 @@ func (u User) PrimaryKey() string {
 }
 
 type UserAction struct {
-	CanCreateRoute bool
+	CanCreateRoute              bool
+	CanViewDashboard            bool
+	CanCreateDonationStep       bool
+	CanCreateDonation           bool
+	CanViewDonationStepTimeline bool
+	CanListDonations            bool
+	CanUpdateDonationStep       bool
+	CanUpdateDonation           bool
+	CanCreateJob                bool
+	CanViewJob                  bool
+	CanListJobs                 bool
+	CanRemoveJob                bool
+	CanUpdateJob                bool
+	CanCreateUser               bool
+	CanListUsers                bool
+	CanViewAnyUser              bool
+	CanCreateAddress            bool
+	CanUpdateAddress            bool
+	CanRemoveAddress            bool
+	CanCreateBaby               bool
+	CanUpdateBaby               bool
+	CanRemoveBaby               bool
+	CanCreateConsentLog         bool
 }
 
 func (u User) Action() UserAction {
 	return UserAction{
-		CanCreateRoute: u.Type == EnumUserTypeAdmin,
+		CanCreateRoute:              u.Type == EnumUserTypeAdmin,
+		CanViewDashboard:            u.Type == EnumUserTypeAdmin,
+		CanCreateDonationStep:       u.Type == EnumUserTypeAdmin,
+		CanCreateDonation:           u.Type == EnumUserTypeCommon,
+		CanViewDonationStepTimeline: u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeNurse,
+		CanListDonations:            u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeNurse || u.Type == EnumUserTypeCommon,
+		CanUpdateDonationStep:       u.Type == EnumUserTypeAdmin,
+		CanUpdateDonation:           u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeCommon,
+		CanCreateJob:                u.Type == EnumUserTypeAdmin,
+		CanViewJob:                  u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeNurse,
+		CanListJobs:                 u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeNurse || u.Type == EnumUserTypeCommon,
+		CanRemoveJob:                u.Type == EnumUserTypeAdmin,
+		CanUpdateJob:                u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeNurse,
+		CanCreateUser:               u.Type == EnumUserTypeAdmin,
+		CanListUsers:                u.Type != EnumUserTypeCommon,
+		CanViewAnyUser:              u.Type != EnumUserTypeCommon,
+		CanCreateAddress:            u.Type == EnumUserTypeCommon || u.Type == EnumUserTypeAdmin,
+		CanUpdateAddress:            u.Type == EnumUserTypeCommon,
+		CanRemoveAddress:            u.Type == EnumUserTypeCommon,
+		CanCreateBaby:               u.Type == EnumUserTypeCommon,
+		CanUpdateBaby:               u.Type == EnumUserTypeCommon,
+		CanRemoveBaby:               u.Type == EnumUserTypeCommon,
+		CanCreateConsentLog:         u.Type == EnumUserTypeCommon,
 	}
+}
+
+func (u User) CanRemoveUser(target User) bool {
+	if u.Type == EnumUserTypeAdmin {
+		return target.Type != EnumUserTypeCommon
+	}
+
+	if u.Type == EnumUserTypeCommon {
+		return target.Type == EnumUserTypeCommon && target.IdUser == u.IdUser
+	}
+
+	return true
 }

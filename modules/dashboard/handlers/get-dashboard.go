@@ -3,7 +3,6 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/dashboard/dtos"
-	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 	"time"
@@ -37,7 +36,7 @@ func (h *HandlerGetDashboard) Execute(ctx c.Context, filters *dto.GetDashboardRe
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
-	if user.Type != entities.EnumUserTypeAdmin {
+	if !user.Action().CanViewDashboard {
 		return nil, utils.ErrorForbidden("Only adms can access the dashboard", "dashboard.forbidden")
 	}
 

@@ -36,6 +36,10 @@ func (h *HandlerListDonations) Execute(ctx c.Context, filters *dto.ListDonationR
 	if user == nil {
 		return nil, fluxgo.ErrorNotFound("User not found")
 	}
+	if !user.Action().CanListDonations {
+		return nil, utils.ErrorForbidden("User does not have permission to list donations", "user.forbidden")
+	}
+
 	if user.Type != entities.EnumUserTypeCommon {
 		filters.ActionBy = nil
 	} else {
