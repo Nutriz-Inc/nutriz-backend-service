@@ -1058,6 +1058,52 @@ INSERT INTO donation_step (
     NULL
 );
 
+INSERT INTO bottle (
+    id_bottle,
+    id_donation,
+    quantity_donated_ml,
+    discarded,
+    description,
+    created_at,
+    created_by
+) VALUES
+(
+    'btl_2veL1FPpuXxUaZcFaEC57BfpcB1',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    150.50,
+    false,
+    'Frasco coletado na Avenida Paulista',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS'
+),
+(
+    'btl_2veL1FPpuXxUaZcFaEC57BfpcB2',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    200.00,
+    NULL,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS'
+),
+(
+    'btl_2veL1FPpuXxUaZcFaEC57BfpcB3',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR2',
+    300.00,
+    false,
+    'Frasco coletado na Vila Mariana',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS'
+),
+(
+    'btl_2veL1FPpuXxUaZcFaEC57BfpcB4',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR2',
+    80.00,
+    true,
+    'Frasco descartado por contaminacao',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS'
+);
+
 INSERT INTO donation_step_timeline (
     id_donation_step_timeline,
     id_donation_step,

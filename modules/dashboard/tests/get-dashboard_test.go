@@ -25,22 +25,22 @@ func TestGetDashboard(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 
-			// totalMilkCollected, ok := body["total_milk_collected"].(float64)
-			// assert.True(t, ok, "total_milk_collected should be a number")
-			// assert.GreaterOrEqual(t, totalMilkCollected, 3.9, "seeded donations alone already sum to 3.9L")
+			totalMilkCollected, ok := body["total_milk_collected"].(float64)
+			assert.True(t, ok, "total_milk_collected should be a number")
+			assert.GreaterOrEqual(t, totalMilkCollected, 650.5, "seeded non-discarded bottles alone already sum to 650.5ml")
 
-			// milkByMonth := fluxgo.ConvertToList(body["milk_collected_by_month"])
-			// assert.GreaterOrEqual(t, len(milkByMonth), 1)
+			milkByMonth := fluxgo.ConvertToList(body["milk_collected_by_month"])
+			assert.GreaterOrEqual(t, len(milkByMonth), 1)
 
-			// var sumByMonth float64
-			// for _, item := range milkByMonth {
-			// 	row := fluxgo.ConvertToMap(item)
-			// 	assert.NotEmpty(t, row["month"])
-			// 	total, ok := row["total"].(float64)
-			// 	assert.True(t, ok)
-			// 	sumByMonth += total
-			// }
-			// assert.InDelta(t, totalMilkCollected, sumByMonth, 0.001, "monthly breakdown should add up to the total")
+			var sumByMonth float64
+			for _, item := range milkByMonth {
+				row := fluxgo.ConvertToMap(item)
+				assert.NotEmpty(t, row["month"])
+				total, ok := row["total"].(float64)
+				assert.True(t, ok)
+				sumByMonth += total
+			}
+			assert.InDelta(t, totalMilkCollected, sumByMonth, 0.001, "monthly breakdown should add up to the total")
 
 			feedback := fluxgo.ConvertToList(body["feedback_by_score"])
 			assert.Len(t, feedback, 5, "feedback breakdown should always report all 5 possible scores")
@@ -83,6 +83,36 @@ func TestGetDashboard(t *testing.T) {
 				sumPercentage += percentage
 			}
 			assert.LessOrEqual(t, sumPercentage, float64(100.01), "percentages across the 4 steps should never exceed 100%")
+
+			bottlesCount, ok := body["bottles_count"].(float64)
+			assert.True(t, ok)
+			assert.GreaterOrEqual(t, bottlesCount, float64(4), "seed has 4 bottles")
+
+			discardedBottles, ok := body["discarded_bottles_count"].(float64)
+			assert.True(t, ok)
+			assert.GreaterOrEqual(t, discardedBottles, float64(1), "seed has 1 discarded bottle")
+			assert.LessOrEqual(t, discardedBottles, bottlesCount)
+
+			avgBottlesPerDonor, ok := body["average_bottles_per_donor"].(float64)
+			assert.True(t, ok)
+			assert.Greater(t, avgBottlesPerDonor, float64(0))
+
+			utilization, ok := body["bottles_utilization_rate"].(float64)
+			assert.True(t, ok)
+			assert.GreaterOrEqual(t, utilization, float64(0))
+			assert.LessOrEqual(t, utilization, float64(100))
+
+			avgMileage, ok := body["average_mileage_per_route"].(float64)
+			assert.True(t, ok, "seed has a completed route with mileage")
+			assert.Greater(t, avgMileage, float64(0))
+
+			avgStops, ok := body["average_stops_per_route"].(float64)
+			assert.True(t, ok, "seed routes have stops")
+			assert.Greater(t, avgStops, float64(0))
+
+			avgDuration, ok := body["average_route_duration_hours"].(float64)
+			assert.True(t, ok, "seed has a route with start and end")
+			assert.Greater(t, avgDuration, float64(0))
 		})
 
 		t.Run("Date range with no data returns empty metrics", func(t *testing.T) {
@@ -93,13 +123,21 @@ func TestGetDashboard(t *testing.T) {
 			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
 
 			assert.Equal(t, http.StatusOK, status)
-			// assert.Equal(t, float64(0), body["total_milk_collected"])
+			assert.Equal(t, float64(0), body["total_milk_collected"])
 			assert.Equal(t, float64(0), body["donations_with_error"])
 			assert.Equal(t, float64(0), body["donor_recurrence_rate"])
 			assert.Nil(t, body["average_service_time_hours"])
 
-			// milkByMonth := fluxgo.ConvertToList(body["milk_collected_by_month"])
-			// assert.Len(t, milkByMonth, 0)
+			milkByMonth := fluxgo.ConvertToList(body["milk_collected_by_month"])
+			assert.Len(t, milkByMonth, 0)
+
+			assert.Equal(t, float64(0), body["bottles_count"])
+			assert.Equal(t, float64(0), body["discarded_bottles_count"])
+			assert.Equal(t, float64(0), body["average_bottles_per_donor"])
+			assert.Equal(t, float64(0), body["bottles_utilization_rate"])
+			assert.Nil(t, body["average_mileage_per_route"])
+			assert.Nil(t, body["average_stops_per_route"])
+			assert.Nil(t, body["average_route_duration_hours"])
 
 			feedback := fluxgo.ConvertToList(body["feedback_by_score"])
 			assert.Len(t, feedback, 5)

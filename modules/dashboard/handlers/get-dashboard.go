@@ -64,15 +64,15 @@ func (h *HandlerGetDashboard) Execute(ctx c.Context, filters *dto.GetDashboardRe
 		endDateExclusive = &exclusive
 	}
 
-	// totalMilkCollected, err := h.dashboardRepo.GetTotalMilkCollected(ctx, startDate, endDateExclusive)
-	// if err != nil {
-	// 	return nil, fluxgo.ErrorInternalError("Error to get total milk collected")
-	// }
+	totalMilkCollected, err := h.dashboardRepo.GetTotalMilkCollected(ctx, startDate, endDateExclusive)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get total milk collected")
+	}
 
-	// milkByMonth, err := h.dashboardRepo.GetMilkCollectedByMonth(ctx, startDate, endDateExclusive)
-	// if err != nil {
-	// 	return nil, fluxgo.ErrorInternalError("Error to get milk collected by month")
-	// }
+	milkByMonth, err := h.dashboardRepo.GetMilkCollectedByMonth(ctx, startDate, endDateExclusive)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get milk collected by month")
+	}
 
 	feedbackByScore, err := h.dashboardRepo.GetFeedbackByScore(ctx, startDate, endDateExclusive)
 	if err != nil {
@@ -99,13 +99,31 @@ func (h *HandlerGetDashboard) Execute(ctx c.Context, filters *dto.GetDashboardRe
 		return nil, fluxgo.ErrorInternalError("Error to get active donations by step")
 	}
 
+	bottleStats, err := h.dashboardRepo.GetBottleStats(ctx, startDate, endDateExclusive)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get bottle stats")
+	}
+	if bottleStats == nil {
+		bottleStats = &dto.BottleStats{}
+	}
+
+	routeStats, err := h.dashboardRepo.GetRouteStats(ctx, startDate, endDateExclusive)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get route stats")
+	}
+	if routeStats == nil {
+		routeStats = &dto.RouteStats{}
+	}
+
 	return &dto.GetDashboardRes{
-		// TotalMilkCollected:      totalMilkCollected,
-		// MilkCollectedByMonth:    milkByMonth,
+		TotalMilkCollected:      totalMilkCollected,
+		MilkCollectedByMonth:    milkByMonth,
 		FeedbackByScore:         feedbackByScore,
 		AverageServiceTimeHours: averageServiceTimeHours,
 		DonationsWithError:      donationsWithError,
 		DonorRecurrenceRate:     donorRecurrenceRate,
 		ActiveDonationsByStep:   activeDonationsByStep,
+		BottleStats:             *bottleStats,
+		RouteStats:              *routeStats,
 	}, nil
 }
