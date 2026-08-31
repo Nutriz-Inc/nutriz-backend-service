@@ -126,5 +126,23 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
+	mod.AddHandler(handlers.HandlerGetRouteStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerGetRoute) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"GET",
+			"/route/:id",
+			fluxgo.RouteIncome{
+				Entity:     dto.GetRouteReq{},
+				FromParam:  true,
+				FromHeader: true,
+				Validate:   true,
+				Cache:      redis,
+			},
+			handler.HandleHttp,
+		)
+	})
+
 	return mod
 }
