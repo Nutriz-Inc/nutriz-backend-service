@@ -17,17 +17,20 @@ import (
 type HandlerUpdateDonation struct {
 	db           *fluxgo.Database
 	donationRepo *repositories.DonationRepository
+	bottleRepo   *repositories.BottleRepository
 	userRepo     *repositories.UserRepository
 }
 
 func HandlerUpdateDonationStart(
 	db *fluxgo.Database,
 	donationRepo *repositories.DonationRepository,
+	bottleRepo *repositories.BottleRepository,
 	userRepo *repositories.UserRepository,
 ) *HandlerUpdateDonation {
 	return &HandlerUpdateDonation{
 		db,
 		donationRepo,
+		bottleRepo,
 		userRepo,
 	}
 }
@@ -79,10 +82,23 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 		}
 	}
 
+	if validator.HasBottles && user.Type != entities.EnumUserTypeAdmin {
+		return nil, utils.ErrorForbidden("Only admins can update donation bottles", "donation.bottles_forbidden")
+	}
+
 	if user.Type == entities.EnumUserTypeAdmin {
 		if validator.HasIsActive {
 			req.IsActive = data.IsActive
 			fieldsToUpdate++
+		}
+
+		if validator.HasBottles {
+			for _, bottle := range *data.Bottles {
+				if bottle.IdDonation != data.Id {
+					return nil, fluxgo.ErrorBadRequest("Bottle id_donation must match the donation", "bottle.invalid_donation")
+				}
+			}
+			fieldsToUpdate = fieldsToUpdate + len(*data.Bottles)
 		}
 	}
 
@@ -94,6 +110,26 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 		err := h.donationRepo.UpdateDonationTx(ctx, tx, &req)
 		if err != nil {
 			return fmt.Errorf("error to update donation: %w", err)
+		}
+
+		if validator.HasBottles {
+			if err := h.bottleRepo.DeleteBottlesByIdDonationTx(ctx, tx, data.Id); err != nil {
+				return fmt.Errorf("error to remove donation bottles: %w", err)
+			}
+
+			for _, bottle := range *data.Bottles {
+				err := h.bottleRepo.CreateBottleTx(ctx, tx, &repositories.CreateBottleRepositoryReq{
+					IdBottle:          utils.IdGenerate(utils.BottleEntity),
+					IdDonation:        data.Id,
+					IdUser:            data.ActionBy,
+					QuantityDonatedMl: bottle.QuantityDonatedMl,
+					Discarded:         bottle.Discarded,
+					Description:       bottle.Description,
+				})
+				if err != nil {
+					return fmt.Errorf("error to create donation bottle: %w", err)
+				}
+			}
 		}
 
 		return nil
