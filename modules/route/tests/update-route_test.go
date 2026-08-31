@@ -212,7 +212,7 @@ func TestUpdateRoute(t *testing.T) {
 			)
 
 			assert.Equal(t, http.StatusBadRequest, status)
-			assert.Equal(t, "route.canceled", resp["code"])
+			assert.Equal(t, "route.canceled_or_done", resp["code"])
 		})
 
 		t.Run("Adm cannot send driver fields", func(t *testing.T) {
