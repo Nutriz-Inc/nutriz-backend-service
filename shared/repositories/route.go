@@ -326,3 +326,43 @@ func (r *RouteRepository) UpdateRoute(
 		data,
 	)
 }
+
+func (r *RouteRepository) touchRoute(
+	ctx c.Context,
+	exec sqlx.ExtContext,
+	idRoute string,
+	updatedBy string,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE route
+		SET updated_at = now(),
+		    updated_by = :updated_by
+		WHERE id_route = :id_route AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_route":   idRoute,
+		"updated_by": updatedBy,
+	}
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *RouteRepository) TouchRouteTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	idRoute string,
+	updatedBy string,
+) error {
+	return r.touchRoute(ctx, tx, idRoute, updatedBy)
+}

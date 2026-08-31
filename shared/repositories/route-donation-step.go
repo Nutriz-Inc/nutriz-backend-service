@@ -109,3 +109,113 @@ func (r *RouteDonationStepRepository) CreateRouteDonationStep(
 		data,
 	)
 }
+
+func (r *RouteDonationStepRepository) GetRouteDonationStepById(
+	ctx c.Context,
+	id string,
+) (*entities.RouteDonationStep, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.Get[entities.RouteDonationStep](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "route_donation_step" WHERE id_route_donation_step = $1 AND removed_at IS NULL`,
+		id,
+	)
+}
+
+func (r *RouteDonationStepRepository) removeRouteDonationStep(
+	ctx c.Context,
+	exec sqlx.ExtContext,
+	id string,
+	removedBy string,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE route_donation_step
+		SET removed_at = now(),
+		    removed_by = :removed_by
+		WHERE id_route_donation_step = :id_route_donation_step AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_route_donation_step": id,
+		"removed_by":             removedBy,
+	}
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *RouteDonationStepRepository) RemoveRouteDonationStepTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	id string,
+	removedBy string,
+) error {
+	return r.removeRouteDonationStep(ctx, tx, id, removedBy)
+}
+
+func (r *RouteDonationStepRepository) RemoveRouteDonationStep(
+	ctx c.Context,
+	id string,
+	removedBy string,
+) error {
+	return r.removeRouteDonationStep(ctx, r.DB.WriteDB(), id, removedBy)
+}
+
+func (r *RouteDonationStepRepository) shiftStopOrdersAfter(
+	ctx c.Context,
+	exec sqlx.ExtContext,
+	idRoute string,
+	stopOrder int16,
+	updatedBy string,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE route_donation_step
+		SET stop_order = stop_order - 1,
+		    updated_at = now(),
+		    updated_by = :updated_by
+		WHERE id_route = :id_route
+		  AND removed_at IS NULL
+		  AND stop_order > :stop_order
+	`
+
+	params := map[string]any{
+		"id_route":   idRoute,
+		"stop_order": stopOrder,
+		"updated_by": updatedBy,
+	}
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *RouteDonationStepRepository) ShiftStopOrdersAfterTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	idRoute string,
+	stopOrder int16,
+	updatedBy string,
+) error {
+	return r.shiftStopOrdersAfter(ctx, tx, idRoute, stopOrder, updatedBy)
+}
