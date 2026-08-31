@@ -247,3 +247,88 @@ func (r *RouteDonationStepRepository) UpdateStopOrderTx(
 ) error {
 	return r.updateStopOrder(ctx, tx, id, stopOrder, updatedBy)
 }
+
+func (r *RouteDonationStepRepository) updateDateStart(
+	ctx c.Context,
+	exec sqlx.ExtContext,
+	id string,
+	updatedBy string,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE route_donation_step
+		SET date_start = now(),
+		    updated_at = now(),
+		    updated_by = :updated_by
+		WHERE id_route_donation_step = :id_route_donation_step AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_route_donation_step": id,
+		"updated_by":             updatedBy,
+	}
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *RouteDonationStepRepository) UpdateDateStartTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	id string,
+	updatedBy string,
+) error {
+	return r.updateDateStart(ctx, tx, id, updatedBy)
+}
+
+func (r *RouteDonationStepRepository) setStartedStepsDateEnd(
+	ctx c.Context,
+	exec sqlx.ExtContext,
+	idRoute string,
+	updatedBy string,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE route_donation_step
+		SET date_end = now(),
+		    updated_at = now(),
+		    updated_by = :updated_by
+		WHERE id_route = :id_route
+		  AND date_start IS NOT NULL
+		  AND date_end IS NULL
+		  AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_route":   idRoute,
+		"updated_by": updatedBy,
+	}
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *RouteDonationStepRepository) SetStartedStepsDateEndTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	idRoute string,
+	updatedBy string,
+) error {
+	return r.setStartedStepsDateEnd(ctx, tx, idRoute, updatedBy)
+}
