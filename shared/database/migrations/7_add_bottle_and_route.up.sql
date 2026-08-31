@@ -1,5 +1,5 @@
 -- ENUMS
-CREATE TYPE enum_route_status AS ENUM ('pending', 'in_progress', 'done', 'canceled');
+CREATE TYPE enum_route_status AS ENUM ('pending', 'in_progress', 'done', 'error', 'canceled');
 ALTER TYPE enum_user_type ADD VALUE IF NOT EXISTS 'driver';
 
 -- BOTTLE

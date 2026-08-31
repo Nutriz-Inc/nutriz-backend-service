@@ -29,6 +29,7 @@ const (
 	EnumRouteStatusPending    EnumRouteStatus = "pending"
 	EnumRouteStatusInProgress EnumRouteStatus = "in_progress"
 	EnumRouteStatusDone       EnumRouteStatus = "done"
+	EnumRouteStatusError      EnumRouteStatus = "error"
 	EnumRouteStatusCanceled   EnumRouteStatus = "canceled"
 )
 
