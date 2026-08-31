@@ -10,6 +10,7 @@ import (
 	"nutriz-backend-service/shared/provider/location"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
@@ -83,7 +84,7 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 		return nil, fluxgo.ErrorBadRequest("Invalid date set format", "route.invalid_date_set_format")
 	}
 
-	donationSteps, globalErr := h.getDonationSteps(ctx, data.Stops)
+	donationSteps, globalErr := h.getDonationSteps(ctx, data)
 	if globalErr != nil {
 		return nil, globalErr
 	}
@@ -158,12 +159,12 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 
 func (h *HandlerCreateRoute) getDonationSteps(
 	ctx c.Context,
-	stops []string,
+	data *dto.CreateRouteReq,
 ) (*[]repositories.DonationStepWithLocation, *fluxgo.GlobalError) {
-	ids := make([]string, 0, len(stops))
-	seen := make(map[string]bool, len(stops))
+	ids := make([]string, 0, len(data.Stops))
+	seen := make(map[string]bool, len(data.Stops))
 
-	for _, id := range stops {
+	for _, id := range data.Stops {
 		if utils.GetIdEntity(id) != utils.DonationStepEntity {
 			return nil, fluxgo.ErrorBadRequest("Stop is not a donation step id", "stops.invalid_id")
 		}
@@ -195,10 +196,32 @@ func (h *HandlerCreateRoute) getDonationSteps(
 		if !donationStep.IsDonationActive {
 			return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("Donation of %s is not active", donationStep.IdDonationStep), "donation.inactive")
 		}
+
+		if data.City != nil && !matchesAddressField(donationStep.City, *data.City) {
+			return nil, fluxgo.ErrorBadRequest(
+				fmt.Sprintf("Donation step %s is not in the city %s", donationStep.IdDonationStep, *data.City),
+				"stops.invalid_city",
+			)
+		}
+		if data.Neighborhood != nil && !matchesAddressField(donationStep.Neighborhood, *data.Neighborhood) {
+			return nil, fluxgo.ErrorBadRequest(
+				fmt.Sprintf("Donation step %s is not in the neighborhood %s", donationStep.IdDonationStep, *data.Neighborhood),
+				"stops.invalid_neighborhood",
+			)
+		}
+
 		ordered = append(ordered, donationStep)
 	}
 
 	return &ordered, nil
+}
+
+func matchesAddressField(value *string, expected string) bool {
+	if value == nil {
+		return false
+	}
+
+	return strings.EqualFold(strings.TrimSpace(*value), strings.TrimSpace(expected))
 }
 
 func (h *HandlerCreateRoute) getOptimizedRoute(

@@ -73,13 +73,11 @@ func TestCreateRoute(t *testing.T) {
 		t.Run("With multiple stops ordered by the routing provider", func(t *testing.T) {
 			body := makeBody([]string{idStepOne, idStepTwo, idStepThree}, futureDate)
 			body.City = utils.StringPtr("Sao Paulo")
-			body.Neighborhood = utils.StringPtr("Vila Mariana")
 
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusCreated, status)
 			assert.Equal(t, "Sao Paulo", resp["city"])
-			assert.Equal(t, "Vila Mariana", resp["neighborhood"])
 
 			stops, ok := resp["stops"].([]interface{})
 			assert.True(t, ok)
@@ -194,6 +192,28 @@ func TestCreateRoute(t *testing.T) {
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "Donation of "+idStepInactive+" is not active", resp["message"])
 			assert.Equal(t, "donation.inactive", resp["code"])
+		})
+
+		t.Run("Stop is not in the requested city", func(t *testing.T) {
+			body := makeBody([]string{idStepOne}, futureDate)
+			body.City = utils.StringPtr("Rio de Janeiro")
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(t, "stops.invalid_city", resp["code"])
+			assert.Contains(t, resp["message"], idStepOne)
+		})
+
+		t.Run("Stop is not in the requested neighborhood", func(t *testing.T) {
+			body := makeBody([]string{idStepOne}, futureDate)
+			body.Neighborhood = utils.StringPtr("Pinheiros")
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(t, "stops.invalid_neighborhood", resp["code"])
+			assert.Contains(t, resp["message"], idStepOne)
 		})
 
 		t.Run("Route takes longer than the maximum duration", func(t *testing.T) {

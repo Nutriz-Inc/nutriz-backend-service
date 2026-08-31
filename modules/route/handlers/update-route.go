@@ -89,13 +89,6 @@ func (h *HandlerUpdateRoute) Execute(ctx c.Context, data *dto.UpdateRouteReq) (*
 			return fmt.Errorf("error to update route: %w", err)
 		}
 
-		if repoData.Status != nil && *repoData.Status == entities.EnumRouteStatusCanceled {
-			err = h.routeDonationStepRepo.RemoveRouteDonationStepsByIdRouteTx(ctx, tx, data.IdRoute, data.ActionBy)
-			if err != nil {
-				return fmt.Errorf("error to remove route donation steps: %w", err)
-			}
-		}
-
 		return nil
 	})
 	if err != nil {
@@ -131,7 +124,7 @@ func (h *HandlerUpdateRoute) handleAdmUpdate(
 			"route.invalid_fields_for_adm",
 		)
 	}
-	if !validator.HasAdmFields() {
+	if !validator.HasAdmFields() && !validator.HasStatus {
 		return fluxgo.ErrorBadRequest("At least one field must be sent to update", "route.no_fields_to_update")
 	}
 
@@ -186,12 +179,29 @@ func (h *HandlerUpdateRoute) handleDriverUpdate(
 			"route.invalid_fields_for_driver",
 		)
 	}
-	if !validator.HasDriverFields() {
+	if !validator.HasDriverFields() && !validator.HasStatus {
 		return fluxgo.ErrorBadRequest("At least one field must be sent to update", "route.no_fields_to_update")
 	}
 
 	if route.IdDriver != user.IdUser {
 		return utils.ErrorForbidden("Route belongs to another driver", "route.forbidden")
+	}
+
+	if validator.HasStatus {
+		if *data.Status != entities.EnumRouteStatusError {
+			return fluxgo.ErrorBadRequest(
+				"Drivers can only set status to error",
+				"route.invalid_status_for_driver",
+			)
+		}
+		if validator.HasDateStart || validator.HasDateEnd {
+			return fluxgo.ErrorBadRequest(
+				"Status error cannot be sent with date_start or date_end",
+				"route.status_error_with_dates",
+			)
+		}
+
+		repoData.Status = data.Status
 	}
 
 	if validator.HasDateStart && validator.HasDateEnd {
@@ -207,9 +217,13 @@ func (h *HandlerUpdateRoute) handleDriverUpdate(
 		}
 
 		repoData.SetDateStart = true
+		repoData.Status = utils.RouteStatusPtr(entities.EnumRouteStatusInProgress)
 	}
 
 	if validator.HasDateEnd {
+		if route.DateStart == nil {
+			return fluxgo.ErrorBadRequest("Route was not started yet", "route.not_started")
+		}
 		if route.DateEnd != nil {
 			return fluxgo.ErrorBadRequest("Date end is already set", "route.date_end_already_set")
 		}
@@ -221,6 +235,7 @@ func (h *HandlerUpdateRoute) handleDriverUpdate(
 		}
 
 		repoData.SetDateEnd = true
+		repoData.Status = utils.RouteStatusPtr(entities.EnumRouteStatusDone)
 	}
 
 	repoData.Mileage = data.Mileage

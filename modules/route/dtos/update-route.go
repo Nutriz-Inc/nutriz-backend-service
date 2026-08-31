@@ -8,13 +8,14 @@ type UpdateRouteReq struct {
 	IdRoute  string `params:"id_route" validate:"required,id"`
 	ActionBy string `reqHeader:"action-by" validate:"required,id"`
 
+	Status *entities.EnumRouteStatus `json:"status" validate:"omitempty,oneof=canceled error"`
+
 	// adm fields
-	Name         *string                   `json:"name" validate:"omitempty,max=150"`
-	City         *string                   `json:"city" validate:"omitempty,max=100"`
-	Neighborhood *string                   `json:"neighborhood" validate:"omitempty,max=100"`
-	Status       *entities.EnumRouteStatus `json:"status" validate:"omitempty,oneof=canceled"`
-	Description  *string                   `json:"description" validate:"omitempty,max=500"`
-	DateSet      *string                   `json:"date_set" validate:"omitempty,datetime=2006-01-02T15:04:05Z07:00"`
+	Name         *string `json:"name" validate:"omitempty,max=150"`
+	City         *string `json:"city" validate:"omitempty,max=100"`
+	Neighborhood *string `json:"neighborhood" validate:"omitempty,max=100"`
+	Description  *string `json:"description" validate:"omitempty,max=500"`
+	DateSet      *string `json:"date_set" validate:"omitempty,datetime=2006-01-02T15:04:05Z07:00"`
 
 	// driver fields
 	DateStart    *bool    `json:"date_start" validate:"omitempty"`
@@ -56,7 +57,7 @@ func (c UpdateRouteReq) ValidateUpdateRouteOptionalFields() UpdateRouteOptionalF
 }
 
 func (f UpdateRouteOptionalFields) HasAdmFields() bool {
-	return f.HasName || f.HasCity || f.HasNeighborhood || f.HasStatus || f.HasDescription || f.HasDateSet
+	return f.HasName || f.HasCity || f.HasNeighborhood || f.HasDescription || f.HasDateSet
 }
 
 func (f UpdateRouteOptionalFields) HasDriverFields() bool {
