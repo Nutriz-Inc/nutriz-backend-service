@@ -2,6 +2,8 @@ package repositories
 
 import (
 	c "context"
+	"time"
+
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
 
@@ -331,4 +333,81 @@ func (r *RouteDonationStepRepository) SetStartedStepsDateEndTx(
 	updatedBy string,
 ) error {
 	return r.setStartedStepsDateEnd(ctx, tx, idRoute, updatedBy)
+}
+
+type RouteDonationStepWithAddress struct {
+	entities.RouteDonationStep
+	AddrIdAddress       *string    `db:"addr_id_address"`
+	AddrIdUser          *string    `db:"addr_id_user"`
+	AddrIdDonationPoint *string    `db:"addr_id_donation_point"`
+	AddrZipcode         *string    `db:"addr_zipcode"`
+	AddrStreet          *string    `db:"addr_street"`
+	AddrNumber          *string    `db:"addr_number"`
+	AddrCity            *string    `db:"addr_city"`
+	AddrState           *string    `db:"addr_state"`
+	AddrNeighborhood    *string    `db:"addr_neighborhood"`
+	AddrComplement      *string    `db:"addr_complement"`
+	AddrLatitude        *float64   `db:"addr_latitude"`
+	AddrLongitude       *float64   `db:"addr_longitude"`
+	AddrCreatedAt       *time.Time `db:"addr_created_at"`
+	AddrUpdatedAt       *time.Time `db:"addr_updated_at"`
+}
+
+func (s RouteDonationStepWithAddress) Address() *entities.Address {
+	if s.AddrIdAddress == nil {
+		return nil
+	}
+
+	return &entities.Address{
+		IdAddress:       *s.AddrIdAddress,
+		IdUser:          s.AddrIdUser,
+		IdDonationPoint: s.AddrIdDonationPoint,
+		Zipcode:         utils.DerefString(s.AddrZipcode),
+		Street:          utils.DerefString(s.AddrStreet),
+		Number:          s.AddrNumber,
+		City:            utils.DerefString(s.AddrCity),
+		State:           utils.DerefString(s.AddrState),
+		Neighborhood:    utils.DerefString(s.AddrNeighborhood),
+		Complement:      s.AddrComplement,
+		Latitude:        s.AddrLatitude,
+		Longitude:       s.AddrLongitude,
+		CreatedAt:       utils.DerefTime(s.AddrCreatedAt),
+		UpdatedAt:       s.AddrUpdatedAt,
+	}
+}
+
+func (r *RouteDonationStepRepository) GetRouteDonationStepsWithAddressByIdRoute(
+	ctx c.Context,
+	idRoute string,
+) (*[]RouteDonationStepWithAddress, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.List[RouteDonationStepWithAddress](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT
+			rds.*,
+			a.id_address AS addr_id_address,
+			a.id_user AS addr_id_user,
+			a.id_donation_point AS addr_id_donation_point,
+			a.zipcode AS addr_zipcode,
+			a.street AS addr_street,
+			a.number AS addr_number,
+			a.city AS addr_city,
+			a.state AS addr_state,
+			a.neighborhood AS addr_neighborhood,
+			a.complement AS addr_complement,
+			a.latitude AS addr_latitude,
+			a.longitude AS addr_longitude,
+			a.created_at AS addr_created_at,
+			a.updated_at AS addr_updated_at
+		 FROM route_donation_step rds
+		 INNER JOIN donation_step ds ON ds.id_donation_step = rds.id_donation_step
+		 LEFT JOIN address a ON a.id_address = ds.id_address AND a.removed_at IS NULL
+		 WHERE rds.id_route = $1 AND rds.removed_at IS NULL
+		 ORDER BY rds.stop_order ASC`,
+		idRoute,
+	)
 }

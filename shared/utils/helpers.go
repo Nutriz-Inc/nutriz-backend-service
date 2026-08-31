@@ -58,6 +58,21 @@ func IsFutureDate(dateStr string) bool {
 	}
 	return false
 }
+
 func RouteStatusPtr(v entities.EnumRouteStatus) *entities.EnumRouteStatus {
 	return &v
+}
+
+func DerefString(v *string) string {
+	if v == nil {
+		return ""
+	}
+	return *v
+}
+
+func DerefTime(v *time.Time) time.Time {
+	if v == nil {
+		return time.Time{}
+	}
+	return *v
 }

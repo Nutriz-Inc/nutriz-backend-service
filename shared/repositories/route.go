@@ -123,6 +123,24 @@ func (r *RouteRepository) GetRouteById(ctx c.Context, id string) (*entities.Rout
 	)
 }
 
+func (r *RouteRepository) GetRouteWithDriverById(ctx c.Context, id string) (*dto.RouteRes, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.Get[dto.RouteRes](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT
+			r.*,
+			ud.name AS driver_name
+		 FROM "route" r
+		 LEFT JOIN "user" ud ON ud.id_user = r.id_driver AND ud.removed_at IS NULL
+		 WHERE r.id_route = $1 AND r.removed_at IS NULL`,
+		id,
+	)
+}
+
 type CreateRouteRepositoryReq struct {
 	IdRoute      string
 	IdDriver     string
