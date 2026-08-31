@@ -61,6 +61,7 @@ func Module() *fluxgo.FluxGo {
 	flux.AddDependency(repositories.DashboardRepositoryStart)
 	flux.AddDependency(repositories.RouteRepositoryStart)
 	flux.AddDependency(repositories.RouteDonationStepRepositoryStart)
+	flux.AddDependency(repositories.BottleRepositoryStart)
 
 	//Modules
 	flux.AddModule(donation.Module())

@@ -322,7 +322,7 @@ func (r *UserRepository) updateUser(ctx c.Context, exec sqlx.ExtContext, data *U
 		params["password"] = *data.Password
 	}
 	if data.MilkDonated != nil {
-		sets = append(sets, "milk_donated = :milk_donated")
+		sets = append(sets, "milk_donated = COALESCE(milk_donated, 0) + :milk_donated")
 		params["milk_donated"] = *data.MilkDonated
 	}
 
