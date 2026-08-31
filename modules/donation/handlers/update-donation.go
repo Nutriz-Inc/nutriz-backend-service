@@ -93,11 +93,6 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 		}
 
 		if validator.HasBottles {
-			for _, bottle := range *data.Bottles {
-				if bottle.IdDonation != data.Id {
-					return nil, fluxgo.ErrorBadRequest("Bottle id_donation must match the donation", "bottle.invalid_donation")
-				}
-			}
 			fieldsToUpdate = fieldsToUpdate + len(*data.Bottles)
 		}
 	}
@@ -117,6 +112,7 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 				return fmt.Errorf("error to remove donation bottles: %w", err)
 			}
 
+			milkDonated := 0.0
 			for _, bottle := range *data.Bottles {
 				err := h.bottleRepo.CreateBottleTx(ctx, tx, &repositories.CreateBottleRepositoryReq{
 					IdBottle:          utils.IdGenerate(utils.BottleEntity),
@@ -129,6 +125,19 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 				if err != nil {
 					return fmt.Errorf("error to create donation bottle: %w", err)
 				}
+
+				if bottle.QuantityDonatedMl != nil && (bottle.Discarded == nil || !*bottle.Discarded) {
+					milkDonated = milkDonated + *bottle.QuantityDonatedMl
+				}
+			}
+
+			err = h.userRepo.UpdateUserTx(ctx, tx, &repositories.UpdateUserRepositoryReq{
+				IdUser:      donation.CreatedBy,
+				ActionBy:    data.ActionBy,
+				MilkDonated: &milkDonated,
+			})
+			if err != nil {
+				return fmt.Errorf("error to update user milk donated: %w", err)
 			}
 		}
 

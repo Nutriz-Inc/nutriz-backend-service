@@ -48,11 +48,9 @@ func TestUpdateDonation(t *testing.T) {
 				IsActive: &isActive,
 				Bottles: &[]dto.BottleUpdateBase{
 					{
-						IdDonation:        idDonation,
 						QuantityDonatedMl: &firstBottle,
 					},
 					{
-						IdDonation:        idDonation,
 						QuantityDonatedMl: &secondBottle,
 						Discarded:         &discarded,
 						Description:       &description,
@@ -86,12 +84,10 @@ func TestUpdateDonation(t *testing.T) {
 			assert.Len(t, bottles, 2)
 			assert.Equal(t, 2, bottleCount(t, idDonation))
 
-			// second update replaces the previous bottles
 			quantity := 10.0
 			replaceBody := dto.UpdateDonationReq{
 				Bottles: &[]dto.BottleUpdateBase{
 					{
-						IdDonation:        idDonation,
 						QuantityDonatedMl: &quantity,
 					},
 				},
@@ -148,7 +144,6 @@ func TestUpdateDonation(t *testing.T) {
 			body := dto.UpdateDonationReq{
 				Bottles: &[]dto.BottleUpdateBase{
 					{
-						IdDonation:        "don_2veL1FPpuXxUaZcFaEC57BfpcKE",
 						QuantityDonatedMl: &quantity,
 					},
 				},
@@ -171,7 +166,6 @@ func TestUpdateDonation(t *testing.T) {
 			body := dto.UpdateDonationReq{
 				Bottles: &[]dto.BottleUpdateBase{
 					{
-						IdDonation:        "don_2veL1FPpuXxUaZcFaEC57BfpcKE",
 						QuantityDonatedMl: &quantity,
 					},
 				},

@@ -14,6 +14,12 @@ type UpdateDonationReq struct {
 	utils.GetReq
 }
 
+type BottleUpdateBase struct {
+	QuantityDonatedMl *float64 `json:"quantity_donated_ml" validate:"required,gte=0"`
+	Discarded         *bool    `json:"discarded" validate:"omitempty"`
+	Description       *string  `json:"description" validate:"omitempty,max=255"`
+}
+
 type UpdateDonationRes struct {
 	entities.Donation
 }
