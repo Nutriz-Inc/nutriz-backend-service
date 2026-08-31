@@ -75,7 +75,7 @@ func TestRemoveRouteStop(t *testing.T) {
 	env := fluxgo.ParseEnv[config.Env](fluxgo.EnvOptions{LoadFromFile: fluxgo.Pointer(".env.development"), Validate: true})
 	db, err := sqlx.Connect("postgres", env.Database.Dsn)
 	assert.NoError(t, err)
-	defer db.Close()
+	defer func() { _ = db.Close() }()
 
 	remainingStops := func(t *testing.T, idRoute string) map[string]int {
 		rows := []struct {
