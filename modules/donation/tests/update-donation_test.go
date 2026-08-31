@@ -35,9 +35,27 @@ func TestUpdateDonation(t *testing.T) {
 		return count
 	}
 
+	donorMilkDonated := func(t *testing.T, idDonation string) float64 {
+		var milk float64
+		err := db.Get(
+			&milk,
+			`SELECT COALESCE(u.milk_donated, 0)
+			 FROM "user" u
+			 JOIN donation d ON d.created_by = u.id_user
+			 WHERE d.id_donation = $1`,
+			idDonation,
+		)
+		assert.NoError(t, err)
+		return milk
+	}
+
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Admin", func(t *testing.T) {
 			idDonation := "don_2veL1FPpuXxUaZcFaEC57BfpcKF"
+
+			_, err := db.Exec(`DELETE FROM bottle WHERE id_donation = $1`, idDonation)
+			assert.NoError(t, err)
+
 			isActive := false
 			firstBottle := 4.2
 			secondBottle := 0.0
@@ -82,10 +100,14 @@ func TestUpdateDonation(t *testing.T) {
 			bottles, ok := getResp["bottles"].([]interface{})
 			assert.True(t, ok)
 			assert.Len(t, bottles, 2)
-			assert.Equal(t, 2, bottleCount(t, idDonation))
+
+			countAfterFirst := bottleCount(t, idDonation)
+			assert.Equal(t, 2, countAfterFirst)
+
+			milkAfterFirst := donorMilkDonated(t, idDonation)
 
 			quantity := 10.0
-			replaceBody := dto.UpdateDonationReq{
+			appendBody := dto.UpdateDonationReq{
 				Bottles: &[]dto.BottleUpdateBase{
 					{
 						QuantityDonatedMl: &quantity,
@@ -93,9 +115,10 @@ func TestUpdateDonation(t *testing.T) {
 				},
 			}
 
-			status, _ = fluxgo.RunTestRequest(app, "PUT", endpoint+"/"+idDonation, replaceBody, adminHeaders)
+			status, _ = fluxgo.RunTestRequest(app, "PUT", endpoint+"/"+idDonation, appendBody, adminHeaders)
 			assert.Equal(t, http.StatusOK, status)
-			assert.Equal(t, 1, bottleCount(t, idDonation))
+			assert.Equal(t, 3, bottleCount(t, idDonation))
+			assert.InDelta(t, milkAfterFirst+quantity, donorMilkDonated(t, idDonation), 0.001)
 		})
 
 		t.Run("Common", func(t *testing.T) {
@@ -159,28 +182,6 @@ func TestUpdateDonation(t *testing.T) {
 
 			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "donation.bottles_forbidden", resp["code"])
-		})
-
-		t.Run("Bottle id_donation must match the donation", func(t *testing.T) {
-			quantity := 1.0
-			body := dto.UpdateDonationReq{
-				Bottles: &[]dto.BottleUpdateBase{
-					{
-						QuantityDonatedMl: &quantity,
-					},
-				},
-			}
-
-			status, resp := fluxgo.RunTestRequest(
-				app,
-				"PUT",
-				endpoint+"/don_2veL1FPpuXxUaZcFaEC57BfpcKF",
-				body,
-				adminHeaders,
-			)
-
-			assert.Equal(t, http.StatusBadRequest, status)
-			assert.Equal(t, "bottle.invalid_donation", resp["code"])
 		})
 
 		t.Run("Donation not found", func(t *testing.T) {

@@ -132,35 +132,3 @@ func (r *BottleRepository) CreateBottle(
 		data,
 	)
 }
-
-func (r *BottleRepository) deleteBottlesByIdDonation(
-	ctx c.Context,
-	exec sqlx.ExtContext,
-	idDonation string,
-) error {
-	ctx, span := r.StartSpan(ctx)
-	defer span.End()
-
-	query := `DELETE FROM bottle WHERE id_donation = :id_donation`
-
-	params := map[string]any{
-		"id_donation": idDonation,
-	}
-
-	_, err := sqlx.NamedExecContext(
-		ctx,
-		exec,
-		query,
-		params,
-	)
-
-	return err
-}
-
-func (r *BottleRepository) DeleteBottlesByIdDonationTx(
-	ctx c.Context,
-	tx *sqlx.Tx,
-	idDonation string,
-) error {
-	return r.deleteBottlesByIdDonation(ctx, tx, idDonation)
-}

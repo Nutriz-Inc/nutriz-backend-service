@@ -108,10 +108,6 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 		}
 
 		if validator.HasBottles {
-			if err := h.bottleRepo.DeleteBottlesByIdDonationTx(ctx, tx, data.Id); err != nil {
-				return fmt.Errorf("error to remove donation bottles: %w", err)
-			}
-
 			milkDonated := 0.0
 			for _, bottle := range *data.Bottles {
 				err := h.bottleRepo.CreateBottleTx(ctx, tx, &repositories.CreateBottleRepositoryReq{
