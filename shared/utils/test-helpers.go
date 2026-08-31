@@ -26,6 +26,10 @@ var TestHeadersNurse = fluxgo.Headers{
 	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGxOViIsImlhdCI6MTc3ODc2OTE4Nn0.eTq-VftqbwbT6bRhWFagXkfrU_BDmt94y2_jrPhq7vU",
 }
 
+var TestHeadersDriver = fluxgo.Headers{
+	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGNEUiIsImlhdCI6MTc4ODA5NjA5M30.D5-sRs9tFvMxGwLOH1eBWT3YM7zelKW2tnOnc4iXbMs",
+}
+
 var InvalidTestHeaders = fluxgo.Headers{
 	"Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c2VyIjoidXNyXzJ2ZUwxRlBwdVh4VWFaY0ZhRUM1N0JmcGNMViIsImlhdCI6MTc2ODU4NzA2OX0.eMkzXrc9lJ_Ah_VLvj0YgTyzrgp42SJ8rtlVm7vg_Ps",
 }
