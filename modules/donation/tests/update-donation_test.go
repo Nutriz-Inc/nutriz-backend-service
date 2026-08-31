@@ -124,6 +124,9 @@ func TestUpdateDonation(t *testing.T) {
 			idDonation := "don_2veL1FPpuXxUaZcFaEC57BfpcC1"
 			_, err := db.Exec(`UPDATE donation SET is_active = true WHERE id_donation = $1`, idDonation)
 			assert.NoError(t, err)
+			t.Cleanup(func() {
+				_, _ = db.Exec(`UPDATE donation SET is_active = false WHERE id_donation = $1`, idDonation)
+			})
 
 			userFeedback := "Feedback atualizado"
 			body := dto.UpdateDonationReq{
@@ -169,6 +172,9 @@ func TestUpdateDonation(t *testing.T) {
 			idDonation := "don_2veL1FPpuXxUaZcFaEC57BfpcC1"
 			_, err := db.Exec(`UPDATE donation SET is_active = true WHERE id_donation = $1`, idDonation)
 			assert.NoError(t, err)
+			t.Cleanup(func() {
+				_, _ = db.Exec(`UPDATE donation SET is_active = false WHERE id_donation = $1`, idDonation)
+			})
 
 			quantity := 1.0
 			body := dto.UpdateDonationReq{
