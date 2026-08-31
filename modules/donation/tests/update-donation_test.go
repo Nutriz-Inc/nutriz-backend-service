@@ -55,6 +55,8 @@ func TestUpdateDonation(t *testing.T) {
 
 			_, err := db.Exec(`DELETE FROM bottle WHERE id_donation = $1`, idDonation)
 			assert.NoError(t, err)
+			_, err = db.Exec(`UPDATE donation SET is_active = true WHERE id_donation = $1`, idDonation)
+			assert.NoError(t, err)
 
 			firstBottle := 4.2
 			secondBottle := 0.0
@@ -119,6 +121,10 @@ func TestUpdateDonation(t *testing.T) {
 		})
 
 		t.Run("Common", func(t *testing.T) {
+			idDonation := "don_2veL1FPpuXxUaZcFaEC57BfpcC1"
+			_, err := db.Exec(`UPDATE donation SET is_active = true WHERE id_donation = $1`, idDonation)
+			assert.NoError(t, err)
+
 			userFeedback := "Feedback atualizado"
 			body := dto.UpdateDonationReq{
 				UserFeedback:  &userFeedback,
@@ -128,13 +134,13 @@ func TestUpdateDonation(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(
 				app,
 				"PUT",
-				endpoint+"/don_2veL1FPpuXxUaZcFaEC57BfpcKE",
+				endpoint+"/"+idDonation,
 				body,
 				commonHeaders,
 			)
 
 			assert.Equal(t, http.StatusOK, status)
-			assert.Equal(t, "don_2veL1FPpuXxUaZcFaEC57BfpcKE", resp["id_donation"])
+			assert.Equal(t, idDonation, resp["id_donation"])
 			assert.Equal(t, userFeedback, resp["user_feedback"])
 		})
 	})
@@ -160,6 +166,10 @@ func TestUpdateDonation(t *testing.T) {
 		})
 
 		t.Run("Only admins can update bottles", func(t *testing.T) {
+			idDonation := "don_2veL1FPpuXxUaZcFaEC57BfpcC1"
+			_, err := db.Exec(`UPDATE donation SET is_active = true WHERE id_donation = $1`, idDonation)
+			assert.NoError(t, err)
+
 			quantity := 1.0
 			body := dto.UpdateDonationReq{
 				Bottles: &[]dto.BottleUpdateBase{
@@ -172,7 +182,7 @@ func TestUpdateDonation(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(
 				app,
 				"PUT",
-				endpoint+"/don_2veL1FPpuXxUaZcFaEC57BfpcKE",
+				endpoint+"/"+idDonation,
 				body,
 				commonHeaders,
 			)
