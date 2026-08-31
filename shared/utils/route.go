@@ -4,8 +4,12 @@ import (
 	c "context"
 	"fmt"
 	"nutriz-backend-service/config"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/provider/location"
+	"strings"
 	"time"
+
+	fluxgo "github.com/MMortari/FluxGo"
 )
 
 type OptimizedRoute struct {
@@ -57,4 +61,79 @@ func GetOptimizedRoute(ctx c.Context, coordinates []location.Coordinate, config 
 		StopOrders: stopOrders,
 		Duration:   time.Duration(optimizedRoute.Trips[0].Duration * float64(time.Second)),
 	}, nil
+}
+
+type StopCoordinates struct {
+	Latitude  *float64
+	Longitude *float64
+}
+
+func BuildOptimizedStopOrders(
+	ctx c.Context,
+	stops []StopCoordinates,
+	config *config.Env,
+) ([]int16, time.Duration, error) {
+	if len(stops) == 0 {
+		return []int16{}, 0, nil
+	}
+
+	coordinates := make([]location.Coordinate, 0, len(stops))
+	for _, stop := range stops {
+		latitude, longitude := FillMissingCoordinates(stop.Latitude, stop.Longitude)
+
+		coordinates = append(coordinates, location.Coordinate{
+			Latitude:  latitude,
+			Longitude: longitude,
+		})
+	}
+
+	optimizedRoute, err := GetOptimizedRoute(ctx, coordinates, config)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	stopOrders := make([]int16, 0, len(optimizedRoute.StopOrders))
+	for _, position := range optimizedRoute.StopOrders {
+		stopOrders = append(stopOrders, int16(position))
+	}
+
+	return stopOrders, optimizedRoute.Duration, nil
+}
+
+func TotalRouteDuration(drivingTime time.Duration, stopCount int) time.Duration {
+	return drivingTime + time.Duration(stopCount)*entities.ROUTE_STOP_SAFETY_TIME
+}
+
+func OptimizeStops(
+	ctx c.Context,
+	env *config.Env,
+	stops []StopCoordinates,
+) ([]int16, *fluxgo.GlobalError) {
+	stopOrders, drivingTime, err := BuildOptimizedStopOrders(ctx, stops, env)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to build the route: " + err.Error())
+	}
+
+	totalDuration := TotalRouteDuration(drivingTime, len(stops))
+
+	if totalDuration > entities.MAX_ROUTE_DURATION {
+		return nil, fluxgo.ErrorBadRequest(
+			fmt.Sprintf(
+				"Route takes %.1f hours and the maximum allowed is %.0f hours",
+				totalDuration.Hours(),
+				entities.MAX_ROUTE_DURATION.Hours(),
+			),
+			"route.max_duration_exceeded",
+		)
+	}
+
+	return stopOrders, nil
+}
+
+func MatchesAddressField(value *string, expected string) bool {
+	if value == nil {
+		return false
+	}
+
+	return strings.EqualFold(strings.TrimSpace(*value), strings.TrimSpace(expected))
 }
