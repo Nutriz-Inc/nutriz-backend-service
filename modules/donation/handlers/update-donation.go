@@ -17,17 +17,20 @@ import (
 type HandlerUpdateDonation struct {
 	db           *fluxgo.Database
 	donationRepo *repositories.DonationRepository
+	bottleRepo   *repositories.BottleRepository
 	userRepo     *repositories.UserRepository
 }
 
 func HandlerUpdateDonationStart(
 	db *fluxgo.Database,
 	donationRepo *repositories.DonationRepository,
+	bottleRepo *repositories.BottleRepository,
 	userRepo *repositories.UserRepository,
 ) *HandlerUpdateDonation {
 	return &HandlerUpdateDonation{
 		db,
 		donationRepo,
+		bottleRepo,
 		userRepo,
 	}
 }
@@ -59,6 +62,9 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 	if donation == nil {
 		return nil, fluxgo.ErrorNotFound("Donation not found")
 	}
+	if !donation.IsActive {
+		return nil, fluxgo.ErrorBadRequest("Donation is inactive and cannot be updated", "donation.inactive")
+	}
 
 	fieldsToUpdate := 0
 	req := repositories.UpdateDonationRepositoryReq{
@@ -79,15 +85,18 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 		}
 	}
 
-	if user.Type == entities.EnumUserTypeAdmin {
-		if validator.HasQuantityDonated {
-			req.QuantityDonated = data.QuantityDonated
-			fieldsToUpdate++
-		}
+	if validator.HasBottles && user.Type != entities.EnumUserTypeAdmin {
+		return nil, utils.ErrorForbidden("Only admins can update donation bottles", "donation.bottles_forbidden")
+	}
 
+	if user.Type == entities.EnumUserTypeAdmin {
 		if validator.HasIsActive {
 			req.IsActive = data.IsActive
 			fieldsToUpdate++
+		}
+
+		if validator.HasBottles {
+			fieldsToUpdate = fieldsToUpdate + len(*data.Bottles)
 		}
 	}
 
@@ -101,11 +110,30 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 			return fmt.Errorf("error to update donation: %w", err)
 		}
 
-		if validator.HasQuantityDonated {
+		if validator.HasBottles {
+			milkDonated := 0.0
+			for _, bottle := range *data.Bottles {
+				err := h.bottleRepo.CreateBottleTx(ctx, tx, &repositories.CreateBottleRepositoryReq{
+					IdBottle:          utils.IdGenerate(utils.BottleEntity),
+					IdDonation:        data.Id,
+					IdUser:            data.ActionBy,
+					QuantityDonatedMl: bottle.QuantityDonatedMl,
+					Discarded:         bottle.Discarded,
+					Description:       bottle.Description,
+				})
+				if err != nil {
+					return fmt.Errorf("error to create donation bottle: %w", err)
+				}
+
+				if bottle.QuantityDonatedMl != nil && (bottle.Discarded == nil || !*bottle.Discarded) {
+					milkDonated = milkDonated + *bottle.QuantityDonatedMl
+				}
+			}
+
 			err = h.userRepo.UpdateUserTx(ctx, tx, &repositories.UpdateUserRepositoryReq{
 				IdUser:      donation.CreatedBy,
 				ActionBy:    data.ActionBy,
-				MilkDonated: req.QuantityDonated,
+				MilkDonated: &milkDonated,
 			})
 			if err != nil {
 				return fmt.Errorf("error to update user milk donated: %w", err)

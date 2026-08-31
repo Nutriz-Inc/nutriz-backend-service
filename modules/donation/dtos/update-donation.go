@@ -6,12 +6,18 @@ import (
 )
 
 type UpdateDonationReq struct {
-	ActionBy        string   `reqHeader:"action-by" validate:"required,id"`
-	IsActive        *bool    `json:"is_active" validate:"omitempty"`                  //adm
-	QuantityDonated *float64 `json:"quantity_donated" validate:"omitempty,gt=0"`      //adm
-	UserFeedback    *string  `json:"user_feedback" validate:"omitempty"`              //common
-	ScoreFeedback   *int16   `json:"score_feedback" validate:"omitempty,gte=0,lte=5"` //common
+	ActionBy      string              `reqHeader:"action-by" validate:"required,id"`
+	IsActive      *bool               `json:"is_active" validate:"omitempty"`                  //adm
+	Bottles       *[]BottleUpdateBase `json:"bottles" validate:"omitempty,max=50,dive"`        //adm
+	UserFeedback  *string             `json:"user_feedback" validate:"omitempty"`              //common
+	ScoreFeedback *int16              `json:"score_feedback" validate:"omitempty,gte=0,lte=5"` //common
 	utils.GetReq
+}
+
+type BottleUpdateBase struct {
+	QuantityDonatedMl *float64 `json:"quantity_donated_ml" validate:"required,gte=0"`
+	Discarded         *bool    `json:"discarded" validate:"omitempty"`
+	Description       *string  `json:"description" validate:"omitempty,max=255"`
 }
 
 type UpdateDonationRes struct {
@@ -19,16 +25,15 @@ type UpdateDonationRes struct {
 }
 
 type UpdateDonationOptionalFields struct {
-	HasIsActive        bool
-	HasQuantityDonated bool
-	HasFeedback        bool
-	HasScoreFeedback   bool
+	HasIsActive bool
+	HasBottles  bool
+	HasFeedback bool
 }
 
 func (c UpdateDonationReq) ValidateUpdateDonationOptionalFields() UpdateDonationOptionalFields {
 	return UpdateDonationOptionalFields{
-		HasIsActive:        c.IsActive != nil && !*c.IsActive,
-		HasQuantityDonated: c.QuantityDonated != nil && *c.QuantityDonated > 0,
-		HasFeedback:        c.UserFeedback != nil && *c.UserFeedback != "" && c.ScoreFeedback != nil,
+		HasIsActive: c.IsActive != nil && !*c.IsActive,
+		HasBottles:  c.Bottles != nil && len(*c.Bottles) > 0,
+		HasFeedback: c.UserFeedback != nil && *c.UserFeedback != "" && c.ScoreFeedback != nil,
 	}
 }

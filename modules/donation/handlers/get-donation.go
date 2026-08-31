@@ -15,13 +15,15 @@ import (
 type HandlerGetDonation struct {
 	donationRepo     *repositories.DonationRepository
 	donationStepRepo *repositories.DonationStepRepository
+	bottleRepo       *repositories.BottleRepository
 	userRepo         *repositories.UserRepository
 }
 
-func HandlerGetDonationStart(donationRepo *repositories.DonationRepository, donationStepRepo *repositories.DonationStepRepository, userRepo *repositories.UserRepository) *HandlerGetDonation {
+func HandlerGetDonationStart(donationRepo *repositories.DonationRepository, donationStepRepo *repositories.DonationStepRepository, bottleRepo *repositories.BottleRepository, userRepo *repositories.UserRepository) *HandlerGetDonation {
 	return &HandlerGetDonation{
 		donationRepo,
 		donationStepRepo,
+		bottleRepo,
 		userRepo,
 	}
 }
@@ -62,8 +64,14 @@ func (h *HandlerGetDonation) Execute(ctx c.Context, filters *dto.GetDonationReq)
 		return nil, fluxgo.ErrorInternalError("Error to get donation steps")
 	}
 
+	bottles, _, err := h.bottleRepo.GetBottlesByIdDonation(ctx, filters.Id)
+	if err != nil {
+		return nil, fluxgo.ErrorInternalError("Error to get donation bottles")
+	}
+
 	return &dto.GetDonationRes{
 		Donation: *donation,
 		Steps:    donationSteps,
+		Bottles:  bottles,
 	}, nil
 }

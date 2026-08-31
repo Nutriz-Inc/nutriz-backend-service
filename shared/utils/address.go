@@ -17,14 +17,14 @@ type AddressRes struct {
 }
 
 func GetAddressByZipCode(ctx c.Context, zipcode string, config *config.Env) (*AddressRes, error) {
-	return getAddressByZipCode(ctx, zipcode, config, true)
+	return getAddressByZipCode(ctx, zipcode, config)
 }
 
 func GetAddressByZipCodeOptionalCoordinates(ctx c.Context, zipcode string, config *config.Env) (*AddressRes, error) {
-	return getAddressByZipCode(ctx, zipcode, config, false)
+	return getAddressByZipCode(ctx, zipcode, config)
 }
 
-func getAddressByZipCode(ctx c.Context, zipcode string, config *config.Env, coordinatesRequired bool) (*AddressRes, error) {
+func getAddressByZipCode(ctx c.Context, zipcode string, config *config.Env) (*AddressRes, error) {
 	provider, err := location.NewLocationProvider(config)
 	if err != nil {
 		return nil, fmt.Errorf("error to initialize location provider: %v", err)
@@ -58,11 +58,12 @@ func getAddressByZipCode(ctx c.Context, zipcode string, config *config.Env, coor
 
 	coordinates, err := provider.GetCoordinatesByAddress(ctx, query)
 	if err != nil {
-		if !coordinatesRequired {
-			return res, nil
-		}
+		latitude, longitude := GenerateSaoPauloCoordinates()
 
-		return nil, fmt.Errorf("error getting coordinates by address: %v", err)
+		res.Latitude = Float64Ptr(latitude)
+		res.Longitude = Float64Ptr(longitude)
+
+		return res, nil
 	}
 
 	res.Latitude = Float64Ptr(StringToFloat64(coordinates.Lat))

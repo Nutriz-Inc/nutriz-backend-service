@@ -27,6 +27,7 @@ const (
 	EnumUserTypeCommon EnumUserType = "common"
 	EnumUserTypeAdmin  EnumUserType = "adm"
 	EnumUserTypeNurse  EnumUserType = "nurse"
+	EnumUserTypeDriver EnumUserType = "driver"
 )
 
 func (u User) TableName() string {
@@ -35,4 +36,26 @@ func (u User) TableName() string {
 
 func (u User) PrimaryKey() string {
 	return "id_user"
+}
+
+type UserAction struct {
+	CanCreateRoute      bool
+	CanListRoute        bool
+	CanUpdateRoute      bool
+	CanCreateRouteStop  bool
+	CanRemoveRouteStop  bool
+	CanUpdateRouteStop  bool
+	CanListDonationStep bool
+}
+
+func (u User) Action() UserAction {
+	return UserAction{
+		CanCreateRoute:      u.Type == EnumUserTypeAdmin,
+		CanListRoute:        u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeDriver || u.Type == EnumUserTypeNurse,
+		CanUpdateRoute:      u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeDriver,
+		CanCreateRouteStop:  u.Type == EnumUserTypeAdmin,
+		CanRemoveRouteStop:  u.Type == EnumUserTypeAdmin,
+		CanUpdateRouteStop:  u.Type == EnumUserTypeDriver,
+		CanListDonationStep: u.Type == EnumUserTypeAdmin,
+	}
 }
