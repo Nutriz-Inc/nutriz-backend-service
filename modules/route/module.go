@@ -86,5 +86,25 @@ func Module() *fluxgo.FluxModule {
 		)
 	})
 
+	mod.AddHandler(handlers.HandlerCreateRouteStopStart)
+	mod.AddRoute(func(f *fluxgo.FluxGo, redis *fluxgo.Redis, handler *handlers.HandlerCreateRouteStop) error {
+		return mod.HttpRoute(
+			f,
+			"/internal",
+			"POST",
+			"/route/:id_route/stop",
+			fluxgo.RouteIncome{
+				Entity:          dto.CreateRouteStopReq{},
+				FromBody:        true,
+				FromParam:       true,
+				FromHeader:      true,
+				Validate:        true,
+				Cache:           redis,
+				CacheInvalidate: []string{"/internal/route"},
+			},
+			handler.HandleHttp,
+		)
+	})
+
 	return mod
 }

@@ -7,11 +7,8 @@ import (
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/route/dtos"
 	"nutriz-backend-service/shared/entities"
-	"nutriz-backend-service/shared/provider/location"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
-	"strings"
-	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/gofiber/fiber/v2"
@@ -89,7 +86,7 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 		return nil, globalErr
 	}
 
-	optimizedRoute, globalErr := h.getOptimizedRoute(ctx, donationSteps)
+	stopOrders, globalErr := utils.OptimizeStops(ctx, h.config, stopCoordinates(donationSteps))
 	if globalErr != nil {
 		return nil, globalErr
 	}
@@ -118,7 +115,7 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 				IdRoute:             idRoute,
 				IdDonationStep:      donationStep.IdDonationStep,
 				IdUser:              data.ActionBy,
-				StopOrder:           int16(optimizedRoute.StopOrders[index]),
+				StopOrder:           stopOrders[index],
 			})
 			if err != nil {
 				return fmt.Errorf("error to create route donation step: %w", err)
@@ -197,13 +194,13 @@ func (h *HandlerCreateRoute) getDonationSteps(
 			return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("Donation of %s is not active", donationStep.IdDonationStep), "donation.inactive")
 		}
 
-		if data.City != nil && !matchesAddressField(donationStep.City, *data.City) {
+		if data.City != nil && !utils.MatchesAddressField(donationStep.City, *data.City) {
 			return nil, fluxgo.ErrorBadRequest(
 				fmt.Sprintf("Donation step %s is not in the city %s", donationStep.IdDonationStep, *data.City),
 				"stops.invalid_city",
 			)
 		}
-		if data.Neighborhood != nil && !matchesAddressField(donationStep.Neighborhood, *data.Neighborhood) {
+		if data.Neighborhood != nil && !utils.MatchesAddressField(donationStep.Neighborhood, *data.Neighborhood) {
 			return nil, fluxgo.ErrorBadRequest(
 				fmt.Sprintf("Donation step %s is not in the neighborhood %s", donationStep.IdDonationStep, *data.Neighborhood),
 				"stops.invalid_neighborhood",
@@ -216,46 +213,15 @@ func (h *HandlerCreateRoute) getDonationSteps(
 	return &ordered, nil
 }
 
-func matchesAddressField(value *string, expected string) bool {
-	if value == nil {
-		return false
-	}
-
-	return strings.EqualFold(strings.TrimSpace(*value), strings.TrimSpace(expected))
-}
-
-func (h *HandlerCreateRoute) getOptimizedRoute(
-	ctx c.Context,
-	donationSteps *[]repositories.DonationStepWithLocation,
-) (*utils.OptimizedRoute, *fluxgo.GlobalError) {
-	coordinates := make([]location.Coordinate, 0, len(*donationSteps))
+func stopCoordinates(donationSteps *[]repositories.DonationStepWithLocation) []utils.StopCoordinates {
+	stops := make([]utils.StopCoordinates, 0, len(*donationSteps))
 
 	for _, donationStep := range *donationSteps {
-		latitude, longitude := utils.FillMissingCoordinates(donationStep.Latitude, donationStep.Longitude)
-
-		coordinates = append(coordinates, location.Coordinate{
-			Latitude:  latitude,
-			Longitude: longitude,
+		stops = append(stops, utils.StopCoordinates{
+			Latitude:  donationStep.Latitude,
+			Longitude: donationStep.Longitude,
 		})
 	}
 
-	optimizedRoute, err := utils.GetOptimizedRoute(ctx, coordinates, h.config)
-	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to build the route: " + err.Error())
-	}
-
-	totalDuration := optimizedRoute.Duration + time.Duration(len(coordinates))*entities.ROUTE_STOP_SAFETY_TIME
-
-	if totalDuration > entities.MAX_ROUTE_DURATION {
-		return nil, fluxgo.ErrorBadRequest(
-			fmt.Sprintf(
-				"Route takes %.1f hours and the maximum allowed is %.0f hours",
-				totalDuration.Hours(),
-				entities.MAX_ROUTE_DURATION.Hours(),
-			),
-			"route.max_duration_exceeded",
-		)
-	}
-
-	return optimizedRoute, nil
+	return stops
 }

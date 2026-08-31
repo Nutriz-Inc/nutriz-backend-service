@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/route/dtos"
-	"nutriz-backend-service/shared/provider/location"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -73,7 +72,7 @@ func (h *HandlerRemoveRouteStop) Execute(ctx c.Context, data *dto.RemoveRouteSto
 		return nil, globalErr
 	}
 
-	stopOrders, globalErr := h.getStopOrders(ctx, remainingStops)
+	stopOrders, globalErr := utils.OptimizeStops(ctx, h.config, routeStopCoordinates(remainingStops))
 	if globalErr != nil {
 		return nil, globalErr
 	}
@@ -144,33 +143,15 @@ func (h *HandlerRemoveRouteStop) getRemainingStops(
 	return remaining, nil
 }
 
-func (h *HandlerRemoveRouteStop) getStopOrders(
-	ctx c.Context,
-	stops []repositories.RouteDonationStepWithLocation,
-) ([]int16, *fluxgo.GlobalError) {
-	if len(stops) == 0 {
-		return nil, nil
-	}
+func routeStopCoordinates(stops []repositories.RouteDonationStepWithLocation) []utils.StopCoordinates {
+	coordinates := make([]utils.StopCoordinates, 0, len(stops))
 
-	coordinates := make([]location.Coordinate, 0, len(stops))
 	for _, stop := range stops {
-		latitude, longitude := utils.FillMissingCoordinates(stop.Latitude, stop.Longitude)
-
-		coordinates = append(coordinates, location.Coordinate{
-			Latitude:  latitude,
-			Longitude: longitude,
+		coordinates = append(coordinates, utils.StopCoordinates{
+			Latitude:  stop.Latitude,
+			Longitude: stop.Longitude,
 		})
 	}
 
-	optimizedRoute, err := utils.GetOptimizedRoute(ctx, coordinates, h.config)
-	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to reorder the route: " + err.Error())
-	}
-
-	stopOrders := make([]int16, 0, len(optimizedRoute.StopOrders))
-	for _, position := range optimizedRoute.StopOrders {
-		stopOrders = append(stopOrders, int16(position))
-	}
-
-	return stopOrders, nil
+	return coordinates
 }
