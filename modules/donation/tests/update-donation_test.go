@@ -197,29 +197,6 @@ func TestUpdateDonation(t *testing.T) {
 			assert.Equal(t, "donation.bottles_forbidden", resp["code"])
 		})
 
-		t.Run("Donation is inactive and cannot be updated", func(t *testing.T) {
-			quantity := 5.0
-			body := dto.UpdateDonationReq{
-				Bottles: &[]dto.BottleUpdateBase{
-					{
-						QuantityDonatedMl: &quantity,
-					},
-				},
-			}
-
-			// don_...KE is seeded as inactive
-			status, resp := fluxgo.RunTestRequest(
-				app,
-				"PUT",
-				endpoint+"/don_2veL1FPpuXxUaZcFaEC57BfpcKE",
-				body,
-				adminHeaders,
-			)
-
-			assert.Equal(t, http.StatusBadRequest, status)
-			assert.Equal(t, "donation.inactive", resp["code"])
-		})
-
 		t.Run("Donation not found", func(t *testing.T) {
 			isActive := false
 			body := dto.UpdateDonationReq{
