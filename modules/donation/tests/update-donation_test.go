@@ -24,8 +24,15 @@ func TestUpdateDonation(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Admin", func(t *testing.T) {
 			isActive := false
+			quantityDonatedMl := 4.2
 			body := dto.UpdateDonationReq{
 				IsActive: &isActive,
+				Bottles: &[]dto.BottleUpdateBase{
+					{
+						IdDonation:        "don_2veL1FPpuXxUaZcFaEC57BfpcKF",
+						QuantityDonatedMl: &quantityDonatedMl,
+					},
+				},
 			}
 
 			status, resp := fluxgo.RunTestRequest(
@@ -39,6 +46,7 @@ func TestUpdateDonation(t *testing.T) {
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, "don_2veL1FPpuXxUaZcFaEC57BfpcKF", resp["id_donation"])
 			assert.Equal(t, isActive, resp["is_active"])
+			assert.Equal(t, quantityDonatedMl, resp["quantity_donated"])
 		})
 
 		t.Run("Common", func(t *testing.T) {

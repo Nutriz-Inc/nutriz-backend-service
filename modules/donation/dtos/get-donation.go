@@ -12,5 +12,6 @@ type GetDonationReq struct {
 
 type GetDonationRes struct {
 	entities.Donation
-	Steps *[]entities.DonationStep `json:"steps"`
+	Steps   *[]entities.DonationStep `json:"steps"`
+	Bottles *[]entities.Bottle       `json:"bottles"`
 }
