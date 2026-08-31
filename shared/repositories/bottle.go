@@ -41,19 +41,6 @@ func (r *BottleRepository) GetBottlesByIdDonation(
 	)
 }
 
-func (r *BottleRepository) GetBottleById(ctx c.Context, id string) (*entities.Bottle, error) {
-	ctx, span := r.StartSpan(ctx)
-	defer span.End()
-
-	return utils.Get[entities.Bottle](
-		ctx,
-		r.DB.ReadOnlyDB(),
-		span,
-		`SELECT * FROM "bottle" WHERE id_bottle = $1`,
-		id,
-	)
-}
-
 type CreateBottleRepositoryReq struct {
 	IdBottle          string
 	IdDonation        string

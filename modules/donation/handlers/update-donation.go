@@ -62,6 +62,9 @@ func (h *HandlerUpdateDonation) Execute(ctx c.Context, data *dto.UpdateDonationR
 	if donation == nil {
 		return nil, fluxgo.ErrorNotFound("Donation not found")
 	}
+	if !donation.IsActive {
+		return nil, fluxgo.ErrorBadRequest("Donation is inactive and cannot be updated", "donation.inactive")
+	}
 
 	fieldsToUpdate := 0
 	req := repositories.UpdateDonationRepositoryReq{

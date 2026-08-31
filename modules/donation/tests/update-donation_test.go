@@ -56,14 +56,12 @@ func TestUpdateDonation(t *testing.T) {
 			_, err := db.Exec(`DELETE FROM bottle WHERE id_donation = $1`, idDonation)
 			assert.NoError(t, err)
 
-			isActive := false
 			firstBottle := 4.2
 			secondBottle := 0.0
 			discarded := true
 			description := "Frasco vazado"
 
 			body := dto.UpdateDonationReq{
-				IsActive: &isActive,
 				Bottles: &[]dto.BottleUpdateBase{
 					{
 						QuantityDonatedMl: &firstBottle,
@@ -86,7 +84,6 @@ func TestUpdateDonation(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, idDonation, resp["id_donation"])
-			assert.Equal(t, isActive, resp["is_active"])
 
 			status, getResp := fluxgo.RunTestRequest(
 				app,
@@ -182,6 +179,29 @@ func TestUpdateDonation(t *testing.T) {
 
 			assert.Equal(t, http.StatusForbidden, status)
 			assert.Equal(t, "donation.bottles_forbidden", resp["code"])
+		})
+
+		t.Run("Donation is inactive and cannot be updated", func(t *testing.T) {
+			quantity := 5.0
+			body := dto.UpdateDonationReq{
+				Bottles: &[]dto.BottleUpdateBase{
+					{
+						QuantityDonatedMl: &quantity,
+					},
+				},
+			}
+
+			// don_...KE is seeded as inactive
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"PUT",
+				endpoint+"/don_2veL1FPpuXxUaZcFaEC57BfpcKE",
+				body,
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(t, "donation.inactive", resp["code"])
 		})
 
 		t.Run("Donation not found", func(t *testing.T) {
