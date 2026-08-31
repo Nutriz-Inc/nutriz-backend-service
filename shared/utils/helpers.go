@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"nutriz-backend-service/shared/entities"
 	"strconv"
 	"time"
 )
@@ -53,7 +54,10 @@ func IsFutureDate(dateStr string) bool {
 		date, err := time.Parse(layout, dateStr)
 		if err == nil {
 			return date.After(time.Now())
-        }
+		}
 	}
 	return false
+}
+func RouteStatusPtr(v entities.EnumRouteStatus) *entities.EnumRouteStatus {
+	return &v
 }

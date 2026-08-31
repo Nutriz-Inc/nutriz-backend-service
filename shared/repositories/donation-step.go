@@ -229,6 +229,8 @@ type DonationStepWithLocation struct {
 	IsDonationActive bool     `db:"is_donation_active" json:"is_donation_active"`
 	Latitude         *float64 `db:"latitude" json:"latitude"`
 	Longitude        *float64 `db:"longitude" json:"longitude"`
+	City             *string  `db:"city" json:"city"`
+	Neighborhood     *string  `db:"neighborhood" json:"neighborhood"`
 }
 
 func (r *DonationStepRepository) GetDonationStepsWithLocationByIds(
@@ -243,7 +245,9 @@ func (r *DonationStepRepository) GetDonationStepsWithLocationByIds(
 			ds.*,
 			d.is_active AS is_donation_active,
 			a.latitude AS latitude,
-			a.longitude AS longitude
+			a.longitude AS longitude,
+			a.city AS city,
+			a.neighborhood AS neighborhood
 		 FROM donation_step ds
 		 INNER JOIN donation d ON d.id_donation = ds.id_donation
 		 LEFT JOIN address a ON a.id_address = ds.id_address AND a.removed_at IS NULL

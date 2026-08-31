@@ -5,6 +5,7 @@ import (
 	dto "nutriz-backend-service/modules/route/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/utils"
+	"strings"
 	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
@@ -207,6 +208,119 @@ func (r *RouteRepository) CreateRoute(
 	data *CreateRouteRepositoryReq,
 ) error {
 	return r.createRoute(
+		ctx,
+		r.DB.WriteDB(),
+		data,
+	)
+}
+
+type UpdateRouteRepositoryReq struct {
+	IdRoute      string
+	UpdatedBy    string
+	Name         *string
+	City         *string
+	Neighborhood *string
+	Status       *entities.EnumRouteStatus
+	Description  *string
+	DateSet      *time.Time
+	SetDateStart bool
+	SetDateEnd   bool
+	Mileage      *float64
+	UserFeedback *string
+}
+
+func (r *RouteRepository) updateRoute(
+	ctx c.Context,
+	exec sqlx.ExtContext,
+	data *UpdateRouteRepositoryReq,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	sets := []string{}
+	params := map[string]any{
+		"id_route":   data.IdRoute,
+		"updated_by": data.UpdatedBy,
+	}
+
+	if data.Name != nil {
+		sets = append(sets, "name = :name")
+		params["name"] = *data.Name
+	}
+	if data.City != nil {
+		sets = append(sets, "city = :city")
+		params["city"] = *data.City
+	}
+	if data.Neighborhood != nil {
+		sets = append(sets, "neighborhood = :neighborhood")
+		params["neighborhood"] = *data.Neighborhood
+	}
+	if data.Status != nil {
+		sets = append(sets, "status = :status")
+		params["status"] = *data.Status
+	}
+	if data.Description != nil {
+		sets = append(sets, "description = :description")
+		params["description"] = *data.Description
+	}
+	if data.DateSet != nil {
+		sets = append(sets, "date_set = :date_set")
+		params["date_set"] = *data.DateSet
+	}
+	if data.Mileage != nil {
+		sets = append(sets, "mileage = :mileage")
+		params["mileage"] = *data.Mileage
+	}
+	if data.UserFeedback != nil {
+		sets = append(sets, "user_feedback = :user_feedback")
+		params["user_feedback"] = *data.UserFeedback
+	}
+	if data.SetDateStart {
+		sets = append(sets, "date_start = now()")
+	}
+	if data.SetDateEnd {
+		sets = append(sets, "date_end = now()")
+	}
+
+	if len(sets) == 0 {
+		return nil
+	}
+
+	query := `
+		UPDATE route
+		SET ` + strings.Join(sets, ", ") + `,
+		    updated_at = now(),
+			updated_by = :updated_by
+		WHERE id_route = :id_route AND removed_at IS NULL
+	`
+
+	_, err := sqlx.NamedExecContext(
+		ctx,
+		exec,
+		query,
+		params,
+	)
+
+	return err
+}
+
+func (r *RouteRepository) UpdateRouteTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	data *UpdateRouteRepositoryReq,
+) error {
+	return r.updateRoute(
+		ctx,
+		tx,
+		data,
+	)
+}
+
+func (r *RouteRepository) UpdateRoute(
+	ctx c.Context,
+	data *UpdateRouteRepositoryReq,
+) error {
+	return r.updateRoute(
 		ctx,
 		r.DB.WriteDB(),
 		data,

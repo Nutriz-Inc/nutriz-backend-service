@@ -32,8 +32,8 @@ func TestListRoutes(t *testing.T) {
 		idOtherUser  = "usr_2veL1FPpuXxUaZcFaEC57BfpcKL"
 		routeDateSet = 4
 		routeName    = "Rota da listagem"
-		routeCity    = "Santo Andre"
-		routeHood    = "Vila Assuncao"
+		routeCity    = "Sao Paulo"
+		routeHood    = "Bela Vista"
 	)
 
 	dateSet := time.Now().UTC().AddDate(0, 0, routeDateSet)
