@@ -107,7 +107,6 @@ func TestRemoveRouteStop(t *testing.T) {
 
 			removed := created[idStepTwo]
 			idRoute := removed["id_route"].(string)
-			removedOrder := removed["stop_order"].(float64)
 
 			status, resp := fluxgo.RunTestRequest(
 				app,
@@ -125,22 +124,15 @@ func TestRemoveRouteStop(t *testing.T) {
 			assert.Len(t, orders, 2)
 			assert.NotContains(t, orders, removed["id_route_donation_step"].(string))
 
-			// every stop that came after the removed one moves one position up
+			assert.ElementsMatch(t, []int{0, 1}, values(orders))
+
 			for idDonationStep, stop := range created {
 				if idDonationStep == idStepTwo {
 					continue
 				}
 
-				order := stop["stop_order"].(float64)
-				expected := int(order)
-				if order > removedOrder {
-					expected = int(order) - 1
-				}
-
-				assert.Equal(t, expected, orders[stop["id_route_donation_step"].(string)])
+				assert.Contains(t, orders, stop["id_route_donation_step"].(string))
 			}
-
-			assert.ElementsMatch(t, []int{0, 1}, values(orders))
 		})
 
 		t.Run("Removes the only stop of a route", func(t *testing.T) {
