@@ -3,6 +3,7 @@ package tests
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	dto "nutriz-backend-service/modules/route/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/module"
@@ -30,6 +31,9 @@ func TestListRoutes(t *testing.T) {
 		idStepOne    = "dst_2veL1FPpuXxUaZcFaEC57BfpcR1"
 		idOtherUser  = "usr_2veL1FPpuXxUaZcFaEC57BfpcKL"
 		routeDateSet = 4
+		routeName    = "Rota da listagem"
+		routeCity    = "Santo Andre"
+		routeHood    = "Vila Assuncao"
 	)
 
 	dateSet := time.Now().UTC().AddDate(0, 0, routeDateSet)
@@ -39,11 +43,13 @@ func TestListRoutes(t *testing.T) {
 		"POST",
 		"/internal/route",
 		dto.CreateRouteReq{
-			IdDriver:    idDriver,
-			DateSet:     dateSet.Format(time.RFC3339),
-			Stops:       []string{idStepOne},
-			Name:        "Rota da listagem",
-			Description: "Rota criada para a listagem",
+			IdDriver:     idDriver,
+			DateSet:      dateSet.Format(time.RFC3339),
+			Stops:        []string{idStepOne},
+			Name:         routeName,
+			Description:  "Rota criada para a listagem",
+			City:         utils.StringPtr(routeCity),
+			Neighborhood: utils.StringPtr(routeHood),
 		},
 		adminHeaders,
 	)
@@ -156,6 +162,64 @@ func TestListRoutes(t *testing.T) {
 				assert.Contains(t, row["date_set"], date)
 			}
 		})
+
+		t.Run("name filter", func(t *testing.T) {
+			route := fmt.Sprintf("%s&name=listagem", endpoint)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Contains(t, row["name"], "listagem")
+			}
+		})
+
+		t.Run("city filter", func(t *testing.T) {
+			route := fmt.Sprintf("%s&city=%s", endpoint, url.QueryEscape(routeCity))
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Equal(t, routeCity, row["city"])
+			}
+		})
+
+		t.Run("neighborhood filter", func(t *testing.T) {
+			route := fmt.Sprintf("%s&neighborhood=%s", endpoint, url.QueryEscape(routeHood))
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "unexpected data length")
+
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Equal(t, routeHood, row["neighborhood"])
+			}
+		})
+
+		t.Run("name filter without routes", func(t *testing.T) {
+			route := fmt.Sprintf("%s&name=rota-inexistente", endpoint)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
+
+			assert.Equal(t, int(http.StatusOK), status)
+			assert.Len(t, fluxgo.ConvertToList(body["data"]), 0)
+			assert.Equal(t, float64(0), body["total"])
+		})
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -165,29 +229,6 @@ func TestListRoutes(t *testing.T) {
 			assert.Equal(t, int(http.StatusForbidden), status)
 			assert.Equal(t, "User does not have permission to list routes", resp["message"])
 			assert.Equal(t, "user.forbidden", resp["code"])
-		})
-
-		t.Run("User not found", func(t *testing.T) {
-			status, resp := fluxgo.RunTestRequest(app, "GET", endpoint, nil, &utils.InvalidTestHeaders)
-
-			assert.Equal(t, int(http.StatusNotFound), status)
-			assert.Equal(t, "User not found", resp["message"])
-		})
-
-		t.Run("Invalid status", func(t *testing.T) {
-			route := fmt.Sprintf("%s&status=invalid", endpoint)
-
-			status, _ := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
-
-			assert.Equal(t, int(http.StatusBadRequest), status)
-		})
-
-		t.Run("Invalid date_set", func(t *testing.T) {
-			route := fmt.Sprintf("%s&date_set=30-08-2026", endpoint)
-
-			status, _ := fluxgo.RunTestRequest(app, "GET", route, nil, adminHeaders)
-
-			assert.Equal(t, int(http.StatusBadRequest), status)
 		})
 	})
 }

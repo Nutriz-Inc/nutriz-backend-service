@@ -75,6 +75,30 @@ func (r *RouteRepository) ListRoutesByFilters(
 		})
 	}
 
+	if filter.Name != nil {
+		qb.WhereAnd(q.Where{
+			Column: "r.name",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.Name + "%",
+		})
+	}
+
+	if filter.City != nil {
+		qb.WhereAnd(q.Where{
+			Column: "r.city",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.City + "%",
+		})
+	}
+
+	if filter.Neighborhood != nil {
+		qb.WhereAnd(q.Where{
+			Column: "r.neighborhood",
+			Type:   "ILIKE",
+			Val:    "%" + *filter.Neighborhood + "%",
+		})
+	}
+
 	return utils.ListQuery[dto.RouteRes](
 		ctx,
 		r.DB.ReadOnlyDB(),
