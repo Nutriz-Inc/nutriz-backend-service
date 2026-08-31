@@ -44,6 +44,7 @@ type UserAction struct {
 	CanUpdateRoute     bool
 	CanCreateRouteStop bool
 	CanRemoveRouteStop bool
+	CanUpdateRouteStop bool
 }
 
 func (u User) Action() UserAction {
@@ -53,5 +54,6 @@ func (u User) Action() UserAction {
 		CanUpdateRoute:     u.Type == EnumUserTypeAdmin || u.Type == EnumUserTypeDriver,
 		CanCreateRouteStop: u.Type == EnumUserTypeAdmin,
 		CanRemoveRouteStop: u.Type == EnumUserTypeAdmin,
+		CanUpdateRouteStop: u.Type == EnumUserTypeDriver,
 	}
 }

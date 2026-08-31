@@ -89,6 +89,13 @@ func (h *HandlerUpdateRoute) Execute(ctx c.Context, data *dto.UpdateRouteReq) (*
 			return fmt.Errorf("error to update route: %w", err)
 		}
 
+		if repoData.SetDateEnd {
+			err = h.routeDonationStepRepo.SetStartedStepsDateEndTx(ctx, tx, data.IdRoute, data.ActionBy)
+			if err != nil {
+				return fmt.Errorf("error to update route stops date end: %w", err)
+			}
+		}
+
 		return nil
 	})
 	if err != nil {
