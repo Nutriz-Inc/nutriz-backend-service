@@ -76,6 +76,73 @@ func (r *DashboardRepository) GetMilkCollectedByMonth(ctx c.Context, start, end 
 	return *result, nil
 }
 
+func (r *DashboardRepository) GetBottleStats(ctx c.Context, start, end *time.Time) (*dto.BottleStats, error) {
+	ctx, span := r.StartSpan(ctx, "GetBottleStats")
+	defer span.End()
+
+	return utils.Get[dto.BottleStats](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`
+		WITH period_bottles AS (
+			SELECT b.discarded, d.created_by AS id_donor
+			FROM bottle b
+			JOIN donation d ON d.id_donation = b.id_donation AND d.removed_at IS NULL
+			WHERE `+dateRangeFilter+`
+		)
+		SELECT
+			COUNT(*) AS bottles_count,
+			COUNT(*) FILTER (WHERE discarded IS TRUE) AS discarded_bottles_count,
+			(CASE WHEN COUNT(DISTINCT id_donor) = 0 THEN 0
+				ELSE ROUND(COUNT(*)::numeric / COUNT(DISTINCT id_donor), 2)
+			END)::float8 AS average_bottles_per_donor,
+			(CASE WHEN COUNT(*) = 0 THEN 0
+				ELSE ROUND(COUNT(*) FILTER (WHERE discarded IS NOT TRUE)::numeric * 100.0 / COUNT(*), 2)
+			END)::float8 AS bottles_utilization_rate
+		FROM period_bottles
+		`,
+		start,
+		end,
+	)
+}
+
+func (r *DashboardRepository) GetRouteStats(ctx c.Context, start, end *time.Time) (*dto.RouteStats, error) {
+	ctx, span := r.StartSpan(ctx, "GetRouteStats")
+	defer span.End()
+
+	return utils.Get[dto.RouteStats](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`
+		WITH period_routes AS (
+			SELECT r.id_route, r.mileage, r.date_start, r.date_end
+			FROM route r
+			WHERE r.removed_at IS NULL
+			  AND ($1::timestamp IS NULL OR r.created_at >= $1)
+			  AND ($2::timestamp IS NULL OR r.created_at < $2)
+		),
+		stop_counts AS (
+			SELECT pr.id_route, COUNT(rds.id_route_donation_step) AS cnt
+			FROM period_routes pr
+			LEFT JOIN route_donation_step rds
+				ON rds.id_route = pr.id_route AND rds.removed_at IS NULL
+			GROUP BY pr.id_route
+		)
+		SELECT
+			AVG(pr.mileage) AS average_mileage_per_route,
+			(SELECT AVG(cnt) FROM stop_counts) AS average_stops_per_route,
+			AVG(EXTRACT(EPOCH FROM (pr.date_end - pr.date_start)) / 3600)
+				FILTER (WHERE pr.date_start IS NOT NULL AND pr.date_end IS NOT NULL)
+				AS average_route_duration_hours
+		FROM period_routes pr
+		`,
+		start,
+		end,
+	)
+}
+
 func (r *DashboardRepository) GetFeedbackByScore(ctx c.Context, start, end *time.Time) ([]dto.FeedbackScoreCount, error) {
 	ctx, span := r.StartSpan(ctx, "GetFeedbackByScore")
 	defer span.End()
