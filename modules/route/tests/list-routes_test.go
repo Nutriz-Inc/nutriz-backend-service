@@ -37,6 +37,7 @@ func TestListRoutes(t *testing.T) {
 	)
 
 	dateSet := time.Now().UTC().AddDate(0, 0, routeDateSet)
+	stops := []string{idStepOne}
 
 	fluxgo.RunTestRequest(
 		app,
@@ -45,7 +46,7 @@ func TestListRoutes(t *testing.T) {
 		dto.CreateRouteReq{
 			IdDriver:     idDriver,
 			DateSet:      dateSet.Format(time.RFC3339),
-			Stops:        []string{idStepOne},
+			Stops:        &stops,
 			Name:         routeName,
 			Description:  "Rota criada para a listagem",
 			City:         utils.StringPtr(routeCity),

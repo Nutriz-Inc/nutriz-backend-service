@@ -50,7 +50,7 @@ func TestRemoveRouteStop(t *testing.T) {
 			dto.CreateRouteReq{
 				IdDriver:    idDriver,
 				DateSet:     futureDate,
-				Stops:       stops,
+				Stops:       &stops,
 				Name:        name,
 				Description: "Rota criada para remocao de parada",
 			},
