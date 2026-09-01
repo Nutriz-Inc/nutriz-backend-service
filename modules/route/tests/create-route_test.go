@@ -40,7 +40,7 @@ func TestCreateRoute(t *testing.T) {
 		return dto.CreateRouteReq{
 			IdDriver:    idDriver,
 			DateSet:     dateSet,
-			Stops:       stops,
+			Stops:       &stops,
 			Name:        "Rota zona sul",
 			Description: "Coletas da zona sul",
 		}
@@ -109,6 +109,38 @@ func TestCreateRoute(t *testing.T) {
 			stops, ok := resp["stops"].([]interface{})
 			assert.True(t, ok)
 			assert.Len(t, stops, 2)
+		})
+
+		t.Run("Without stops when the field is omitted", func(t *testing.T) {
+			body := dto.CreateRouteReq{
+				IdDriver:    idDriver,
+				DateSet:     futureDate,
+				Name:        "Rota sem paradas",
+				Description: "Rota criada sem paradas",
+			}
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusCreated, status)
+			assert.NotEmpty(t, resp["id_route"])
+			assert.Equal(t, string(entities.EnumRouteStatusPending), resp["status"])
+
+			stops, ok := resp["stops"].([]interface{})
+			assert.True(t, ok)
+			assert.Len(t, stops, 0)
+		})
+
+		t.Run("Without stops when an empty list is sent", func(t *testing.T) {
+			body := makeBody([]string{}, futureDate)
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusCreated, status)
+			assert.NotEmpty(t, resp["id_route"])
+
+			stops, ok := resp["stops"].([]interface{})
+			assert.True(t, ok)
+			assert.Len(t, stops, 0)
 		})
 	})
 
@@ -224,14 +256,6 @@ func TestCreateRoute(t *testing.T) {
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "route.max_duration_exceeded", resp["code"])
 			assert.Contains(t, resp["message"], "the maximum allowed is 6 hours")
-		})
-
-		t.Run("Empty stops", func(t *testing.T) {
-			body := makeBody([]string{}, futureDate)
-
-			status, _ := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
-
-			assert.Equal(t, http.StatusBadRequest, status)
 		})
 
 		t.Run("User not found", func(t *testing.T) {

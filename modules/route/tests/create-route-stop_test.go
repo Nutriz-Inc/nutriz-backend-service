@@ -43,7 +43,7 @@ func TestCreateRouteStop(t *testing.T) {
 			dto.CreateRouteReq{
 				IdDriver:     idDriver,
 				DateSet:      futureDate,
-				Stops:        stops,
+				Stops:        &stops,
 				Name:         name,
 				Description:  "Rota criada para adicionar parada",
 				City:         city,
