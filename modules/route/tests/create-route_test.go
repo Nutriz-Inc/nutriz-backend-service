@@ -95,7 +95,7 @@ func TestCreateRoute(t *testing.T) {
 
 				ordered = append(ordered, stop["id_donation_step"].(string))
 			}
-			assert.ElementsMatch(t, body.Stops, ordered)
+			assert.ElementsMatch(t, *body.Stops, ordered)
 			assert.Equal(t, []string{idStepTwo, idStepOne, idStepThree}, ordered)
 		})
 
