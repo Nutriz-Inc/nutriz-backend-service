@@ -31,7 +31,7 @@ type CreateUserOptionalFields struct {
 func (c CreateUserReq) ValidateCreateUserOptionalFields() CreateUserOptionalFields {
 	return CreateUserOptionalFields{
 		CanCreateCommon: c.Type == entities.EnumUserTypeCommon && c.BirthDate != nil && c.Address != nil && c.ActionBy == nil && c.ConsentLog != nil,
-		CanCreateWorker: (c.Type == entities.EnumUserTypeAdmin || c.Type == entities.EnumUserTypeNurse) && c.Identifier != nil && c.ActionBy != nil,
+		CanCreateWorker: (c.Type != entities.EnumUserTypeCommon) && c.Identifier != nil && c.ActionBy != nil,
 	}
 }
 
