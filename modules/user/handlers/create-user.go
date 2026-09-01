@@ -107,7 +107,7 @@ func (h *HandlerCreateUser) Execute(ctx c.Context, data *dto.CreateUserReq) (*dt
 	switch data.Type {
 	case entities.EnumUserTypeCommon:
 		return h.handleCommon(ctx, data, &req, validator, idUser)
-	case entities.EnumUserTypeAdmin, entities.EnumUserTypeNurse:
+	case entities.EnumUserTypeAdmin, entities.EnumUserTypeNurse, entities.EnumUserTypeDriver:
 		return h.handleWorker(ctx, data, &req, validator, idUser)
 	}
 
