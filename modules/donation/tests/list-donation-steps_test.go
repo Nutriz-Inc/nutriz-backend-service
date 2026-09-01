@@ -112,6 +112,42 @@ func TestListDonationSteps(t *testing.T) {
 			assert.Equal(t, "Rua Domingos de Morais", address["street"])
 		})
 
+		t.Run("Filters by has_address = true", func(t *testing.T) {
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"GET",
+				withQuery(map[string]string{"has_address": "true"}),
+				nil,
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusOK, status)
+			data := resp["data"].([]interface{})
+			assert.NotEmpty(t, data)
+			for _, item := range data {
+				step := item.(map[string]interface{})
+				assert.NotNil(t, step["address"], "every step must carry an address")
+			}
+		})
+
+		t.Run("Filters by has_address = false", func(t *testing.T) {
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"GET",
+				withQuery(map[string]string{"has_address": "false"}),
+				nil,
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusOK, status)
+			data := resp["data"].([]interface{})
+			assert.NotEmpty(t, data)
+			for _, item := range data {
+				step := item.(map[string]interface{})
+				assert.Nil(t, step["address"], "no step should carry an address")
+			}
+		})
+
 		t.Run("Filters by status with no matches", func(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(
 				app,

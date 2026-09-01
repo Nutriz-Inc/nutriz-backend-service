@@ -364,6 +364,13 @@ func (r *DonationStepRepository) ListDonationStepsByFilters(
 	if filter.City != nil {
 		qb.WhereAnd(q.Where{Column: "a.city", Type: "ILIKE", Val: "%" + *filter.City + "%"})
 	}
+	if filter.HasAddress != nil {
+		if *filter.HasAddress {
+			qb.WhereAnd(q.Where{Column: "a.id_address", Type: "IS NOT NULL"})
+		} else {
+			qb.WhereAnd(q.Where{Column: "a.id_address", Type: "IS NULL"})
+		}
+	}
 
 	return utils.ListQuery[DonationStepWithAddress](
 		ctx,
