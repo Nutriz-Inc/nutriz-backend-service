@@ -74,11 +74,6 @@ func (h *HandlerCreateRouteStop) Execute(ctx c.Context, data *dto.CreateRouteSto
 		return nil, fluxgo.ErrorBadRequest("Canceled routes cannot be updated", "route.canceled")
 	}
 
-	donationStep, globalErr := h.getDonationStep(ctx, data, route)
-	if globalErr != nil {
-		return nil, globalErr
-	}
-
 	currentStops, err := h.routeDonationStepRepo.GetRouteDonationStepsWithLocationByIdRoute(ctx, data.IdRoute)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get route stops")
@@ -90,12 +85,17 @@ func (h *HandlerCreateRouteStop) Execute(ctx c.Context, data *dto.CreateRouteSto
 		}
 	}
 
+	donationStep, globalErr := h.getDonationStep(ctx, data, route)
+	if globalErr != nil {
+		return nil, globalErr
+	}
+
 	stops := append(routeStopCoordinates(*currentStops), utils.StopCoordinates{
 		Latitude:  donationStep.Latitude,
 		Longitude: donationStep.Longitude,
 	})
 
-	stopOrders, globalErr := utils.OptimizeStops(ctx, h.config, stops)
+	stopOrders, estimatedTime, globalErr := utils.OptimizeStops(ctx, h.config, stops)
 	if globalErr != nil {
 		return nil, globalErr
 	}
@@ -127,9 +127,9 @@ func (h *HandlerCreateRouteStop) Execute(ctx c.Context, data *dto.CreateRouteSto
 			return fmt.Errorf("error to create route stop: %w", err)
 		}
 
-		err = h.routeRepo.TouchRouteTx(ctx, tx, data.IdRoute, data.ActionBy)
+		err = h.routeRepo.UpdateEstimatedTimeTx(ctx, tx, data.IdRoute, &estimatedTime, data.ActionBy)
 		if err != nil {
-			return fmt.Errorf("error to update route: %w", err)
+			return fmt.Errorf("error to update route estimated time: %w", err)
 		}
 
 		return nil
@@ -184,6 +184,18 @@ func (h *HandlerCreateRouteStop) getDonationStep(
 		return nil, fluxgo.ErrorBadRequest(
 			fmt.Sprintf("Donation of %s is not active", donationStep.IdDonationStep),
 			"donation.inactive",
+		)
+	}
+	if !donationStep.HasAddress {
+		return nil, fluxgo.ErrorBadRequest(
+			fmt.Sprintf("Donation step %s has no address", donationStep.IdDonationStep),
+			"stops.no_address",
+		)
+	}
+	if donationStep.InActiveRoute {
+		return nil, fluxgo.ErrorBadRequest(
+			fmt.Sprintf("Donation step %s is already in another active route", donationStep.IdDonationStep),
+			"stops.already_in_route",
 		)
 	}
 

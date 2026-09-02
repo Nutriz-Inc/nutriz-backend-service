@@ -228,6 +228,8 @@ func (r *DonationStepRepository) UpdateDonationStep(
 type DonationStepWithLocation struct {
 	entities.DonationStep
 	IsDonationActive bool     `db:"is_donation_active" json:"is_donation_active"`
+	HasAddress       bool     `db:"has_address" json:"has_address"`
+	InActiveRoute    bool     `db:"in_active_route" json:"in_active_route"`
 	Latitude         *float64 `db:"latitude" json:"latitude"`
 	Longitude        *float64 `db:"longitude" json:"longitude"`
 	City             *string  `db:"city" json:"city"`
@@ -245,6 +247,16 @@ func (r *DonationStepRepository) GetDonationStepsWithLocationByIds(
 		`SELECT
 			ds.*,
 			d.is_active AS is_donation_active,
+			(a.id_address IS NOT NULL) AS has_address,
+			EXISTS (
+				SELECT 1 FROM route_donation_step rds
+				JOIN route r ON r.id_route = rds.id_route
+				WHERE rds.id_donation_step = ds.id_donation_step
+				  AND rds.removed_at IS NULL
+				  AND rds.status IN ('pending', 'in_progress', 'done')
+				  AND r.removed_at IS NULL
+				  AND r.status NOT IN ('canceled', 'done', 'error')
+			) AS in_active_route,
 			a.latitude AS latitude,
 			a.longitude AS longitude,
 			a.city AS city,
@@ -369,6 +381,22 @@ func (r *DonationStepRepository) ListDonationStepsByFilters(
 			qb.WhereAnd(q.Where{Column: "a.id_address", Type: "IS NOT NULL"})
 		} else {
 			qb.WhereAnd(q.Where{Column: "a.id_address", Type: "IS NULL"})
+		}
+	}
+	if filter.AvailableForRoute != nil {
+		activeRouteStep := `EXISTS (
+			SELECT 1 FROM route_donation_step rds
+			JOIN route r ON r.id_route = rds.id_route
+			WHERE rds.id_donation_step = ds.id_donation_step
+			  AND rds.removed_at IS NULL
+			  AND rds.status IN ('pending', 'in_progress', 'done')
+			  AND r.removed_at IS NULL
+			  AND r.status NOT IN ('canceled', 'done', 'error')
+		)`
+		if *filter.AvailableForRoute {
+			qb.WhereAnd(q.Where{Column: "NOT " + activeRouteStep})
+		} else {
+			qb.WhereAnd(q.Where{Column: activeRouteStep})
 		}
 	}
 

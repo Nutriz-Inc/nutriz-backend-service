@@ -4,6 +4,8 @@ import (
 	c "context"
 	"errors"
 	"fmt"
+	"time"
+
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/route/dtos"
 	"nutriz-backend-service/shared/repositories"
@@ -72,9 +74,14 @@ func (h *HandlerRemoveRouteStop) Execute(ctx c.Context, data *dto.RemoveRouteSto
 		return nil, globalErr
 	}
 
-	stopOrders, globalErr := utils.OptimizeStops(ctx, h.config, routeStopCoordinates(remainingStops))
+	stopOrders, estimatedDuration, globalErr := utils.OptimizeStops(ctx, h.config, routeStopCoordinates(remainingStops))
 	if globalErr != nil {
 		return nil, globalErr
+	}
+
+	var estimatedTime *time.Duration
+	if len(remainingStops) > 0 {
+		estimatedTime = &estimatedDuration
 	}
 
 	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
@@ -96,9 +103,9 @@ func (h *HandlerRemoveRouteStop) Execute(ctx c.Context, data *dto.RemoveRouteSto
 			}
 		}
 
-		err = h.routeRepo.TouchRouteTx(ctx, tx, stop.IdRoute, data.ActionBy)
+		err = h.routeRepo.UpdateEstimatedTimeTx(ctx, tx, stop.IdRoute, estimatedTime, data.ActionBy)
 		if err != nil {
-			return fmt.Errorf("error to update route: %w", err)
+			return fmt.Errorf("error to update route estimated time: %w", err)
 		}
 
 		return nil

@@ -1056,6 +1056,62 @@ INSERT INTO donation_step (
     NULL,
     NULL,
     NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57Bfpd54',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT1',
+    'Coletar leite',
+    'Parada de rota ja vinculada a uma rota ativa (fixture)',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57Bfpd55',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT2',
+    'Coletar leite',
+    'Parada de rota ja vinculada a uma rota ativa (fixture)',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57Bfpd56',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    'adr_01JTG8K8N4P2R6T9V1X3Y5Z7RT3',
+    'Coletar leite',
+    'Parada de rota ja vinculada a uma rota ativa (fixture)',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57Bfpd57',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    NULL,
+    'Coletar leite',
+    'Etapa de doacao ativa porem sem endereco (fixture)',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO bottle (
@@ -1339,7 +1395,7 @@ INSERT INTO route_donation_step (
 (
     'rds_3Idl50yWGFGbXMnMxn4t9MKpqqe',
     'rot_3Idl53RaMuX0ZMiITkgCEcPBiZq',
-    'dst_2veL1FPpuXxUaZcFaEC57BfpcR3',
+    'dst_2veL1FPpuXxUaZcFaEC57Bfpd54',
     0,
     NOW() - INTERVAL '2 hours',
     NOW() - INTERVAL '1 hour',
@@ -1353,7 +1409,7 @@ INSERT INTO route_donation_step (
 (
     'rds_3Idl56YdFkFfaGRvGueGauyvH4t',
     'rot_3Idl53RaMuX0ZMiITkgCEcPBiZq',
-    'dst_2veL1FPpuXxUaZcFaEC57BfpcR5',
+    'dst_2veL1FPpuXxUaZcFaEC57Bfpd55',
     1,
     NULL,
     NULL,
@@ -1367,7 +1423,7 @@ INSERT INTO route_donation_step (
 (
     'rds_3Idl5682G71NpyWcLO11dpwnX59',
     'rot_3Idl54wck70MCPRK5i7rViCNvwO',
-    'dst_2veL1FPpuXxUaZcFaEC57BfpcR6',
+    'dst_2veL1FPpuXxUaZcFaEC57Bfpd56',
     0,
     NULL,
     NULL,

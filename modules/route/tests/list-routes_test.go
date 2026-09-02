@@ -39,7 +39,7 @@ func TestListRoutes(t *testing.T) {
 	dateSet := time.Now().UTC().AddDate(0, 0, routeDateSet)
 	stops := []string{idStepOne}
 
-	fluxgo.RunTestRequest(
+	_, listSetupResp := fluxgo.RunTestRequest(
 		app,
 		"POST",
 		"/internal/route",
@@ -54,6 +54,11 @@ func TestListRoutes(t *testing.T) {
 		},
 		adminHeaders,
 	)
+	// deferred (not t.Cleanup) so it runs while the app is still up, before
+	// the fx.RequireStop() defer tears it down
+	if id, ok := listSetupResp["id_route"].(string); ok {
+		defer cancelRouteNow(app, id)
+	}
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("No filters", func(t *testing.T) {

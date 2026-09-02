@@ -4,6 +4,8 @@ import (
 	c "context"
 	"errors"
 	"fmt"
+	"time"
+
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/route/dtos"
 	"nutriz-backend-service/shared/entities"
@@ -85,6 +87,7 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 
 	var donationSteps []repositories.DonationStepWithLocation
 	var stopOrders []int16
+	var estimatedTime *time.Duration
 
 	if validator.HasStops {
 		steps, globalErr := h.getDonationSteps(ctx, data)
@@ -93,25 +96,28 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 		}
 		donationSteps = *steps
 
-		stopOrders, globalErr = utils.OptimizeStops(ctx, h.config, stopCoordinates(steps))
+		orders, duration, globalErr := utils.OptimizeStops(ctx, h.config, stopCoordinates(steps))
 		if globalErr != nil {
 			return nil, globalErr
 		}
+		stopOrders = orders
+		estimatedTime = &duration
 	}
 
 	idRoute := utils.IdGenerate(utils.RouteEntity)
 
 	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
 		err := h.routeRepo.CreateRouteTx(ctx, tx, &repositories.CreateRouteRepositoryReq{
-			IdRoute:      idRoute,
-			IdDriver:     data.IdDriver,
-			IdUser:       data.ActionBy,
-			Name:         data.Name,
-			Description:  data.Description,
-			City:         data.City,
-			Neighborhood: data.Neighborhood,
-			Status:       entities.EnumRouteStatusPending, // Always starts as pending
-			DateSet:      *dateSet,
+			IdRoute:       idRoute,
+			IdDriver:      data.IdDriver,
+			IdUser:        data.ActionBy,
+			Name:          data.Name,
+			Description:   data.Description,
+			City:          data.City,
+			Neighborhood:  data.Neighborhood,
+			Status:        entities.EnumRouteStatusPending, // Always starts as pending
+			DateSet:       *dateSet,
+			EstimatedTime: estimatedTime,
 		})
 		if err != nil {
 			return fmt.Errorf("error to create route: %w", err)
@@ -207,6 +213,18 @@ func (h *HandlerCreateRoute) getDonationSteps(
 		}
 		if !donationStep.IsDonationActive {
 			return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("Donation of %s is not active", donationStep.IdDonationStep), "donation.inactive")
+		}
+		if !donationStep.HasAddress {
+			return nil, fluxgo.ErrorBadRequest(
+				fmt.Sprintf("Donation step %s has no address", donationStep.IdDonationStep),
+				"stops.no_address",
+			)
+		}
+		if donationStep.InActiveRoute {
+			return nil, fluxgo.ErrorBadRequest(
+				fmt.Sprintf("Donation step %s is already in another active route", donationStep.IdDonationStep),
+				"stops.already_in_route",
+			)
 		}
 
 		if data.City != nil && !utils.MatchesAddressField(donationStep.City, *data.City) {
