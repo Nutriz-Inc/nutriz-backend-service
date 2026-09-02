@@ -3,6 +3,7 @@ package handlers
 import (
 	c "context"
 	dto "nutriz-backend-service/modules/route/dtos"
+	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/repositories"
 	"nutriz-backend-service/shared/utils"
 
@@ -46,7 +47,12 @@ func (h *HandlerListRoutes) Execute(ctx c.Context, filters *dto.ListRoutesReq) (
 		return nil, utils.ErrorForbidden("User does not have permission to list routes", "user.forbidden")
 	}
 
-	routes, total, err := h.routeRepo.ListRoutesByFilters(ctx, filters)
+	var idNurse *string
+	if user.Type == entities.EnumUserTypeNurse {
+		idNurse = &user.IdUser
+	}
+
+	routes, total, err := h.routeRepo.ListRoutesByFilters(ctx, filters, idNurse)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to list routes")
 	}
