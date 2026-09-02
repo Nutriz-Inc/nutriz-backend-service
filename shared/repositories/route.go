@@ -24,6 +24,7 @@ func RouteRepositoryStart(db *fluxgo.Database) *RouteRepository {
 func (r *RouteRepository) ListRoutesByFilters(
 	ctx c.Context,
 	filter *dto.ListRoutesReq,
+	idNurse *string,
 ) (*[]dto.RouteRes, int, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
@@ -98,6 +99,20 @@ func (r *RouteRepository) ListRoutesByFilters(
 			Type:   "ILIKE",
 			Val:    "%" + *filter.Neighborhood + "%",
 		})
+	}
+
+	if idNurse != nil {
+		nurseID := strings.ReplaceAll(*idNurse, "'", "''")
+		qb.WhereAnd(q.Where{Column: `EXISTS (
+			SELECT 1
+			FROM route_donation_step rds
+			JOIN job j ON j.id_step = rds.id_donation_step
+			WHERE rds.id_route = r.id_route
+			  AND rds.removed_at IS NULL
+			  AND j.removed_at IS NULL
+			  AND j.status = 'pending'
+			  AND j.id_user = '` + nurseID + `'
+		)`})
 	}
 
 	return utils.ListQuery[dto.RouteRes](
