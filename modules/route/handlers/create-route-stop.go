@@ -95,7 +95,7 @@ func (h *HandlerCreateRouteStop) Execute(ctx c.Context, data *dto.CreateRouteSto
 		Longitude: donationStep.Longitude,
 	})
 
-	stopOrders, globalErr := utils.OptimizeStops(ctx, h.config, stops)
+	stopOrders, estimatedTime, globalErr := utils.OptimizeStops(ctx, h.config, stops)
 	if globalErr != nil {
 		return nil, globalErr
 	}
@@ -127,9 +127,9 @@ func (h *HandlerCreateRouteStop) Execute(ctx c.Context, data *dto.CreateRouteSto
 			return fmt.Errorf("error to create route stop: %w", err)
 		}
 
-		err = h.routeRepo.TouchRouteTx(ctx, tx, data.IdRoute, data.ActionBy)
+		err = h.routeRepo.UpdateEstimatedTimeTx(ctx, tx, data.IdRoute, &estimatedTime, data.ActionBy)
 		if err != nil {
-			return fmt.Errorf("error to update route: %w", err)
+			return fmt.Errorf("error to update route estimated time: %w", err)
 		}
 
 		return nil

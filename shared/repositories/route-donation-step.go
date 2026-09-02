@@ -59,6 +59,7 @@ func (r *RouteDonationStepRepository) createRouteDonationStep(
 			id_route,
 			id_donation_step,
 			stop_order,
+			status,
 			created_at,
 			created_by
 		) VALUES (
@@ -66,6 +67,7 @@ func (r *RouteDonationStepRepository) createRouteDonationStep(
 			:id_route,
 			:id_donation_step,
 			:stop_order,
+			:status,
 			now(),
 			:id_user
 		)
@@ -77,6 +79,7 @@ func (r *RouteDonationStepRepository) createRouteDonationStep(
 		"id_donation_step":       data.IdDonationStep,
 		"id_user":                data.IdUser,
 		"stop_order":             data.StopOrder,
+		"status":                 entities.EnumRouteDonationStepStatusPending,
 	}
 
 	_, err := sqlx.NamedExecContext(
@@ -140,13 +143,15 @@ func (r *RouteDonationStepRepository) removeRouteDonationStep(
 	query := `
 		UPDATE route_donation_step
 		SET removed_at = now(),
-		    removed_by = :removed_by
+		    removed_by = :removed_by,
+		    status = :status
 		WHERE id_route_donation_step = :id_route_donation_step AND removed_at IS NULL
 	`
 
 	params := map[string]any{
 		"id_route_donation_step": id,
 		"removed_by":             removedBy,
+		"status":                 entities.EnumRouteDonationStepStatusError,
 	}
 
 	_, err := sqlx.NamedExecContext(
@@ -262,6 +267,7 @@ func (r *RouteDonationStepRepository) updateDateStart(
 	query := `
 		UPDATE route_donation_step
 		SET date_start = now(),
+		    status = :status,
 		    updated_at = now(),
 		    updated_by = :updated_by
 		WHERE id_route_donation_step = :id_route_donation_step AND removed_at IS NULL
@@ -270,6 +276,7 @@ func (r *RouteDonationStepRepository) updateDateStart(
 	params := map[string]any{
 		"id_route_donation_step": id,
 		"updated_by":             updatedBy,
+		"status":                 entities.EnumRouteDonationStepStatusInProgress,
 	}
 
 	_, err := sqlx.NamedExecContext(
@@ -291,6 +298,45 @@ func (r *RouteDonationStepRepository) UpdateDateStartTx(
 	return r.updateDateStart(ctx, tx, id, updatedBy)
 }
 
+func (r *RouteDonationStepRepository) setStatus(
+	ctx c.Context,
+	exec sqlx.ExtContext,
+	id string,
+	status entities.EnumRouteDonationStepStatus,
+	updatedBy string,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	query := `
+		UPDATE route_donation_step
+		SET status = :status,
+		    updated_at = now(),
+		    updated_by = :updated_by
+		WHERE id_route_donation_step = :id_route_donation_step AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_route_donation_step": id,
+		"status":                 status,
+		"updated_by":             updatedBy,
+	}
+
+	_, err := sqlx.NamedExecContext(ctx, exec, query, params)
+
+	return err
+}
+
+func (r *RouteDonationStepRepository) SetStatusTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	id string,
+	status entities.EnumRouteDonationStepStatus,
+	updatedBy string,
+) error {
+	return r.setStatus(ctx, tx, id, status, updatedBy)
+}
+
 func (r *RouteDonationStepRepository) setStartedStepsDateEnd(
 	ctx c.Context,
 	exec sqlx.ExtContext,
@@ -303,6 +349,7 @@ func (r *RouteDonationStepRepository) setStartedStepsDateEnd(
 	query := `
 		UPDATE route_donation_step
 		SET date_end = now(),
+		    status = :status,
 		    updated_at = now(),
 		    updated_by = :updated_by
 		WHERE id_route = :id_route
@@ -314,6 +361,7 @@ func (r *RouteDonationStepRepository) setStartedStepsDateEnd(
 	params := map[string]any{
 		"id_route":   idRoute,
 		"updated_by": updatedBy,
+		"status":     entities.EnumRouteDonationStepStatusDone,
 	}
 
 	_, err := sqlx.NamedExecContext(

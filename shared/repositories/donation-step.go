@@ -371,6 +371,19 @@ func (r *DonationStepRepository) ListDonationStepsByFilters(
 			qb.WhereAnd(q.Where{Column: "a.id_address", Type: "IS NULL"})
 		}
 	}
+	if filter.AvailableForRoute != nil {
+		activeRouteStep := `EXISTS (
+			SELECT 1 FROM route_donation_step rds
+			WHERE rds.id_donation_step = ds.id_donation_step
+			  AND rds.removed_at IS NULL
+			  AND rds.status IN ('pending', 'in_progress', 'done')
+		)`
+		if *filter.AvailableForRoute {
+			qb.WhereAnd(q.Where{Column: "NOT " + activeRouteStep})
+		} else {
+			qb.WhereAnd(q.Where{Column: activeRouteStep})
+		}
+	}
 
 	return utils.ListQuery[DonationStepWithAddress](
 		ctx,

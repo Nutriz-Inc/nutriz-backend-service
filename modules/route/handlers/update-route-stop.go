@@ -56,8 +56,14 @@ func (h *HandlerUpdateRouteStop) Execute(ctx c.Context, data *dto.UpdateRouteSto
 		return nil, utils.ErrorForbidden("User does not have permission to update route stop", "user.forbidden")
 	}
 
-	if data.DateStart == nil || !*data.DateStart {
-		return nil, fluxgo.ErrorBadRequest("date_start must be sent to update", "route_stop.no_fields_to_update")
+	hasError := data.HasError != nil && *data.HasError
+	setDateStart := data.DateStart != nil && *data.DateStart
+
+	if !hasError && !setDateStart {
+		return nil, fluxgo.ErrorBadRequest("date_start or has_error must be sent to update", "route_stop.no_fields_to_update")
+	}
+	if hasError && setDateStart {
+		return nil, fluxgo.ErrorBadRequest("date_start and has_error cannot be sent together", "route_stop.date_start_and_has_error")
 	}
 
 	stop, err := h.routeDonationStepRepo.GetRouteDonationStepById(ctx, data.IdStop)
@@ -67,7 +73,7 @@ func (h *HandlerUpdateRouteStop) Execute(ctx c.Context, data *dto.UpdateRouteSto
 	if stop == nil {
 		return nil, fluxgo.ErrorNotFound("Route stop not found")
 	}
-	if stop.DateStart != nil {
+	if setDateStart && stop.DateStart != nil {
 		return nil, fluxgo.ErrorBadRequest("Date start is already set", "route_stop.date_start_already_set")
 	}
 
@@ -86,9 +92,16 @@ func (h *HandlerUpdateRouteStop) Execute(ctx c.Context, data *dto.UpdateRouteSto
 	}
 
 	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
-		err := h.routeDonationStepRepo.UpdateDateStartTx(ctx, tx, data.IdStop, data.ActionBy)
-		if err != nil {
-			return fmt.Errorf("error to update route stop: %w", err)
+		if hasError {
+			err := h.routeDonationStepRepo.SetStatusTx(ctx, tx, data.IdStop, entities.EnumRouteDonationStepStatusError, data.ActionBy)
+			if err != nil {
+				return fmt.Errorf("error to update route stop: %w", err)
+			}
+		} else {
+			err := h.routeDonationStepRepo.UpdateDateStartTx(ctx, tx, data.IdStop, data.ActionBy)
+			if err != nil {
+				return fmt.Errorf("error to update route stop: %w", err)
+			}
 		}
 
 		err = h.routeRepo.TouchRouteTx(ctx, tx, stop.IdRoute, data.ActionBy)

@@ -108,16 +108,16 @@ func OptimizeStops(
 	ctx c.Context,
 	env *config.Env,
 	stops []StopCoordinates,
-) ([]int16, *fluxgo.GlobalError) {
+) ([]int16, time.Duration, *fluxgo.GlobalError) {
 	stopOrders, drivingTime, err := BuildOptimizedStopOrders(ctx, stops, env)
 	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to build the route: " + err.Error())
+		return nil, 0, fluxgo.ErrorInternalError("Error to build the route: " + err.Error())
 	}
 
 	totalDuration := TotalRouteDuration(drivingTime, len(stops))
 
 	if totalDuration > entities.MAX_ROUTE_DURATION {
-		return nil, fluxgo.ErrorBadRequest(
+		return nil, 0, fluxgo.ErrorBadRequest(
 			fmt.Sprintf(
 				"Route takes %.1f hours and the maximum allowed is %.0f hours",
 				totalDuration.Hours(),
@@ -127,7 +127,7 @@ func OptimizeStops(
 		)
 	}
 
-	return stopOrders, nil
+	return stopOrders, totalDuration, nil
 }
 
 func MatchesAddressField(value *string, expected string) bool {
