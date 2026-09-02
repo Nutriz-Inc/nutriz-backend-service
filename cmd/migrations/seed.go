@@ -1267,6 +1267,22 @@ INSERT INTO job (
     NULL,
     NULL,
     NULL
+),
+(
+    'job_2veL1FPpuXxUaZcFaEC57Bfpc03',
+    'usr_2veL1FPpuXxUaZcFaEC57BfplNV',
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcR1',
+    'pending',
+    'Coleta da rota concluida',
+    'Job ativo da enfermeira sobre uma etapa que e parada de rota (fixture)',
+    CURRENT_DATE + INTERVAL '3 days',
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcAD',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 INSERT INTO route (

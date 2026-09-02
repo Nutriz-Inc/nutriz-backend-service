@@ -80,11 +80,17 @@ func TestListRoutes(t *testing.T) {
 			assert.GreaterOrEqual(t, body["total"], float64(1))
 		})
 
-		t.Run("Nurse can list routes", func(t *testing.T) {
-			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, nurseHeaders)
+		t.Run("Nurse only sees routes feeding an active job assigned to her", func(t *testing.T) {
+			_, adminBody := fluxgo.RunTestRequest(app, "GET", endpoint, nil, adminHeaders)
+			adminCount := len(fluxgo.ConvertToList(adminBody["data"]))
 
+			status, body := fluxgo.RunTestRequest(app, "GET", endpoint, nil, nurseHeaders)
 			assert.Equal(t, int(http.StatusOK), status)
-			assert.GreaterOrEqual(t, len(fluxgo.ConvertToList(body["data"])), 1)
+
+			nurseRoutes := fluxgo.ConvertToList(body["data"])
+			// the seed has a pending job for this nurse on a step of one seeded route
+			assert.GreaterOrEqual(t, len(nurseRoutes), 1)
+			assert.Less(t, len(nurseRoutes), adminCount, "nurse must see a strict subset")
 		})
 
 		t.Run("Driver can list routes", func(t *testing.T) {
