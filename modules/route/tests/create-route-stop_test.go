@@ -54,9 +54,9 @@ func TestCreateRouteStop(t *testing.T) {
 
 		assert.Equal(t, http.StatusCreated, status)
 
-		idRoute := resp["id_route"].(string)
-		cancelRouteOnCleanup(t, app, idRoute)
+		cancelRouteOnCleanup(t, app, resp["id_route"])
 
+		idRoute, _ := resp["id_route"].(string)
 		return idRoute
 	}
 

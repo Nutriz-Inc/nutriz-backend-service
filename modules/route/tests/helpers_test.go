@@ -10,23 +10,30 @@ import (
 	fluxgo "github.com/MMortari/FluxGo"
 )
 
-func cancelRouteOnCleanup(t *testing.T, app *fluxgo.Http, idRoute string) {
-	t.Helper()
-
+func cancelRouteNow(app *fluxgo.Http, idRoute string) {
 	if idRoute == "" {
 		return
 	}
 
-	t.Cleanup(func() {
-		_, _ = fluxgo.RunTestRequestRaw(
-			app,
-			"PUT",
-			fmt.Sprintf("/internal/route/%s", idRoute),
-			dto.UpdateRouteReq{
-				Status:      utils.RouteStatusPtr(entities.EnumRouteStatusCanceled),
-				Description: utils.StringPtr("cleanup: liberar donation steps"),
-			},
-			&utils.TestHeadersAdmin,
-		)
-	})
+	_, _ = fluxgo.RunTestRequestRaw(
+		app,
+		"PUT",
+		fmt.Sprintf("/internal/route/%s", idRoute),
+		dto.UpdateRouteReq{
+			Status:      utils.RouteStatusPtr(entities.EnumRouteStatusCanceled),
+			Description: utils.StringPtr("cleanup: liberar donation steps"),
+		},
+		&utils.TestHeadersAdmin,
+	)
+}
+
+func cancelRouteOnCleanup(t *testing.T, app *fluxgo.Http, idRoute interface{}) {
+	t.Helper()
+
+	id, _ := idRoute.(string)
+	if id == "" {
+		return
+	}
+
+	t.Cleanup(func() { cancelRouteNow(app, id) })
 }
