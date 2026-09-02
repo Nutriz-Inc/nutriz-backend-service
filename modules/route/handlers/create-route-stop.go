@@ -74,11 +74,6 @@ func (h *HandlerCreateRouteStop) Execute(ctx c.Context, data *dto.CreateRouteSto
 		return nil, fluxgo.ErrorBadRequest("Canceled routes cannot be updated", "route.canceled")
 	}
 
-	donationStep, globalErr := h.getDonationStep(ctx, data, route)
-	if globalErr != nil {
-		return nil, globalErr
-	}
-
 	currentStops, err := h.routeDonationStepRepo.GetRouteDonationStepsWithLocationByIdRoute(ctx, data.IdRoute)
 	if err != nil {
 		return nil, fluxgo.ErrorInternalError("Error to get route stops")
@@ -88,6 +83,11 @@ func (h *HandlerCreateRouteStop) Execute(ctx c.Context, data *dto.CreateRouteSto
 		if stop.IdDonationStep == data.IdDonationStep {
 			return nil, fluxgo.ErrorBadRequest("Donation step is already a stop of the route", "stops.duplicated")
 		}
+	}
+
+	donationStep, globalErr := h.getDonationStep(ctx, data, route)
+	if globalErr != nil {
+		return nil, globalErr
 	}
 
 	stops := append(routeStopCoordinates(*currentStops), utils.StopCoordinates{
@@ -184,6 +184,18 @@ func (h *HandlerCreateRouteStop) getDonationStep(
 		return nil, fluxgo.ErrorBadRequest(
 			fmt.Sprintf("Donation of %s is not active", donationStep.IdDonationStep),
 			"donation.inactive",
+		)
+	}
+	if !donationStep.HasAddress {
+		return nil, fluxgo.ErrorBadRequest(
+			fmt.Sprintf("Donation step %s has no address", donationStep.IdDonationStep),
+			"stops.no_address",
+		)
+	}
+	if donationStep.InActiveRoute {
+		return nil, fluxgo.ErrorBadRequest(
+			fmt.Sprintf("Donation step %s is already in another active route", donationStep.IdDonationStep),
+			"stops.already_in_route",
 		)
 	}
 

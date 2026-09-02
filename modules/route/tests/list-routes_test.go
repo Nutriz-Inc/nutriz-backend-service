@@ -39,7 +39,7 @@ func TestListRoutes(t *testing.T) {
 	dateSet := time.Now().UTC().AddDate(0, 0, routeDateSet)
 	stops := []string{idStepOne}
 
-	fluxgo.RunTestRequest(
+	_, listSetupResp := fluxgo.RunTestRequest(
 		app,
 		"POST",
 		"/internal/route",
@@ -54,6 +54,9 @@ func TestListRoutes(t *testing.T) {
 		},
 		adminHeaders,
 	)
+	if id, ok := listSetupResp["id_route"].(string); ok {
+		cancelRouteOnCleanup(t, app, id)
+	}
 
 	t.Run("Success", func(t *testing.T) {
 		t.Run("No filters", func(t *testing.T) {

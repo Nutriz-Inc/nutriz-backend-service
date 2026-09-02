@@ -59,6 +59,8 @@ func TestRemoveRouteStop(t *testing.T) {
 
 		assert.Equal(t, http.StatusCreated, status)
 
+		cancelRouteOnCleanup(t, app, resp["id_route"].(string))
+
 		byDonationStep := map[string]map[string]interface{}{}
 		for _, item := range resp["stops"].([]interface{}) {
 			stop := item.(map[string]interface{})

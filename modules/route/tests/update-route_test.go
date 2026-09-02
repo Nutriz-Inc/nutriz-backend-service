@@ -52,6 +52,7 @@ func TestUpdateRoute(t *testing.T) {
 
 		idRoute, ok := resp["id_route"].(string)
 		assert.True(t, ok)
+		cancelRouteOnCleanup(t, app, idRoute)
 
 		return idRoute
 	}

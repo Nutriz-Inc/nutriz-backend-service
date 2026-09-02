@@ -149,13 +149,10 @@ func TestListDonationSteps(t *testing.T) {
 		})
 
 		t.Run("Filters by available_for_route = false (already routed)", func(t *testing.T) {
-			// seed route_donation_step rows tie these steps to active routes
 			seedRouted := []string{
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR1",
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR2",
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR3",
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR5",
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR6",
+				"dst_2veL1FPpuXxUaZcFaEC57Bfpd54",
+				"dst_2veL1FPpuXxUaZcFaEC57Bfpd55",
+				"dst_2veL1FPpuXxUaZcFaEC57Bfpd56",
 			}
 
 			status, resp := fluxgo.RunTestRequest(
@@ -183,11 +180,9 @@ func TestListDonationSteps(t *testing.T) {
 
 		t.Run("Filters by available_for_route = true (free steps)", func(t *testing.T) {
 			routed := map[string]bool{
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR1": true,
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR2": true,
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR3": true,
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR5": true,
-				"dst_2veL1FPpuXxUaZcFaEC57BfpcR6": true,
+				"dst_2veL1FPpuXxUaZcFaEC57Bfpd54": true,
+				"dst_2veL1FPpuXxUaZcFaEC57Bfpd55": true,
+				"dst_2veL1FPpuXxUaZcFaEC57Bfpd56": true,
 			}
 
 			status, resp := fluxgo.RunTestRequest(

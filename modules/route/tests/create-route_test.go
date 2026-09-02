@@ -53,6 +53,7 @@ func TestCreateRoute(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusCreated, status)
+			cancelRouteOnCleanup(t, app, resp["id_route"].(string))
 			assert.NotEmpty(t, resp["id_route"])
 			assert.Equal(t, idDriver, resp["id_driver"])
 			assert.Equal(t, body.Name, resp["name"])
@@ -82,6 +83,7 @@ func TestCreateRoute(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusCreated, status)
+			cancelRouteOnCleanup(t, app, resp["id_route"].(string))
 			assert.Equal(t, "Sao Paulo", resp["city"])
 
 			stops, ok := resp["stops"].([]interface{})
@@ -110,6 +112,7 @@ func TestCreateRoute(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusCreated, status)
+			cancelRouteOnCleanup(t, app, resp["id_route"].(string))
 
 			stops, ok := resp["stops"].([]interface{})
 			assert.True(t, ok)
@@ -127,6 +130,7 @@ func TestCreateRoute(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusCreated, status)
+			cancelRouteOnCleanup(t, app, resp["id_route"].(string))
 			assert.NotEmpty(t, resp["id_route"])
 			assert.Equal(t, string(entities.EnumRouteStatusPending), resp["status"])
 			assert.Nil(t, resp["estimated_time"], "a route without stops has no estimated time")
@@ -142,6 +146,7 @@ func TestCreateRoute(t *testing.T) {
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
 			assert.Equal(t, http.StatusCreated, status)
+			cancelRouteOnCleanup(t, app, resp["id_route"].(string))
 			assert.NotEmpty(t, resp["id_route"])
 
 			stops, ok := resp["stops"].([]interface{})
@@ -230,6 +235,24 @@ func TestCreateRoute(t *testing.T) {
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "Donation of "+idStepInactive+" is not active", resp["message"])
 			assert.Equal(t, "donation.inactive", resp["code"])
+		})
+
+		t.Run("Stop has no address", func(t *testing.T) {
+			body := makeBody([]string{"dst_2veL1FPpuXxUaZcFaEC57Bfpd57"}, futureDate)
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(t, "stops.no_address", resp["code"])
+		})
+
+		t.Run("Stop already belongs to another active route", func(t *testing.T) {
+			body := makeBody([]string{"dst_2veL1FPpuXxUaZcFaEC57Bfpd54"}, futureDate)
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(t, "stops.already_in_route", resp["code"])
 		})
 
 		t.Run("Stop is not in the requested city", func(t *testing.T) {

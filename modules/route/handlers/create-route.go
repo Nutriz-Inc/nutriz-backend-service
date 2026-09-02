@@ -214,6 +214,18 @@ func (h *HandlerCreateRoute) getDonationSteps(
 		if !donationStep.IsDonationActive {
 			return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("Donation of %s is not active", donationStep.IdDonationStep), "donation.inactive")
 		}
+		if !donationStep.HasAddress {
+			return nil, fluxgo.ErrorBadRequest(
+				fmt.Sprintf("Donation step %s has no address", donationStep.IdDonationStep),
+				"stops.no_address",
+			)
+		}
+		if donationStep.InActiveRoute {
+			return nil, fluxgo.ErrorBadRequest(
+				fmt.Sprintf("Donation step %s is already in another active route", donationStep.IdDonationStep),
+				"stops.already_in_route",
+			)
+		}
 
 		if data.City != nil && !utils.MatchesAddressField(donationStep.City, *data.City) {
 			return nil, fluxgo.ErrorBadRequest(
