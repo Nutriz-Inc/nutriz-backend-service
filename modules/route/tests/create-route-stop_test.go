@@ -43,7 +43,7 @@ func TestCreateRouteStop(t *testing.T) {
 			dto.CreateRouteReq{
 				IdDriver:     idDriver,
 				DateSet:      futureDate,
-				Stops:        stops,
+				Stops:        &stops,
 				Name:         name,
 				Description:  "Rota criada para adicionar parada",
 				City:         city,
@@ -54,7 +54,10 @@ func TestCreateRouteStop(t *testing.T) {
 
 		assert.Equal(t, http.StatusCreated, status)
 
-		return resp["id_route"].(string)
+		cancelRouteOnCleanup(t, app, resp["id_route"])
+
+		idRoute, _ := resp["id_route"].(string)
+		return idRoute
 	}
 
 	endpointOf := func(idRoute string) string {
@@ -75,6 +78,10 @@ func TestCreateRouteStop(t *testing.T) {
 			assert.Equal(t, idRoute, resp["id_route"])
 			assert.NotNil(t, resp["updated_at"])
 
+			estimatedTime, ok := resp["estimated_time"].(float64)
+			assert.True(t, ok)
+			assert.Greater(t, estimatedTime, float64(0))
+
 			stops := fluxgo.ConvertToList(resp["stops"])
 			assert.Len(t, stops, 3)
 
@@ -85,6 +92,7 @@ func TestCreateRouteStop(t *testing.T) {
 
 				assert.Equal(t, idRoute, stop["id_route"])
 				assert.Equal(t, float64(index), stop["stop_order"])
+				assert.Equal(t, string(entities.EnumRouteDonationStepStatusPending), stop["status"])
 
 				donationSteps = append(donationSteps, stop["id_donation_step"].(string))
 			}
@@ -230,6 +238,36 @@ func TestCreateRouteStop(t *testing.T) {
 
 			assert.Equal(t, http.StatusBadRequest, status)
 			assert.Equal(t, "route.max_duration_exceeded", resp["code"])
+		})
+
+		t.Run("Donation step has no address", func(t *testing.T) {
+			idRoute := createRoute(t, "Rota parada sem endereco", []string{idStepOne}, nil, nil)
+
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"POST",
+				endpointOf(idRoute),
+				body("dst_2veL1FPpuXxUaZcFaEC57Bfpd57"),
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(t, "stops.no_address", resp["code"])
+		})
+
+		t.Run("Donation step already belongs to another active route", func(t *testing.T) {
+			idRoute := createRoute(t, "Rota parada ja em outra rota", []string{idStepOne}, nil, nil)
+
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"POST",
+				endpointOf(idRoute),
+				body("dst_2veL1FPpuXxUaZcFaEC57Bfpd54"),
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(t, "stops.already_in_route", resp["code"])
 		})
 
 		t.Run("Invalid donation step id", func(t *testing.T) {

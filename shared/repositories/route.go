@@ -142,15 +142,16 @@ func (r *RouteRepository) GetRouteWithDriverById(ctx c.Context, id string) (*dto
 }
 
 type CreateRouteRepositoryReq struct {
-	IdRoute      string
-	IdDriver     string
-	IdUser       string
-	Name         string
-	Description  string
-	City         *string
-	Neighborhood *string
-	Status       entities.EnumRouteStatus
-	DateSet      time.Time
+	IdRoute       string
+	IdDriver      string
+	IdUser        string
+	Name          string
+	Description   string
+	City          *string
+	Neighborhood  *string
+	Status        entities.EnumRouteStatus
+	DateSet       time.Time
+	EstimatedTime *time.Duration
 }
 
 func (r *RouteRepository) createRoute(
@@ -171,6 +172,7 @@ func (r *RouteRepository) createRoute(
 			neighborhood,
 			status,
 			date_set,
+			estimated_time,
 			created_at,
 			created_by
 		) VALUES (
@@ -182,21 +184,29 @@ func (r *RouteRepository) createRoute(
 			:neighborhood,
 			:status,
 			:date_set,
+			:estimated_time,
 			now(),
 			:id_user
 		)
 	`
 
+	var estimatedTime *int64
+	if data.EstimatedTime != nil {
+		v := int64(*data.EstimatedTime)
+		estimatedTime = &v
+	}
+
 	params := map[string]any{
-		"id_route":     data.IdRoute,
-		"id_driver":    data.IdDriver,
-		"id_user":      data.IdUser,
-		"name":         data.Name,
-		"description":  data.Description,
-		"city":         data.City,
-		"neighborhood": data.Neighborhood,
-		"status":       data.Status,
-		"date_set":     data.DateSet,
+		"id_route":       data.IdRoute,
+		"id_driver":      data.IdDriver,
+		"id_user":        data.IdUser,
+		"name":           data.Name,
+		"description":    data.Description,
+		"city":           data.City,
+		"neighborhood":   data.Neighborhood,
+		"status":         data.Status,
+		"date_set":       data.DateSet,
+		"estimated_time": estimatedTime,
 	}
 
 	_, err := sqlx.NamedExecContext(
@@ -383,4 +393,49 @@ func (r *RouteRepository) TouchRouteTx(
 	updatedBy string,
 ) error {
 	return r.touchRoute(ctx, tx, idRoute, updatedBy)
+}
+
+func (r *RouteRepository) updateEstimatedTime(
+	ctx c.Context,
+	exec sqlx.ExtContext,
+	idRoute string,
+	estimatedTime *time.Duration,
+	updatedBy string,
+) error {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	var value *int64
+	if estimatedTime != nil {
+		v := int64(*estimatedTime)
+		value = &v
+	}
+
+	query := `
+		UPDATE route
+		SET estimated_time = :estimated_time,
+		    updated_at = now(),
+		    updated_by = :updated_by
+		WHERE id_route = :id_route AND removed_at IS NULL
+	`
+
+	params := map[string]any{
+		"id_route":       idRoute,
+		"estimated_time": value,
+		"updated_by":     updatedBy,
+	}
+
+	_, err := sqlx.NamedExecContext(ctx, exec, query, params)
+
+	return err
+}
+
+func (r *RouteRepository) UpdateEstimatedTimeTx(
+	ctx c.Context,
+	tx *sqlx.Tx,
+	idRoute string,
+	estimatedTime *time.Duration,
+	updatedBy string,
+) error {
+	return r.updateEstimatedTime(ctx, tx, idRoute, estimatedTime, updatedBy)
 }

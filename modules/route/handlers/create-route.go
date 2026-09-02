@@ -4,6 +4,8 @@ import (
 	c "context"
 	"errors"
 	"fmt"
+	"time"
+
 	"nutriz-backend-service/config"
 	dto "nutriz-backend-service/modules/route/dtos"
 	"nutriz-backend-service/shared/entities"
@@ -81,44 +83,58 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 		return nil, fluxgo.ErrorBadRequest("Invalid date set format", "route.invalid_date_set_format")
 	}
 
-	donationSteps, globalErr := h.getDonationSteps(ctx, data)
-	if globalErr != nil {
-		return nil, globalErr
-	}
+	validator := data.ValidateCreateRouteOptionalFields()
 
-	stopOrders, globalErr := utils.OptimizeStops(ctx, h.config, stopCoordinates(donationSteps))
-	if globalErr != nil {
-		return nil, globalErr
+	var donationSteps []repositories.DonationStepWithLocation
+	var stopOrders []int16
+	var estimatedTime *time.Duration
+
+	if validator.HasStops {
+		steps, globalErr := h.getDonationSteps(ctx, data)
+		if globalErr != nil {
+			return nil, globalErr
+		}
+		donationSteps = *steps
+
+		orders, duration, globalErr := utils.OptimizeStops(ctx, h.config, stopCoordinates(steps))
+		if globalErr != nil {
+			return nil, globalErr
+		}
+		stopOrders = orders
+		estimatedTime = &duration
 	}
 
 	idRoute := utils.IdGenerate(utils.RouteEntity)
 
 	err = h.db.RunTransaction(ctx, func(ctx c.Context, tx *sqlx.Tx) error {
 		err := h.routeRepo.CreateRouteTx(ctx, tx, &repositories.CreateRouteRepositoryReq{
-			IdRoute:      idRoute,
-			IdDriver:     data.IdDriver,
-			IdUser:       data.ActionBy,
-			Name:         data.Name,
-			Description:  data.Description,
-			City:         data.City,
-			Neighborhood: data.Neighborhood,
-			Status:       entities.EnumRouteStatusPending, // Always starts as pending
-			DateSet:      *dateSet,
+			IdRoute:       idRoute,
+			IdDriver:      data.IdDriver,
+			IdUser:        data.ActionBy,
+			Name:          data.Name,
+			Description:   data.Description,
+			City:          data.City,
+			Neighborhood:  data.Neighborhood,
+			Status:        entities.EnumRouteStatusPending, // Always starts as pending
+			DateSet:       *dateSet,
+			EstimatedTime: estimatedTime,
 		})
 		if err != nil {
 			return fmt.Errorf("error to create route: %w", err)
 		}
 
-		for index, donationStep := range *donationSteps {
-			err = h.routeDonationStepRepo.CreateRouteDonationStepTx(ctx, tx, &repositories.CreateRouteDonationStepRepositoryReq{
-				IdRouteDonationStep: utils.IdGenerate(utils.RouteDonationStepEntity),
-				IdRoute:             idRoute,
-				IdDonationStep:      donationStep.IdDonationStep,
-				IdUser:              data.ActionBy,
-				StopOrder:           stopOrders[index],
-			})
-			if err != nil {
-				return fmt.Errorf("error to create route donation step: %w", err)
+		if validator.HasStops {
+			for index, donationStep := range donationSteps {
+				err = h.routeDonationStepRepo.CreateRouteDonationStepTx(ctx, tx, &repositories.CreateRouteDonationStepRepositoryReq{
+					IdRouteDonationStep: utils.IdGenerate(utils.RouteDonationStepEntity),
+					IdRoute:             idRoute,
+					IdDonationStep:      donationStep.IdDonationStep,
+					IdUser:              data.ActionBy,
+					StopOrder:           stopOrders[index],
+				})
+				if err != nil {
+					return fmt.Errorf("error to create route donation step: %w", err)
+				}
 			}
 		}
 
@@ -140,17 +156,22 @@ func (h *HandlerCreateRoute) Execute(ctx c.Context, data *dto.CreateRouteReq) (*
 		return nil, fluxgo.ErrorNotFound("Route not found")
 	}
 
-	stops, err := h.routeDonationStepRepo.GetRouteDonationStepsByIdRoute(ctx, idRoute)
-	if err != nil {
-		return nil, fluxgo.ErrorInternalError("Error to get route donation steps")
-	}
-	if stops == nil || len(*stops) == 0 {
-		return nil, fluxgo.ErrorNotFound("No donation steps found for the route")
+	stops := make([]entities.RouteDonationStep, 0)
+
+	if validator.HasStops {
+		routeStops, err := h.routeDonationStepRepo.GetRouteDonationStepsByIdRoute(ctx, idRoute)
+		if err != nil {
+			return nil, fluxgo.ErrorInternalError("Error to get route donation steps")
+		}
+		if routeStops == nil || len(*routeStops) == 0 {
+			return nil, fluxgo.ErrorNotFound("No donation steps found for the route")
+		}
+		stops = *routeStops
 	}
 
 	return &dto.CreateRouteRes{
 		Route: *route,
-		Stops: *stops,
+		Stops: stops,
 	}, nil
 }
 
@@ -158,10 +179,10 @@ func (h *HandlerCreateRoute) getDonationSteps(
 	ctx c.Context,
 	data *dto.CreateRouteReq,
 ) (*[]repositories.DonationStepWithLocation, *fluxgo.GlobalError) {
-	ids := make([]string, 0, len(data.Stops))
-	seen := make(map[string]bool, len(data.Stops))
+	ids := make([]string, 0, len(*data.Stops))
+	seen := make(map[string]bool, len(*data.Stops))
 
-	for _, id := range data.Stops {
+	for _, id := range *data.Stops {
 		if utils.GetIdEntity(id) != utils.DonationStepEntity {
 			return nil, fluxgo.ErrorBadRequest("Stop is not a donation step id", "stops.invalid_id")
 		}
@@ -192,6 +213,18 @@ func (h *HandlerCreateRoute) getDonationSteps(
 		}
 		if !donationStep.IsDonationActive {
 			return nil, fluxgo.ErrorBadRequest(fmt.Sprintf("Donation of %s is not active", donationStep.IdDonationStep), "donation.inactive")
+		}
+		if !donationStep.HasAddress {
+			return nil, fluxgo.ErrorBadRequest(
+				fmt.Sprintf("Donation step %s has no address", donationStep.IdDonationStep),
+				"stops.no_address",
+			)
+		}
+		if donationStep.InActiveRoute {
+			return nil, fluxgo.ErrorBadRequest(
+				fmt.Sprintf("Donation step %s is already in another active route", donationStep.IdDonationStep),
+				"stops.already_in_route",
+			)
 		}
 
 		if data.City != nil && !utils.MatchesAddressField(donationStep.City, *data.City) {

@@ -31,6 +31,7 @@ func TestUpdateRoute(t *testing.T) {
 	)
 
 	futureDate := time.Now().UTC().AddDate(0, 0, routeDateSet).Format(time.RFC3339)
+	stops := []string{idStepOne}
 
 	createRoute := func(t *testing.T, name string) string {
 		status, resp := fluxgo.RunTestRequest(
@@ -40,7 +41,7 @@ func TestUpdateRoute(t *testing.T) {
 			dto.CreateRouteReq{
 				IdDriver:    idDriver,
 				DateSet:     futureDate,
-				Stops:       []string{idStepOne},
+				Stops:       &stops,
 				Name:        name,
 				Description: "Rota criada para a atualizacao",
 			},
@@ -51,6 +52,7 @@ func TestUpdateRoute(t *testing.T) {
 
 		idRoute, ok := resp["id_route"].(string)
 		assert.True(t, ok)
+		cancelRouteOnCleanup(t, app, idRoute)
 
 		return idRoute
 	}
