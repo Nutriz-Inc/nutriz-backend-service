@@ -101,6 +101,20 @@ func TestRemoveRouteStop(t *testing.T) {
 		return orders
 	}
 
+	stopStatus := func(t *testing.T, idStop string) string {
+		var status string
+		err := db.Get(&status, `SELECT status FROM route_donation_step WHERE id_route_donation_step = $1`, idStop)
+		assert.NoError(t, err)
+		return status
+	}
+
+	routeEstimatedTime := func(t *testing.T, idRoute string) *int64 {
+		var v *int64
+		err := db.Get(&v, `SELECT estimated_time FROM route WHERE id_route = $1`, idRoute)
+		assert.NoError(t, err)
+		return v
+	}
+
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Removes a stop and reorders the remaining ones", func(t *testing.T) {
 			created := createRoute(t, "Rota para remover parada", []string{idStepOne, idStepTwo, idStepThree})
@@ -118,6 +132,9 @@ func TestRemoveRouteStop(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, true, resp["success"])
+
+			assert.Equal(t, "error", stopStatus(t, removed["id_route_donation_step"].(string)))
+			assert.NotNil(t, routeEstimatedTime(t, idRoute))
 
 			orders := remainingStops(t, idRoute)
 
@@ -139,6 +156,7 @@ func TestRemoveRouteStop(t *testing.T) {
 			created := createRoute(t, "Rota com uma parada", []string{idStepOne})
 
 			stop := created[idStepOne]
+			idRoute := stop["id_route"].(string)
 
 			status, resp := fluxgo.RunTestRequest(
 				app,
@@ -150,6 +168,8 @@ func TestRemoveRouteStop(t *testing.T) {
 
 			assert.Equal(t, http.StatusOK, status)
 			assert.Equal(t, true, resp["success"])
+
+			assert.Nil(t, routeEstimatedTime(t, idRoute))
 		})
 	})
 

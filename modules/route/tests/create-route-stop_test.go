@@ -75,6 +75,10 @@ func TestCreateRouteStop(t *testing.T) {
 			assert.Equal(t, idRoute, resp["id_route"])
 			assert.NotNil(t, resp["updated_at"])
 
+			estimatedTime, ok := resp["estimated_time"].(float64)
+			assert.True(t, ok)
+			assert.Greater(t, estimatedTime, float64(0))
+
 			stops := fluxgo.ConvertToList(resp["stops"])
 			assert.Len(t, stops, 3)
 
@@ -85,6 +89,7 @@ func TestCreateRouteStop(t *testing.T) {
 
 				assert.Equal(t, idRoute, stop["id_route"])
 				assert.Equal(t, float64(index), stop["stop_order"])
+				assert.Equal(t, string(entities.EnumRouteDonationStepStatusPending), stop["status"])
 
 				donationSteps = append(donationSteps, stop["id_donation_step"].(string))
 			}

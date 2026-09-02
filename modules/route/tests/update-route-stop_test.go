@@ -89,6 +89,17 @@ func TestUpdateRouteStop(t *testing.T) {
 		return row.DateStart, row.DateEnd
 	}
 
+	stopStatus := func(t *testing.T, idStop string) string {
+		var status string
+		err := db.Get(
+			&status,
+			`SELECT status FROM route_donation_step WHERE id_route_donation_step = $1`,
+			idStop,
+		)
+		assert.NoError(t, err)
+		return status
+	}
+
 	t.Run("Success", func(t *testing.T) {
 		t.Run("Driver sets date_start of a stop", func(t *testing.T) {
 			created := createRoute(t, "Rota para iniciar parada", []string{idStepOne})
@@ -106,10 +117,31 @@ func TestUpdateRouteStop(t *testing.T) {
 			stop := resp["stop"].(map[string]interface{})
 			assert.NotNil(t, stop["date_start"])
 			assert.Nil(t, stop["date_end"])
+			assert.Equal(t, "in_progress", stop["status"])
 
 			start, end := stopDates(t, idStop)
 			assert.NotNil(t, start)
 			assert.Nil(t, end)
+			assert.Equal(t, "in_progress", stopStatus(t, idStop))
+		})
+
+		t.Run("Driver reports an error on a stop", func(t *testing.T) {
+			created := createRoute(t, "Rota parada com erro", []string{idStepOne})
+			idStop := created[idStepOne]["id_route_donation_step"].(string)
+
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"PUT",
+				endpointOf(idStop),
+				dto.UpdateRouteStopReq{HasError: utils.BoolPtr(true)},
+				driverHeaders,
+			)
+
+			assert.Equal(t, http.StatusOK, status)
+			stop := resp["stop"].(map[string]interface{})
+			assert.Equal(t, "error", stop["status"])
+			assert.Nil(t, stop["date_start"])
+			assert.Equal(t, "error", stopStatus(t, idStop))
 		})
 
 		t.Run("Route date_end propagates to started stops only", func(t *testing.T) {
@@ -152,9 +184,11 @@ func TestUpdateRouteStop(t *testing.T) {
 			startedStart, startedEnd := stopDates(t, idStartedStop)
 			assert.NotNil(t, startedStart)
 			assert.NotNil(t, startedEnd)
+			assert.Equal(t, "done", stopStatus(t, idStartedStop))
 
 			_, pendingEnd := stopDates(t, idPendingStop)
 			assert.Nil(t, pendingEnd)
+			assert.Equal(t, "pending", stopStatus(t, idPendingStop))
 		})
 	})
 
