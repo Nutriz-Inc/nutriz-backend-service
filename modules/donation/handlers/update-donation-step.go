@@ -178,6 +178,19 @@ func (h *HandlerUpdateDonationStep) Execute(ctx c.Context, data *dto.UpdateDonat
 			return fmt.Errorf("error to update donation step: %w", err)
 		}
 
+		if isDone && donationStep.Name == entities.EnumDonationStepBloodTest {
+			bloodExamValidUntil := entities.BloodExamValidUntilFrom(time.Now())
+
+			err = h.userRepo.UpdateUserTx(ctx, tx, &repositories.UpdateUserRepositoryReq{
+				IdUser:              donation.CreatedBy,
+				ActionBy:            data.ActionBy,
+				BloodExamValidUntil: &bloodExamValidUntil,
+			})
+			if err != nil {
+				return fmt.Errorf("error to update user blood exam validity: %w", err)
+			}
+		}
+
 		if (isDone && donationStep.Name == entities.EnumDonationStepMilkAnalysis) || isFailed {
 			err = h.donationRepo.UpdateDonationTx(ctx, tx, &repositories.UpdateDonationRepositoryReq{
 				IdDonation: donation.IdDonation,
