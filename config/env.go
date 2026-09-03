@@ -35,4 +35,7 @@ type Env struct {
 		Version string `env:"SERVICE_VERSION" validate:"required"`
 		Email   string `env:"EMAIL" validate:"required"`
 	}
+	Cors struct {
+		AllowedOrigins string `env:"CORS_ALLOWED_ORIGINS"`
+	}
 }
