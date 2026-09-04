@@ -12,5 +12,5 @@ type LoginRes struct {
 	IdUser           string                `json:"id_user"`
 	Name             string                `json:"name"`
 	Type             entities.EnumUserType `json:"type"`
-	IsRecurrentDonor *bool                 `json:"is_recurrent_donor"`
+	IsRecurrentDonor bool                  `json:"is_recurrent_donor"`
 }
