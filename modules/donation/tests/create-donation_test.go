@@ -3,6 +3,7 @@ package tests
 import (
 	"fmt"
 	"net/http"
+	authDto "nutriz-backend-service/modules/auth/dtos"
 	"nutriz-backend-service/shared/entities"
 	"nutriz-backend-service/shared/module"
 	"nutriz-backend-service/shared/utils"
@@ -27,6 +28,30 @@ func TestCreateDonation(t *testing.T) {
 			assert.NotEmpty(t, body["id_donation"])
 			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", body["created_by"])
 			assert.Equal(t, true, body["is_active"])
+			assert.Equal(t, false, body["is_recurrent"], "user has no valid blood exam")
+		})
+
+		t.Run("Recurrent donation when the user has a valid blood exam", func(t *testing.T) {
+			loginData := authDto.LoginReq{
+				Email:    "renata@email.com",
+				Password: "12345678",
+			}
+
+			status, loginBody := fluxgo.RunTestRequest(app, "POST", "/public/auth/login", loginData, nil)
+
+			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, true, loginBody["is_recurrent_donor"])
+
+			token, ok := loginBody["token"].(string)
+			assert.True(t, ok)
+
+			recurrentHeaders := fluxgo.Headers{"Authorization": "Bearer " + token}
+
+			status, body := fluxgo.RunTestRequest(app, "POST", endpoint, nil, &recurrentHeaders)
+
+			assert.Equal(t, http.StatusCreated, status)
+			assert.Equal(t, "usr_2veL1FPpuXxUaZcFaEC57BfpcBR", body["created_by"])
+			assert.Equal(t, true, body["is_recurrent"])
 		})
 	})
 

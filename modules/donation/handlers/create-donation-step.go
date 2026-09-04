@@ -92,9 +92,9 @@ func (h *HandlerCreateDonationStep) Execute(ctx c.Context, data *dto.CreateDonat
 		if donationUser == nil {
 			return nil, fluxgo.ErrorNotFound("Donation user not found")
 		}
-		if !donationUser.IsBloodExamValid() {
+		if !donationUser.IsBloodExamValid() || !donation.IsRecurrent {
 			return nil, fluxgo.ErrorBadRequest(
-				"Donation can only start at the milk collection step if the user has a valid blood exam",
+				"Donation can only start at the milk collection step if the user has a valid blood exam and is a recurrent donation",
 				"donation_step.blood_exam_invalid",
 			)
 		}

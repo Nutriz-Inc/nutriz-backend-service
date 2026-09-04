@@ -64,9 +64,10 @@ func (h *HandlerCreateDonation) Execute(ctx c.Context, data *dto.CreateDonationR
 
 	idDonation := utils.IdGenerate(utils.DonationEntity)
 	repoData := &repositories.CreateDonationRepositoryReq{
-		IdDonation: idDonation,
-		IdUser:     user.IdUser,
-		IsActive:   true, // default value for new donation
+		IdDonation:  idDonation,
+		IdUser:      user.IdUser,
+		IsActive:    true, // default value for new donation
+		IsRecurrent: user.IsBloodExamValid(),
 	}
 
 	err = h.donationRepo.CreateDonation(ctx, repoData)
