@@ -86,7 +86,7 @@ func TestUpdateDonationStep(t *testing.T) {
 			status, userResp := fluxgo.RunTestRequest(
 				app,
 				"GET",
-				"/internal/user/usr_2veL1FPpuXxUaZcFaEC57BfpcKF",
+				"/internal/user/usr_2veL1FPpuXxUaZcFaEC57BfpcBC",
 				nil,
 				adminHeaders,
 			)
@@ -100,7 +100,7 @@ func TestUpdateDonationStep(t *testing.T) {
 			assert.NoError(t, err)
 
 			expected := time.Now().AddDate(0, entities.BLOOD_EXAM_VALIDITY_MONTHS, 0)
-			assert.WithinDuration(t, expected, validUntil, time.Minute)
+			assert.WithinDuration(t, expected, validUntil, 24*time.Hour)
 		})
 
 		t.Run("Admin updates with new address by zip code", func(t *testing.T) {

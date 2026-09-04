@@ -11,6 +11,7 @@ type ListDonationReq struct {
 	UserName     *string                     `query:"user_name" validate:"omitempty"`
 	IdUserCommon *string                     `query:"id_user_common" validate:"omitempty,id"`
 	CurrentStep  *entities.EnumDonationSteps `query:"current_step" validate:"omitempty,oneof='Exame de sangue' 'Entregar kit de ordenha' 'Coletar leite' 'Análise de leite'"`
+	IsRecurrent  *bool                       `query:"is_recurrent" validate:"omitempty"`
 	ActionBy     *string                     `reqHeader:"action-by" validate:"required,id"`
 	utils.PaginationReq
 }

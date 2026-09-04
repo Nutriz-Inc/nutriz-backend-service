@@ -234,6 +234,42 @@ INSERT INTO "user" (
     NULL,
     NULL,
     NULL
+),
+(
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBR',
+    '234567898765442',
+    'common',
+    'Renata Recorrente',
+    '89373481070',
+    CURRENT_DATE - INTERVAL '27 years',
+    '11999999995',
+    'renata@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    0,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBR',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBC',
+    '234567898765443',
+    'common',
+    'Carla Coleta',
+    '64723525005',
+    CURRENT_DATE - INTERVAL '31 years',
+    '11999999994',
+    'carla@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    0,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBC',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 UPDATE "user"
@@ -243,6 +279,10 @@ WHERE id_user = 'usr_2veL1FPpuXxUaZcFaEC57BfpcKL';
 UPDATE "user"
 SET blood_exam_valid_until = NOW() - INTERVAL '1 day'
 WHERE id_user = 'usr_2veL1FPpuXxUaZcFaEC57BfpcBX';
+
+UPDATE "user"
+SET blood_exam_valid_until = NOW() + INTERVAL '6 months'
+WHERE id_user = 'usr_2veL1FPpuXxUaZcFaEC57BfpcBR';
 
 INSERT INTO donation_point (
     id_donation_point,
@@ -497,7 +537,7 @@ INSERT INTO donation (
     true,
     NULL,
     NOW(),
-    'usr_2veL1FPpuXxUaZcFaEC57BfpcKF',
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBC',
     NULL,
     NULL,
     NULL,
@@ -513,6 +553,30 @@ INSERT INTO donation (
     NULL,
     NULL,
     NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcBH',
+    true,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
+
+UPDATE donation
+SET is_recurrent = true
+WHERE id_donation IN (
+    'don_2veL1FPpuXxUaZcFaEC57BfpcBG',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKG',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKH',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKI',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKM',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKN',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKP',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKQ'
 );
 
 INSERT INTO address (
