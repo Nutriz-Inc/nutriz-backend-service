@@ -85,7 +85,7 @@ func TestCreateDonationStep(t *testing.T) {
 		})
 
 		t.Run("Starts donation at the milk collection step when the blood exam is valid", func(t *testing.T) {
-			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcKP", nil)
+			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcBG", nil)
 
 			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
 
