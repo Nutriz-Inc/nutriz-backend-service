@@ -111,6 +111,14 @@ func (r *UserRepository) ListUsersByFilters(
 		})
 	}
 
+	if filter.IsRecurrent != nil {
+		qb.WhereAnd(q.Where{
+			Column: "COALESCE(u.blood_exam_valid_until > NOW(), false)",
+			Type:   "=",
+			Val:    *filter.IsRecurrent,
+		})
+	}
+
 	if filter.Cpf != nil {
 		qb.WhereAnd(q.Where{
 			Column: "u.cpf",
