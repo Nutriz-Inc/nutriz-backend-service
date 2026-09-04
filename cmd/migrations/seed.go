@@ -216,11 +216,33 @@ INSERT INTO "user" (
     NULL,
     NULL,
     NULL
+),
+(
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBX',
+    '234567898765441',
+    'common',
+    'Beatriz Exame Vencido',
+    '30830143028',
+    CURRENT_DATE - INTERVAL '32 years',
+    '11999999996',
+    'beatriz@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    0,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBX',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
 
 UPDATE "user"
 SET blood_exam_valid_until = NOW() + INTERVAL '6 months'
 WHERE id_user = 'usr_2veL1FPpuXxUaZcFaEC57BfpcKL';
+
+UPDATE "user"
+SET blood_exam_valid_until = NOW() - INTERVAL '1 day'
+WHERE id_user = 'usr_2veL1FPpuXxUaZcFaEC57BfpcBX';
 
 INSERT INTO donation_point (
     id_donation_point,

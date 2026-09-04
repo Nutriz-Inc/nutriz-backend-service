@@ -61,10 +61,13 @@ func (h *HandlerLogin) Execute(ctx c.Context, data *dto.LoginReq) (*dto.LoginRes
 		return nil, fluxgo.ErrorInternalError("Error to create jwt token")
 	}
 
+	isRecurrentDonor := user.IsBloodExamValid()
+
 	return &dto.LoginRes{
-		Token:  token,
-		IdUser: user.IdUser,
-		Name:   user.Name,
-		Type:   user.Type,
+		Token:            token,
+		IdUser:           user.IdUser,
+		Name:             user.Name,
+		Type:             user.Type,
+		IsRecurrentDonor: &isRecurrentDonor,
 	}, nil
 }
