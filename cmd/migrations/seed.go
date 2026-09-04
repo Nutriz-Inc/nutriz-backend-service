@@ -568,7 +568,16 @@ INSERT INTO donation (
 
 UPDATE donation
 SET is_recurrent = true
-WHERE id_donation = 'don_2veL1FPpuXxUaZcFaEC57BfpcBG';
+WHERE id_donation IN (
+    'don_2veL1FPpuXxUaZcFaEC57BfpcBG',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKG',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKH',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKI',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKM',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKN',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKP',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcKQ'
+);
 
 INSERT INTO address (
     id_address,
