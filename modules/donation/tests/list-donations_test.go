@@ -65,6 +65,8 @@ func TestListDonation(t *testing.T) {
 					[]string{
 						"usr_2veL1FPpuXxUaZcFaEC57BfpcKE",
 						"usr_2veL1FPpuXxUaZcFaEC57BfpcKL",
+						"usr_2veL1FPpuXxUaZcFaEC57BfpcKF",
+						"usr_2veL1FPpuXxUaZcFaEC57BfpcBE",
 					},
 					createdBy,
 				)

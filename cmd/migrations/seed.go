@@ -198,7 +198,51 @@ INSERT INTO "user" (
     NULL,
     NULL,
     NULL
+),
+(
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBE',
+    '234567898765440',
+    'common',
+    'Bianca Exame',
+    '15350946056',
+    CURRENT_DATE - INTERVAL '28 years',
+    '11999999997',
+    'bianca@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    0,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBE',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBX',
+    '234567898765441',
+    'common',
+    'Beatriz Exame Vencido',
+    '30830143028',
+    CURRENT_DATE - INTERVAL '32 years',
+    '11999999996',
+    'beatriz@email.com',
+    '2b9643d9671363af30ebed5463130ee7',
+    0,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBX',
+    NULL,
+    NULL,
+    NULL,
+    NULL
 );
+
+UPDATE "user"
+SET blood_exam_valid_until = NOW() + INTERVAL '6 months'
+WHERE id_user = 'usr_2veL1FPpuXxUaZcFaEC57BfpcKL';
+
+UPDATE "user"
+SET blood_exam_valid_until = NOW() - INTERVAL '1 day'
+WHERE id_user = 'usr_2veL1FPpuXxUaZcFaEC57BfpcBX';
 
 INSERT INTO donation_point (
     id_donation_point,
@@ -429,6 +473,39 @@ INSERT INTO donation (
 (
     'don_2veL1FPpuXxUaZcFaEC57BfpcR3',
     false,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcBE',
+    true,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcBE',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcBF',
+    true,
+    NULL,
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpcKF',
+    NULL,
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'don_2veL1FPpuXxUaZcFaEC57BfpcBG',
+    true,
     NULL,
     NOW(),
     'usr_2veL1FPpuXxUaZcFaEC57BfpcKL',
@@ -1105,6 +1182,20 @@ INSERT INTO donation_step (
     NULL,
     'Coletar leite',
     'Etapa de doacao ativa porem sem endereco (fixture)',
+    'pending',
+    NOW() + INTERVAL '2 days',
+    NOW(),
+    'usr_2veL1FPpuXxUaZcFaEC57BfpxWS',
+    NULL,
+    NULL,
+    NULL
+),
+(
+    'dst_2veL1FPpuXxUaZcFaEC57BfpcBF',
+    'don_2veL1FPpuXxUaZcFaEC57BfpcBF',
+    NULL,
+    'Exame de sangue',
+    'Step reservado para testes de conclusao do exame de sangue',
     'pending',
     NOW() + INTERVAL '2 days',
     NOW(),

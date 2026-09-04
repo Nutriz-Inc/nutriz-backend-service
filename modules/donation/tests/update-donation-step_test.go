@@ -65,6 +65,44 @@ func TestUpdateDonationStep(t *testing.T) {
 			assert.Equal(t, idAddress, resp["id_address"])
 		})
 
+		t.Run("Completing the blood exam step updates the user blood exam validity", func(t *testing.T) {
+			statusToUpdate := entities.EnumDonationStepStatusDone
+			body := dto.UpdateDonationStepReq{
+				Description: "Exame de sangue concluido",
+				Status:      &statusToUpdate,
+			}
+
+			status, resp := fluxgo.RunTestRequest(
+				app,
+				"PUT",
+				endpoint+"/dst_2veL1FPpuXxUaZcFaEC57BfpcBF",
+				body,
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusOK, status)
+			assert.Equal(t, string(entities.EnumDonationStepStatusDone), resp["status"])
+
+			status, userResp := fluxgo.RunTestRequest(
+				app,
+				"GET",
+				"/internal/user/usr_2veL1FPpuXxUaZcFaEC57BfpcKF",
+				nil,
+				adminHeaders,
+			)
+
+			assert.Equal(t, http.StatusOK, status)
+
+			validUntilRaw, ok := userResp["blood_exam_valid_until"].(string)
+			assert.True(t, ok, "blood_exam_valid_until should be set after completing the blood exam step")
+
+			validUntil, err := time.Parse(time.RFC3339, validUntilRaw)
+			assert.NoError(t, err)
+
+			expected := time.Now().AddDate(0, entities.BLOOD_EXAM_VALIDITY_MONTHS, 0)
+			assert.WithinDuration(t, expected, validUntil, time.Minute)
+		})
+
 		t.Run("Admin updates with new address by zip code", func(t *testing.T) {
 			body := dto.UpdateDonationStepReq{
 				Description: "Atualizacao com endereco criado via CEP",
