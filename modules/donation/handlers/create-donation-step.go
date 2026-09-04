@@ -82,7 +82,25 @@ func (h *HandlerCreateDonationStep) Execute(ctx c.Context, data *dto.CreateDonat
 		return nil, fluxgo.ErrorInternalError("Error to get donation steps")
 	}
 
-	if donationSteps != nil && len(*donationSteps) > 0 {
+	isFirstStep := donationSteps == nil || len(*donationSteps) == 0
+
+	if isFirstStep && data.Name == entities.EnumDonationStepCollectMilk {
+		donationUser, err := h.userRepo.GetUserById(ctx, donation.CreatedBy)
+		if err != nil {
+			return nil, fluxgo.ErrorInternalError("Error to get donation user")
+		}
+		if donationUser == nil {
+			return nil, fluxgo.ErrorNotFound("Donation user not found")
+		}
+		if !donationUser.IsBloodExamValid() {
+			return nil, fluxgo.ErrorBadRequest(
+				"Donation can only start at the milk collection step if the user has a valid blood exam",
+				"donation_step.blood_exam_invalid",
+			)
+		}
+	}
+
+	if !isFirstStep {
 		if len(*donationSteps) == entities.NUMBER_OF_DONATION_STEPS {
 			return nil, fluxgo.ErrorBadRequest("Donation already has the maximum number of steps", "donation_step.max_steps")
 		}
