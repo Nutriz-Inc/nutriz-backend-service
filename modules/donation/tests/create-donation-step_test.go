@@ -83,9 +83,31 @@ func TestCreateDonationStep(t *testing.T) {
 			assert.NotEmpty(t, resp["id_address"])
 			assert.NotEqual(t, "adr_01JTX0H1V8N5Q3W7E2R4T6Y8ADM", resp["id_address"])
 		})
+
+		t.Run("Starts donation at the milk collection step when the blood exam is valid", func(t *testing.T) {
+			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcKP", nil)
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusCreated, status)
+			assert.Equal(t, string(entities.EnumDonationStepCollectMilk), resp["name"])
+		})
 	})
 
 	t.Run("Error", func(t *testing.T) {
+		t.Run("Donation can only start at the milk collection step if the user has a valid blood exam", func(t *testing.T) {
+			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcBE", nil)
+
+			status, resp := fluxgo.RunTestRequest(app, "POST", endpoint, body, adminHeaders)
+
+			assert.Equal(t, http.StatusBadRequest, status)
+			assert.Equal(
+				t,
+				"Donation can only start at the milk collection step if the user has a valid blood exam",
+				resp["message"],
+			)
+		})
+
 		t.Run("User does not have permission to create donation step", func(t *testing.T) {
 			body := makeBody("don_2veL1FPpuXxUaZcFaEC57BfpcKG", nil)
 
