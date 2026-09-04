@@ -91,6 +91,26 @@ func TestListDonation(t *testing.T) {
 
 			assert.Equal(t, is_active, item["is_active"])
 		})
+		t.Run("is_recurrent filter = true", func(t *testing.T) {
+			route := fmt.Sprintf("%s&is_recurrent=true", endpoint)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, &utils.TestHeadersAdmin)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "seed has a recurrent donation")
+
+			ids := make([]string, 0, len(data))
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				assert.Equal(t, true, row["is_recurrent"])
+				ids = append(ids, row["id_donation"].(string))
+			}
+
+			assert.Contains(t, ids, "don_2veL1FPpuXxUaZcFaEC57BfpcBG")
+		})
+
 		t.Run("user_document filter as a admin", func(t *testing.T) {
 			user_document := "47046117012"
 			route := fmt.Sprintf("%s&user_document=%s", endpoint, user_document)

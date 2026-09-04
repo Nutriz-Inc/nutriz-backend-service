@@ -75,6 +75,14 @@ func (r *DonationRepository) ListDonationByFilters(
 		})
 	}
 
+	if filter.IsRecurrent != nil {
+		qb.WhereAnd(q.Where{
+			Column: "d.is_recurrent",
+			Type:   "=",
+			Val:    *filter.IsRecurrent,
+		})
+	}
+
 	if filter.ActionBy != nil {
 		qb.WhereAnd(q.Where{
 			Column: "d.created_by",
