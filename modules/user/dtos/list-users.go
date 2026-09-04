@@ -10,6 +10,7 @@ type ListUsersReq struct {
 	Type               *entities.EnumUserType `query:"type" validate:"omitempty,oneof=common adm nurse driver"`
 	InternalIdentifier *string                `query:"internal_identifier" validate:"omitempty,max=36"`
 	Cpf                *string                `query:"cpf" validate:"omitempty,document"`
+	IsRecurrent        *bool                  `query:"is_recurrent" validate:"omitempty"`
 	ActionBy           string                 `reqHeader:"action-by" validate:"required,id"`
 	utils.PaginationReq
 }

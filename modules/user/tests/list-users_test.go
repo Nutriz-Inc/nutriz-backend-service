@@ -7,6 +7,7 @@ import (
 	"nutriz-backend-service/shared/module"
 	"nutriz-backend-service/shared/utils"
 	"testing"
+	"time"
 
 	fluxgo "github.com/MMortari/FluxGo"
 	"github.com/stretchr/testify/assert"
@@ -63,6 +64,62 @@ func TestListUsers(t *testing.T) {
 
 			assert.Equal(t, userType, item["type"])
 		})
+		t.Run("is_recurrent filter = true", func(t *testing.T) {
+			route := fmt.Sprintf("%s&is_recurrent=true", endpoint)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "seed has users with a valid blood exam")
+
+			ids := make([]string, 0, len(data))
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+				validUntil, ok := row["blood_exam_valid_until"].(string)
+				assert.True(t, ok, "user without blood exam should not be listed")
+
+				parsed, err := time.Parse(time.RFC3339, validUntil)
+				assert.NoError(t, err)
+				assert.True(t, parsed.After(time.Now()), "blood exam should still be valid")
+
+				ids = append(ids, row["id_user"].(string))
+			}
+
+			assert.Contains(t, ids, "usr_2veL1FPpuXxUaZcFaEC57BfpcKL")
+			assert.Contains(t, ids, "usr_2veL1FPpuXxUaZcFaEC57BfpcBR")
+			assert.NotContains(t, ids, "usr_2veL1FPpuXxUaZcFaEC57BfpcBX", "expired blood exam")
+		})
+
+		t.Run("is_recurrent filter = false", func(t *testing.T) {
+			route := fmt.Sprintf("%s&is_recurrent=false", endpoint)
+
+			status, body := fluxgo.RunTestRequest(app, "GET", route, nil, headers)
+
+			assert.Equal(t, int(http.StatusOK), status)
+
+			data := fluxgo.ConvertToList(body["data"])
+			assert.GreaterOrEqual(t, len(data), 1, "seed has users without a valid blood exam")
+
+			ids := make([]string, 0, len(data))
+			for _, item := range data {
+				row := fluxgo.ConvertToMap(item)
+
+				if validUntil, ok := row["blood_exam_valid_until"].(string); ok {
+					parsed, err := time.Parse(time.RFC3339, validUntil)
+					assert.NoError(t, err)
+					assert.False(t, parsed.After(time.Now()), "blood exam should be expired")
+				}
+
+				ids = append(ids, row["id_user"].(string))
+			}
+
+			assert.Contains(t, ids, "usr_2veL1FPpuXxUaZcFaEC57BfpcKE", "user without blood exam")
+			assert.Contains(t, ids, "usr_2veL1FPpuXxUaZcFaEC57BfpcBX", "user with expired blood exam")
+			assert.NotContains(t, ids, "usr_2veL1FPpuXxUaZcFaEC57BfpcKL")
+		})
+
 		t.Run("internal_identifier filter", func(t *testing.T) {
 			identifier := "234567898765435"
 			route := fmt.Sprintf("%s&internal_identifier=%s", endpoint, identifier)
