@@ -7,6 +7,7 @@ type Donation struct {
 	IsActive      bool       `json:"is_active" db:"is_active"`
 	UserFeedback  *string    `json:"user_feedback" db:"user_feedback"`
 	ScoreFeedback *int16     `json:"score_feedback" db:"score_feedback"`
+	IsRecurrent   bool       `json:"is_recurrent" db:"is_recurrent"`
 	CreatedAt     time.Time  `json:"created_at" db:"created_at"`
 	CreatedBy     string     `json:"created_by" db:"created_by"`
 	UpdatedAt     *time.Time `json:"updated_at" db:"updated_at"`

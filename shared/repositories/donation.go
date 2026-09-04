@@ -139,9 +139,10 @@ func (r *DonationRepository) GetDonationById(ctx c.Context, id string) (*entitie
 }
 
 type CreateDonationRepositoryReq struct {
-	IdDonation string
-	IdUser     string
-	IsActive   bool
+	IdDonation  string
+	IdUser      string
+	IsActive    bool
+	IsRecurrent bool
 }
 
 func (r *DonationRepository) CreateDonation(
@@ -155,20 +156,23 @@ func (r *DonationRepository) CreateDonation(
 		INSERT INTO donation (
 			id_donation,
 			is_active,
+			is_recurrent,
 			created_by,
 			created_at
 		) VALUES (
 		 	:id_donation,
 			:is_active,
+			:is_recurrent,
 			:id_user,
 			now()
 		)
 	`
 
 	params := map[string]any{
-		"id_donation": data.IdDonation,
-		"id_user":     data.IdUser,
-		"is_active":   data.IsActive,
+		"id_donation":  data.IdDonation,
+		"id_user":      data.IdUser,
+		"is_active":    data.IsActive,
+		"is_recurrent": data.IsRecurrent,
 	}
 
 	return utils.Insert(
