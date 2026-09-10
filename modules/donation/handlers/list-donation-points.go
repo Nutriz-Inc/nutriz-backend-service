@@ -14,11 +14,12 @@ import (
 
 type HandlerListDonationPoints struct {
 	donationPointRepo *repositories.DonationPointRepository
+	addressRepo       *repositories.AddressRepository
 	config            *config.Env
 }
 
-func HandlerListDonationPointsStart(donationPointRepo *repositories.DonationPointRepository, config *config.Env) *HandlerListDonationPoints {
-	return &HandlerListDonationPoints{donationPointRepo, config}
+func HandlerListDonationPointsStart(donationPointRepo *repositories.DonationPointRepository, addressRepo *repositories.AddressRepository, config *config.Env) *HandlerListDonationPoints {
+	return &HandlerListDonationPoints{donationPointRepo, addressRepo, config}
 }
 
 func (h *HandlerListDonationPoints) HandleHttp(c *fiber.Ctx, income interface{}) (*fluxgo.GlobalResponse, *fluxgo.GlobalError) {
@@ -31,13 +32,23 @@ func (h *HandlerListDonationPoints) HandleHttp(c *fiber.Ctx, income interface{})
 
 func (h *HandlerListDonationPoints) Execute(ctx c.Context, filters *dto.ListDonationPointsReq) (*dto.ListDonationPointsRes, *fluxgo.GlobalError) {
 	if filters.ZipCode != nil {
-		coordinates, err := h.getCoordinatesByZipcode(ctx, *filters.ZipCode)
+		address, err := h.addressRepo.GetAddressWithCoordinatesByZipcode(ctx, *filters.ZipCode)
 		if err != nil {
-			return nil, err
+			return nil, fluxgo.ErrorInternalError("Error to get address by zipcode")
 		}
 
-		filters.Latitude = &coordinates.Latitude
-		filters.Longitude = &coordinates.Longitude
+		if address == nil {
+			coordinates, err := h.getCoordinatesByZipcode(ctx, *filters.ZipCode)
+			if err != nil {
+				return nil, err
+			}
+
+			filters.Latitude = &coordinates.Latitude
+			filters.Longitude = &coordinates.Longitude
+		}
+
+		filters.Latitude = address.Latitude
+		filters.Longitude = address.Longitude
 	}
 
 	donationPoints, total, err := h.donationPointRepo.ListDonationPointsByFilters(ctx, filters)
