@@ -70,6 +70,19 @@ func (r *AddressRepository) GetAddressByZipcode(ctx c.Context, zipcode string) (
 	)
 }
 
+func (r *AddressRepository) GetAddressWithCoordinatesByZipcode(ctx c.Context, zipcode string) (*entities.Address, error) {
+	ctx, span := r.StartSpan(ctx)
+	defer span.End()
+
+	return utils.Get[entities.Address](
+		ctx,
+		r.DB.ReadOnlyDB(),
+		span,
+		`SELECT * FROM "address" WHERE zipcode = $1 AND removed_at IS NULL AND latitude IS NOT NULL AND longitude IS NOT NULL`,
+		zipcode,
+	)
+}
+
 func (r *AddressRepository) GetAddressByZipcodeAndIdUser(ctx c.Context, zipcode string, userId string) (*entities.Address, error) {
 	ctx, span := r.StartSpan(ctx)
 	defer span.End()
