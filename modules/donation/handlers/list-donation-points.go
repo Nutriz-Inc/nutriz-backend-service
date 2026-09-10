@@ -45,10 +45,10 @@ func (h *HandlerListDonationPoints) Execute(ctx c.Context, filters *dto.ListDona
 
 			filters.Latitude = &coordinates.Latitude
 			filters.Longitude = &coordinates.Longitude
+		} else {
+			filters.Latitude = address.Latitude
+			filters.Longitude = address.Longitude
 		}
-
-		filters.Latitude = address.Latitude
-		filters.Longitude = address.Longitude
 	}
 
 	donationPoints, total, err := h.donationPointRepo.ListDonationPointsByFilters(ctx, filters)
